@@ -142,12 +142,18 @@ export function EditorialVarA() {
     const ctx = gsap.context(() => {
       const track = root.current!.querySelector(".ea-cases__track");
       const names = root.current!.querySelectorAll(".ea-cases__name");
-      const bgLayers = root.current!.querySelectorAll(".ea-cases__bg");
+      const bgLayers =
+        root.current!.querySelectorAll<HTMLElement>(".ea-cases__bg");
 
       if (!track) return;
 
       gsap.to(track, {
-        y: () => -(track.scrollHeight - (root.current!.querySelector(".ea-cases__window")?.clientHeight || 320)),
+        y: () =>
+          -(
+            track.scrollHeight -
+            (root.current!.querySelector(".ea-cases__window")?.clientHeight ||
+              320)
+          ),
         ease: "none",
         scrollTrigger: {
           trigger: ".ea-cases",
@@ -310,11 +316,7 @@ export function EditorialVarA() {
 
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (
-              <span
-                className="ea-hero__word"
-                data-hero-word
-                key={`${w}-${i}`}
-              >
+              <span className="ea-hero__word" data-hero-word key={`${w}-${i}`}>
                 {w}
               </span>
             ))}

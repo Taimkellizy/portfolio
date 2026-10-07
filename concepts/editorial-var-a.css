@@ -151,7 +151,9 @@
   font-weight: 600;
   font-size: 15px;
   letter-spacing: -0.01em;
-  transition: transform 240ms var(--ease-out), opacity 240ms ease;
+  transition:
+    transform 240ms var(--ease-out),
+    opacity 240ms ease;
 }
 
 .ea-menu-panel__cta:hover {
@@ -214,15 +216,33 @@
 }
 
 @keyframes ea-grain-drift {
-  0% { transform: translate(0, 0); }
-  12.5% { transform: translate(-3%, 2%); }
-  25% { transform: translate(2%, -4%); }
-  37.5% { transform: translate(-4%, -2%); }
-  50% { transform: translate(3%, 3%); }
-  62.5% { transform: translate(-2%, 4%); }
-  75% { transform: translate(4%, -3%); }
-  87.5% { transform: translate(-3%, -4%); }
-  100% { transform: translate(0, 0); }
+  0% {
+    transform: translate(0, 0);
+  }
+  12.5% {
+    transform: translate(-3%, 2%);
+  }
+  25% {
+    transform: translate(2%, -4%);
+  }
+  37.5% {
+    transform: translate(-4%, -2%);
+  }
+  50% {
+    transform: translate(3%, 3%);
+  }
+  62.5% {
+    transform: translate(-2%, 4%);
+  }
+  75% {
+    transform: translate(4%, -3%);
+  }
+  87.5% {
+    transform: translate(-3%, -4%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
 
 .ea-hero__bio {
@@ -477,7 +497,9 @@
   font-weight: 500;
   letter-spacing: -0.005em;
   opacity: 0.3;
-  transition: opacity 300ms ease, font-weight 300ms ease;
+  transition:
+    opacity 300ms ease,
+    font-weight 300ms ease;
   cursor: default;
 }
 
