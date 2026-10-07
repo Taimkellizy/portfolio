@@ -687,17 +687,17 @@ export function EditorialVarA() {
             </div>
 
             {/* right: sticky project names */}
-          <div className="ea-cases__names">
-            {projects.map((p, i) => (
-              <a
-                key={p.id}
-                className={`ea-case-name${i === 0 ? " is-active" : ""}`}
-                href="#ea-work"
-              >
-                {p.title}
-              </a>
-            ))}
-          </div>
+            <div className="ea-cases__names">
+              {projects.map((p, i) => (
+                <a
+                  key={p.id}
+                  className={`ea-case-name${i === 0 ? " is-active" : ""}`}
+                  href="#ea-work"
+                >
+                  {p.title}
+                </a>
+              ))}
+            </div>
           </div>
         </section>
 
