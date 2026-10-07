@@ -438,7 +438,7 @@ export function EditorialVarA() {
               if (dist < radius) {
                 const t = 1 - dist / radius;
                 const peak = t * t; /* quadratic falloff */
-                const s = 1 + peak * 0.3;
+                const s = 1 + peak * 2;
                 item.style.transform = `scale(${s.toFixed(4)})`;
                 item.style.opacity = String(0.2 + peak * 0.8);
               } else {
