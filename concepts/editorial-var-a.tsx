@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { gsap, ScrollTrigger, usePrefersReducedMotion } from "@/lib/motion";
 import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
@@ -9,16 +9,84 @@ import "./editorial-var-a.css";
 
 const HERO_WORD = "taim";
 
-const WORK_PLATE = [
+const BIO_WORDS =
+  "I'm Taim Kellizy — a developer and CS student based in Egypt, originally from Syria. I build interfaces with React and Flask, and translate TED talks that reach millions.".split(
+    " ",
+  );
+
+const CASES = [
   { from: "#23203a", to: "#5d4b8a" },
   { from: "#1e2b28", to: "#6f8a7d" },
   { from: "#2c2430", to: "#9b7bb6" },
   { from: "#242428", to: "#6e6e78" },
 ];
 
+const MENU_LINKS = [
+  { label: "Work", href: "#ea-work" },
+  { label: "Credentials", href: "#ea-credentials" },
+  { label: "Writing", href: "#ea-writing" },
+  { label: "Contact", href: "#ea-contact" },
+];
+
 export function EditorialVarA() {
   const root = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
+  const menuOverlayRef = useRef<HTMLDivElement>(null);
+  const giantRef = useRef<HTMLHeadingElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
+
+  /* ---------- menu open / close ---------- */
+
+  const openMenu = useCallback(() => setMenuOpen(true), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeMenu();
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen, closeMenu]);
+
+  useEffect(() => {
+    if (!menuPanelRef.current || !menuOverlayRef.current) return;
+    if (reduced) return;
+    if (menuOpen) {
+      gsap.to(menuOverlayRef.current, { opacity: 1, duration: 0.35 });
+      gsap.to(menuPanelRef.current, { x: 0, duration: 0.55, ease: "expo.out" });
+    } else {
+      gsap.to(menuOverlayRef.current, {
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => {
+          if (menuOverlayRef.current)
+            menuOverlayRef.current.style.pointerEvents = "none";
+        },
+      });
+      gsap.to(menuPanelRef.current, {
+        x: "100%",
+        duration: 0.45,
+        ease: "expo.in",
+      });
+    }
+  }, [menuOpen, reduced]);
+
+  useEffect(() => {
+    if (reduced) return;
+    if (menuOverlayRef.current && menuPanelRef.current) {
+      gsap.set(menuOverlayRef.current, { opacity: 0, pointerEvents: "none" });
+      gsap.set(menuPanelRef.current, { x: "100%" });
+    }
+  }, [reduced]);
+
+  /* ---------- hero entrance + word-by-word bio ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -31,7 +99,16 @@ export function EditorialVarA() {
         duration: 0.95,
         stagger: 0.09,
       })
-        .from("[data-hero-bio]", { y: 30, opacity: 0, duration: 1.15 }, 0.12)
+        .from(
+          "[data-hero-word]",
+          {
+            y: 14,
+            opacity: 0,
+            duration: 0.7,
+            stagger: 0.028,
+          },
+          0.12,
+        )
         .from(
           "[data-hero-letter]",
           {
@@ -43,33 +120,7 @@ export function EditorialVarA() {
           0.18,
         )
         .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
-        .from(
-          "[data-hero-plate]",
-          {
-            y: 84,
-            opacity: 0,
-            rotate: (i: number) => (i % 2 ? 6.5 : -6.5),
-            duration: 1.5,
-            stagger: 0.1,
-          },
-          0.3,
-        )
         .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
-
-      gsap.utils.toArray<HTMLElement>("[data-drift]").forEach((el) => {
-        const speed = parseFloat(el.dataset.drift || "1");
-        gsap.to(el, {
-          yPercent: -14 * speed,
-          rotate: `+=${speed > 1 ? 2.4 : -1.8}`,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.1,
-          },
-        });
-      });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         gsap.from(el, {
@@ -81,64 +132,199 @@ export function EditorialVarA() {
         });
       });
     }, root);
-
     return () => ctx.revert();
+  }, [reduced]);
+
+  /* ---------- cases scroll animation ---------- */
+
+  useEffect(() => {
+    if (!root.current || reduced) return;
+    const ctx = gsap.context(() => {
+      const track = root.current!.querySelector(".ea-cases__track");
+      const names = root.current!.querySelectorAll(".ea-cases__name");
+      const bgLayers = root.current!.querySelectorAll(".ea-cases__bg");
+
+      if (!track) return;
+
+      gsap.to(track, {
+        y: () => -(track.scrollHeight - (root.current!.querySelector(".ea-cases__window")?.clientHeight || 320)),
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".ea-cases",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.8,
+          pin: ".ea-cases__sticky",
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            const idx = Math.min(
+              projects.length - 1,
+              Math.floor(self.progress * projects.length),
+            );
+            names.forEach((n, i) => {
+              n.classList.toggle("is-active", i === idx);
+            });
+          },
+        },
+      });
+
+      bgLayers.forEach((layer) => {
+        const speed = parseFloat(layer.dataset.speed || "1");
+        gsap.to(layer, {
+          y: () => -120 * speed,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".ea-cases",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.2,
+          },
+        });
+      });
+    }, root);
+    return () => ctx.revert();
+  }, [reduced]);
+
+  /* ---------- magnetic wordmark ---------- */
+
+  useEffect(() => {
+    if (!giantRef.current || reduced) return;
+    const el = giantRef.current;
+    const letters = el.querySelectorAll<HTMLElement>(".ea-giant__letter");
+    if (!letters.length) return;
+
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        letters.forEach((letter) => {
+          const rect = letter.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const radius = 380;
+          if (dist < radius) {
+            const force = (1 - dist / radius) * 6;
+            const tx = (dx / dist) * force;
+            const ty = (dy / dist) * force;
+            letter.style.transform = `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px)`;
+          } else {
+            letter.style.transform = "translate(0, 0)";
+          }
+        });
+      });
+    };
+    const onLeave = () => {
+      letters.forEach((l) => (l.style.transform = "translate(0, 0)"));
+    };
+
+    const isTouch = matchMedia("(hover: none)").matches;
+    if (!isTouch) {
+      window.addEventListener("mousemove", onMove);
+      el.addEventListener("mouseleave", onLeave);
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+      el.removeEventListener("mouseleave", onLeave);
+    };
   }, [reduced]);
 
   return (
     <div className="ea" ref={root}>
-      <main>
-        <section className="ea-hero" id="ea-top">
-          <header className="ea-nav">
-            <a className="ea-nav__mark" href="#ea-top" data-hero-nav>
-              taim kellizy
-              <StarGlyph className="ea-nav__star" />
-            </a>
-            <nav className="ea-nav__links" aria-label="Primary" data-hero-nav>
-              <a href="#ea-work">Work</a>
-              <a href="#ea-credentials">Credentials</a>
-              <a href="#ea-writing">Writing</a>
-              <a href="#ea-contact">Contact</a>
-            </nav>
-            <a
-              className="ea-nav__cta"
-              href={`mailto:${person.email}`}
-              data-hero-nav
-            >
-              Get in touch
-            </a>
-          </header>
+      {/* ---- right-side menu button ---- */}
+      <button
+        className="ea-menu-btn"
+        type="button"
+        onClick={openMenu}
+        aria-label="Open menu"
+        data-hero-nav
+      >
+        menu
+      </button>
 
-          <p className="ea-hero__bio" data-hero-bio>
-            I&apos;m Taim Kellizy — a developer and CS student based in Egypt,
-            originally from Syria. I build interfaces with React and Flask, and
-            translate TED talks that reach millions.
-          </p>
-
-          <div className="ea-hero__plates" aria-hidden="true">
-            <div className="ea-hero__plate ea-hero__plate--a" data-hero-plate>
-              <div className="ea-drift" data-drift="1.6">
-                <Plate from="#23203a" to="#5d4b8a" label="Plate 01" />
-              </div>
-            </div>
-            <div className="ea-hero__plate ea-hero__plate--b" data-hero-plate>
-              <div className="ea-drift" data-drift="0.7">
-                <Plate from="#1e2b28" to="#6f8a7d" label="Plate 02" />
-              </div>
-            </div>
-            <div className="ea-hero__plate ea-hero__plate--c" data-hero-plate>
-              <div className="ea-drift" data-drift="1.25">
-                <Plate from="#2c2430" to="#9b7bb6" label="Plate 03" />
-              </div>
-            </div>
-            <div className="ea-hero__plate ea-hero__plate--d" data-hero-plate>
-              <div className="ea-drift" data-drift="0.55">
-                <Plate from="#242428" to="#6e6e78" label="Plate 04" />
-              </div>
+      {/* ---- slide-in menu panel ---- */}
+      <div
+        className="ea-menu-overlay"
+        ref={menuOverlayRef}
+        onClick={closeMenu}
+        aria-hidden="true"
+      />
+      <div
+        className="ea-menu-panel"
+        ref={menuPanelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site menu"
+        hidden={!menuOpen}
+      >
+        <div className="ea-menu-panel__inner">
+          <button
+            className="ea-menu-panel__close"
+            type="button"
+            onClick={closeMenu}
+            aria-label="Close menu"
+          >
+            close
+          </button>
+          <nav className="ea-menu-panel__nav" aria-label="Site navigation">
+            {MENU_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className="ea-menu-panel__link"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <a
+            className="ea-menu-panel__cta"
+            href={`mailto:${person.email}`}
+            onClick={closeMenu}
+          >
+            Get in touch
+          </a>
+          <div className="ea-menu-panel__foot">
+            <p className="ea-menu-panel__status">Available for work</p>
+            <a href={`mailto:${person.email}`}>{person.email}</a>
+            <div className="ea-menu-panel__social">
+              <a href={person.instagram} target="_blank" rel="noreferrer">
+                Instagram
+              </a>
+              <a href={person.linkedin} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
             </div>
           </div>
+        </div>
+      </div>
 
-          <h1 className="ea-giant ea-hero__word" aria-label={person.name}>
+      <main>
+        {/* ===================== HERO ===================== */}
+        <section className="ea-hero" id="ea-top">
+          <div className="ea-hero__grain" aria-hidden="true" />
+
+          <p className="ea-hero__bio">
+            {BIO_WORDS.map((w, i) => (
+              <span
+                className="ea-hero__word"
+                data-hero-word
+                key={`${w}-${i}`}
+              >
+                {w}
+              </span>
+            ))}
+          </p>
+
+          <h1
+            className="ea-giant ea-hero__giant"
+            aria-label={person.name}
+            ref={giantRef}
+          >
             <span aria-hidden="true">
               {HERO_WORD.split("").map((ch, i) => (
                 <span
@@ -160,21 +346,8 @@ export function EditorialVarA() {
           </a>
         </section>
 
+        {/* ===================== BIO ===================== */}
         <section className="ea-bio" id="ea-bio">
-          <div className="ea-bio__tiles" aria-hidden="true">
-            <div className="ea-bio__tile ea-bio__tile--1" data-drift="1.4">
-              <Plate from="#23203a" to="#5d4b8a" />
-            </div>
-            <div className="ea-bio__tile ea-bio__tile--2" data-drift="0.8">
-              <Plate from="#1e2b28" to="#6f8a7d" />
-            </div>
-            <div className="ea-bio__tile ea-bio__tile--3" data-drift="1.15">
-              <Plate from="#2c2430" to="#9b7bb6" />
-            </div>
-            <div className="ea-bio__tile ea-bio__tile--4" data-drift="0.6">
-              <Plate from="#242428" to="#6e6e78" />
-            </div>
-          </div>
           <div className="ea-bio__inner" data-reveal>
             <p className="ea-bio__label u-label">
               About
@@ -191,35 +364,56 @@ export function EditorialVarA() {
           </div>
         </section>
 
-        <section className="ea-block" id="ea-work">
-          <header className="ea-sec" data-reveal>
-            <h2 className="ea-sec__title">selected work</h2>
-            <span className="ea-sec__count u-label">
-              {String(projects.length).padStart(2, "0")} entries
-            </span>
-          </header>
-          <ul className="ea-work__grid">
-            {projects.map((p, i) => (
-              <li key={p.id} className="ea-work__item" data-reveal>
-                <a href="#ea-work">
-                  <div className="ea-work__media">
+        {/* ===================== CASES (scroll animation) ===================== */}
+        <section className="ea-cases" id="ea-work">
+          <div className="ea-cases__sticky">
+            <div className="ea-cases__bg-wrap" aria-hidden="true">
+              <div className="ea-cases__bg ea-cases__bg--1" data-speed="0.4">
+                <Plate from="#23203a" to="#5d4b8a" />
+              </div>
+              <div className="ea-cases__bg ea-cases__bg--2" data-speed="0.8">
+                <Plate from="#1e2b28" to="#6f8a7d" />
+              </div>
+              <div className="ea-cases__bg ea-cases__bg--3" data-speed="0.2">
+                <Plate from="#2c2430" to="#9b7bb6" />
+              </div>
+            </div>
+
+            <div className="ea-cases__window">
+              <div className="ea-cases__window-bar">
+                <span className="ea-cases__window-title">Cases</span>
+              </div>
+              <div className="ea-cases__track">
+                {projects.map((p, i) => (
+                  <div className="ea-cases__slide" key={p.id}>
                     <Plate
-                      from={WORK_PLATE[i].from}
-                      to={WORK_PLATE[i].to}
+                      from={CASES[i].from}
+                      to={CASES[i].to}
                       label={p.kind}
                     />
+                    <div className="ea-cases__slide-meta">
+                      <span>{p.title}</span>
+                      <span className="u-label">{p.year}</span>
+                    </div>
                   </div>
-                  <div className="ea-work__meta">
-                    <h3>{p.title}</h3>
-                    <span className="u-label">{p.year}</span>
-                  </div>
-                  <p className="ea-work__stack">{p.stack.join(" · ")}</p>
-                </a>
-              </li>
-            ))}
-          </ul>
+                ))}
+              </div>
+            </div>
+
+            <ul className="ea-cases__names" aria-label="Projects">
+              {projects.map((p, i) => (
+                <li
+                  key={p.id}
+                  className={`ea-cases__name${i === 0 ? " is-active" : ""}`}
+                >
+                  {p.title}
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
+        {/* ===================== CREDENTIALS ===================== */}
         <section className="ea-block" id="ea-credentials">
           <header className="ea-sec" data-reveal>
             <h2 className="ea-sec__title">credentials</h2>
@@ -242,6 +436,7 @@ export function EditorialVarA() {
           </ul>
         </section>
 
+        {/* ===================== WRITING ===================== */}
         <section className="ea-block" id="ea-writing">
           <header className="ea-sec" data-reveal>
             <h2 className="ea-sec__title">writing</h2>
@@ -267,6 +462,7 @@ export function EditorialVarA() {
         </section>
       </main>
 
+      {/* ===================== FOOTER ===================== */}
       <footer className="ea-foot" id="ea-contact">
         <div className="ea-foot__cols" data-reveal>
           <div className="ea-foot__col">
