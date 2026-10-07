@@ -6,10 +6,6 @@
   font-display: swap;
 }
 
-/* ============================================================
-   Editorial Var A — Ollef-style editorial portfolio
-   ============================================================ */
-
 .ea {
   --font-outfit: "Outfit", "Work Sans", "Helvetica Neue", Arial, sans-serif;
   --ea-bg: #0c0c0e;
@@ -34,18 +30,20 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  border: 1.5px solid rgba(232, 230, 225, 0.35);
-  background: rgba(232, 230, 225, 0.06);
+  background: #fff;
   pointer-events: none;
   z-index: 500;
   will-change: transform;
   mix-blend-mode: difference;
+  transition:
+    width 0.3s,
+    height 0.3s;
 }
 
-/* ---------- right-side menu button ---------- */
+/* ---------- menu button ---------- */
 
 .ea-menu-btn {
   position: fixed;
@@ -53,16 +51,15 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 300;
-  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   border: 1px solid rgba(232, 230, 225, 0.25);
-  border-radius: 999px;
+  border-radius: 50%;
   background: transparent;
   color: var(--ea-ink);
-  font-family: var(--font-outfit);
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: -0.01em;
-  text-transform: lowercase;
   cursor: pointer;
   transition:
     transform 280ms var(--ease-out),
@@ -71,18 +68,18 @@
 }
 
 .ea-menu-btn:hover {
-  transform: translateY(-50%) scale(1.06);
+  transform: translateY(-50%) scale(1.1);
   border-color: rgba(232, 230, 225, 0.5);
-  background: rgba(232, 230, 225, 0.06);
+  background: rgba(232, 230, 225, 0.08);
 }
 
-/* ---------- slide-in menu panel ---------- */
+/* ---------- slide-in menu ---------- */
 
 .ea-menu-overlay {
   position: fixed;
   inset: 0;
   z-index: 380;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   pointer-events: none;
   transition: opacity 300ms ease;
@@ -112,11 +109,11 @@
 
 .ea-menu-panel__close {
   align-self: flex-end;
-  font-family: var(--font-outfit);
-  font-weight: 500;
-  font-size: 14px;
-  letter-spacing: -0.01em;
-  text-transform: lowercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   color: var(--ea-menu-ink);
   opacity: 0.55;
   cursor: pointer;
@@ -156,6 +153,8 @@
 
 .ea-menu-panel__cta {
   display: inline-flex;
+  align-items: center;
+  gap: 10px;
   align-self: flex-start;
   margin-top: 40px;
   padding: 14px 32px;
@@ -217,57 +216,6 @@
   overflow: clip;
 }
 
-/* subtle white glow so grain is visible on dark bg */
-.ea-hero__glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(
-    ellipse 70% 55% at 55% 42%,
-    rgba(232, 230, 225, 0.07) 0%,
-    rgba(232, 230, 225, 0.03) 40%,
-    transparent 75%
-  );
-}
-
-/* grain texture — visible against the glow above */
-.ea-hero__grain {
-  position: absolute;
-  inset: -20%;
-  pointer-events: none;
-  z-index: 1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
-  opacity: 0.3;
-  animation: ea-grain-drift 10s steps(6) infinite;
-  mix-blend-mode: overlay;
-}
-
-@keyframes ea-grain-drift {
-  0% {
-    transform: translate(0, 0);
-  }
-  16% {
-    transform: translate(-3%, 2%);
-  }
-  33% {
-    transform: translate(2%, -4%);
-  }
-  50% {
-    transform: translate(-4%, -2%);
-  }
-  66% {
-    transform: translate(3%, 3%);
-  }
-  83% {
-    transform: translate(-2%, 4%);
-  }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-
 .ea-hero__bio {
   position: absolute;
   top: clamp(132px, 19vh, 224px);
@@ -289,7 +237,10 @@
   cursor: default;
 }
 
-/* ---------- giant wordmark ---------- */
+.ea-hero__ch {
+  display: inline-block;
+  will-change: transform, opacity;
+}
 
 .ea-giant {
   margin: 0;
@@ -382,13 +333,47 @@
   color: var(--ea-ink-soft);
 }
 
-/* ---------- cases scroll animation ---------- */
+/* ---------- cases scroll ---------- */
 
 .ea-cases {
   position: relative;
   height: 100vh;
   overflow: hidden;
-  background: #1a1a1e;
+  background: var(--ea-bg);
+}
+
+/* soft edge fades */
+.ea-cases__fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 120px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ea-cases__fade--top {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--ea-bg) 0%,
+    rgba(12, 12, 14, 0.6) 50%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+.ea-cases__fade--bottom {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--ea-bg) 0%,
+    rgba(12, 12, 14, 0.6) 50%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to top, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 60%, transparent 100%);
 }
 
 .ea-cases__bg-wrap {
@@ -402,7 +387,7 @@
   position: absolute;
   overflow: hidden;
   border-radius: 4px;
-  opacity: 0.35;
+  opacity: 0.2;
 }
 
 .ea-cases__bg .plate {
@@ -411,92 +396,41 @@
 }
 
 .ea-cases__bg--1 {
-  width: clamp(280px, 32vw, 520px);
-  height: clamp(200px, 24vw, 380px);
-  top: 10%;
-  left: 5%;
+  width: clamp(300px, 35vw, 560px);
+  height: clamp(220px, 26vw, 400px);
+  top: 5%;
+  left: 3%;
   transform: rotate(-3deg);
 }
 
 .ea-cases__bg--2 {
-  width: clamp(240px, 26vw, 440px);
-  height: clamp(180px, 20vw, 320px);
-  bottom: 5%;
-  right: 8%;
+  width: clamp(260px, 28vw, 460px);
+  height: clamp(190px, 22vw, 340px);
+  bottom: 3%;
+  right: 5%;
   transform: rotate(4deg);
 }
 
 .ea-cases__bg--3 {
   width: clamp(200px, 22vw, 360px);
   height: clamp(150px, 17vw, 270px);
-  top: 30%;
-  right: 25%;
+  top: 35%;
+  right: 30%;
   transform: rotate(-5deg);
-  opacity: 0.2;
+  opacity: 0.12;
 }
 
-/* the white card — viewport window */
-
-.ea-cases__card {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  width: min(820px, 72vw);
-  height: min(480px, 62vh);
-  background: #e8e5df;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
-  color: #111;
-}
-
-.ea-cases__card-header {
-  display: flex;
-  align-items: baseline;
-  gap: 28px;
-  padding: 18px 28px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.ea-cases__card-name {
-  font-family: var(--font-outfit);
-  font-weight: 600;
-  font-size: 13px;
-  letter-spacing: -0.01em;
-}
-
-.ea-cases__card-nav {
-  font-family: var(--font-outfit);
-  font-weight: 500;
-  font-size: 13px;
-  opacity: 0.5;
-}
-
-.ea-cases__card-role {
-  margin-left: auto;
-  font-family: var(--font-outfit);
-  font-weight: 500;
-  font-size: 11px;
-  line-height: 1.4;
-  text-align: right;
-  opacity: 0.5;
-}
-
-/* image strip inside the card */
+/* central image window */
 
 .ea-cases__window {
   position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(180px, 20vw, 260px);
-  height: calc(100% - 120px);
-  overflow: hidden;
+  top: 50%;
+  left: 42%;
+  transform: translate(-50%, -50%);
   z-index: 2;
+  width: clamp(220px, 22vw, 320px);
+  height: 65vh;
+  overflow: hidden;
 }
 
 .ea-cases__track {
@@ -504,49 +438,67 @@
 }
 
 .ea-cases__slide {
-  padding: 8px 0;
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ea-cases__slide .plate {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ea-cases__slide--tall .plate {
   width: 100%;
-  height: clamp(160px, 20vw, 240px);
-  border-radius: 3px;
+  height: clamp(280px, 34vh, 380px);
+}
+
+.ea-cases__slide--mid .plate {
+  width: 85%;
+  height: clamp(200px, 24vh, 280px);
+}
+
+.ea-cases__slide--short .plate {
+  width: 70%;
+  height: clamp(150px, 18vh, 220px);
 }
 
 .ea-cases__title {
   position: absolute;
-  bottom: 24px;
-  left: 28px;
+  bottom: 32px;
+  left: 40px;
   z-index: 3;
   font-family: var(--font-outfit);
   font-weight: 700;
-  font-size: clamp(28px, 3.5vw, 42px);
+  font-size: clamp(32px, 4vw, 52px);
   letter-spacing: -0.03em;
-  color: #111;
+  color: var(--ea-ink);
 }
 
 .ea-cases__names {
   position: absolute;
-  right: 28px;
-  bottom: 28px;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 3;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
   text-align: right;
 }
 
 .ea-cases__name {
   font-family: var(--font-outfit);
-  font-size: 12px;
+  font-size: clamp(15px, 1.3vw, 19px);
   font-weight: 500;
-  letter-spacing: -0.005em;
-  color: #111;
-  opacity: 0.3;
+  letter-spacing: -0.01em;
+  color: var(--ea-ink);
+  opacity: 0.25;
   transition:
-    opacity 300ms ease,
-    font-weight 300ms ease;
+    opacity 350ms ease,
+    font-weight 350ms ease;
 }
 
 .ea-cases__name.is-active {
@@ -583,8 +535,6 @@
 .ea-sec__count {
   opacity: 0.5;
 }
-
-/* hairline rows */
 
 .ea-rows {
   list-style: none;
@@ -643,6 +593,8 @@
 
 .ea-row__arrow {
   justify-self: end;
+  display: flex;
+  align-items: center;
   opacity: 0.45;
   transition:
     opacity 280ms var(--ease-out),
@@ -720,7 +672,7 @@
   bottom: clamp(28px, 5vh, 58px);
   z-index: 3;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: clamp(32px, 6vw, 96px);
   font-family: var(--font-outfit);
   font-weight: 600;
@@ -729,6 +681,9 @@
 }
 
 .ea-foot__top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: opacity 240ms var(--ease-out);
 }
 
@@ -753,8 +708,12 @@
   .ea-hero__bio {
     width: min(44vw, 560px);
   }
-  .ea-cases__card {
-    width: min(680px, 82vw);
+  .ea-cases__window {
+    left: 38%;
+    width: clamp(180px, 24vw, 260px);
+  }
+  .ea-cases__names {
+    right: 24px;
   }
 }
 
@@ -774,12 +733,20 @@
   .ea-cases__bg {
     display: none;
   }
-  .ea-cases__card {
-    width: min(440px, 88vw);
-    height: min(400px, 55vh);
-  }
   .ea-cases__window {
-    width: clamp(140px, 24vw, 200px);
+    left: 50%;
+    width: clamp(160px, 30vw, 220px);
+  }
+  .ea-cases__names {
+    right: 16px;
+    gap: 4px;
+  }
+  .ea-cases__name {
+    font-size: 13px;
+  }
+  .ea-cases__title {
+    left: 20px;
+    bottom: 20px;
   }
   .ea-menu-panel {
     width: 100%;
@@ -800,8 +767,8 @@
 @media (max-width: 620px) {
   .ea-menu-btn {
     right: 16px;
-    padding: 8px 16px;
-    font-size: 13px;
+    width: 42px;
+    height: 42px;
   }
   .ea-hero__scroll {
     font-size: 13px;
@@ -825,9 +792,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ea-hero__grain {
-    animation: none;
-  }
   .ea-cursor {
     display: none;
   }

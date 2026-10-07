@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { gsap, ScrollTrigger, usePrefersReducedMotion } from "@/lib/motion";
 import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
+import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
 import { person, projects, credentials, posts } from "@/lib/content";
 import "./editorial-var-a.css";
 
@@ -15,10 +16,10 @@ const BIO_WORDS =
   );
 
 const CASES = [
-  { from: "#23203a", to: "#5d4b8a" },
-  { from: "#1e2b28", to: "#6f8a7d" },
-  { from: "#2c2430", to: "#9b7bb6" },
-  { from: "#242428", to: "#6e6e78" },
+  { from: "#23203a", to: "#5d4b8a", h: "tall" },
+  { from: "#1e2b28", to: "#6f8a7d", h: "mid" },
+  { from: "#2c2430", to: "#9b7bb6", h: "short" },
+  { from: "#242428", to: "#6e6e78", h: "mid" },
 ];
 
 const MENU_LINKS = [
@@ -27,8 +28,6 @@ const MENU_LINKS = [
   { label: "Writing", href: "#ea-writing" },
   { label: "Contact", href: "#ea-contact" },
 ];
-
-const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
 
 export function EditorialVarA() {
   const root = useRef<HTMLDivElement>(null);
@@ -134,7 +133,7 @@ export function EditorialVarA() {
     return () => ctx.revert();
   }, [reduced]);
 
-  /* ---------- cursor bubble + text interaction ---------- */
+  /* ---------- cursor bubble + letter disassembly ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -142,51 +141,79 @@ export function EditorialVarA() {
     const isTouch = matchMedia("(hover: none)").matches;
     if (!bubble || isTouch) return;
 
-    const words = root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
-    const originals = new Map<HTMLElement, { x: number; y: number }>();
-    words.forEach((w) => originals.set(w, { x: 0, y: 0 }));
-
     let mouseX = -100;
     let mouseY = -100;
     let bubbleX = -100;
     let bubbleY = -100;
+    let scale = 1;
+    let targetScale = 1;
     let raf = 0;
-
-    const scrambleWord = (el: HTMLElement) => {
-      const original = el.textContent || "";
-      if (!original || el.dataset.scrambling === "1") return;
-      el.dataset.scrambling = "1";
-      let iteration = 0;
-      const maxIterations = 8;
-      const interval = setInterval(() => {
-        el.textContent = original
-          .split("")
-          .map((ch, i) => {
-            if (ch === " ") return " ";
-            if (i < iteration) return original[i];
-            return SCRAMBLE_CHARS[
-              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
-            ];
-          })
-          .join("");
-        iteration += 1;
-        if (iteration >= maxIterations) {
-          clearInterval(interval);
-          el.textContent = original;
-          el.dataset.scrambling = "0";
-        }
-      }, 40);
-    };
 
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
     };
 
+    /* split words into per-letter spans for disassembly */
+    const words =
+      root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
+    words.forEach((word) => {
+      const text = word.textContent || "";
+      word.innerHTML = text
+        .split("")
+        .map(
+          (ch) =>
+            `<span class="ea-hero__ch"${ch === " " ? ' data-space="1"' : ""}>${ch === " " ? "&nbsp;" : ch}</span>`,
+        )
+        .join("");
+    });
+
+    const disassemble = (word: HTMLElement) => {
+      if (word.dataset.busy === "1") return;
+      word.dataset.busy = "1";
+      const chars = word.querySelectorAll<HTMLElement>(
+        ".ea-hero__ch:not([data-space])",
+      );
+      const n = chars.length;
+      chars.forEach((ch, i) => {
+        const angle = (i / Math.max(n, 1)) * Math.PI * 2;
+        const radius = 20 + Math.random() * 18;
+        gsap.to(ch, {
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+          rotation: (Math.random() - 0.5) * 60,
+          opacity: 0.35,
+          duration: 0.35,
+          ease: "power2.out",
+          delay: i * 0.015,
+        });
+      });
+      gsap.delayedCall(0.55, () => {
+        chars.forEach((ch, i) => {
+          gsap.to(ch, {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            opacity: 1,
+            duration: 0.45,
+            ease: "power2.inOut",
+            delay: i * 0.018,
+            onComplete:
+              i === n - 1
+                ? () => {
+                    word.dataset.busy = "0";
+                  }
+                : undefined,
+          });
+        });
+      });
+    };
+
     const loop = () => {
-      bubbleX += (mouseX - bubbleX) * 0.12;
-      bubbleY += (mouseY - bubbleY) * 0.12;
-      bubble.style.transform = `translate(${bubbleX - 24}px, ${bubbleY - 24}px)`;
+      bubbleX += (mouseX - bubbleX) * 0.14;
+      bubbleY += (mouseY - bubbleY) * 0.14;
+      scale += (targetScale - scale) * 0.1;
+      bubble.style.transform = `translate(${bubbleX - 22}px, ${bubbleY - 22}px) scale(${scale})`;
 
       words.forEach((word) => {
         const rect = word.getBoundingClientRect();
@@ -195,10 +222,11 @@ export function EditorialVarA() {
         const dx = mouseX - cx;
         const dy = mouseY - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const radius = 180;
+        const radius = 160;
 
         if (dist < radius) {
-          const force = (1 - dist / radius) * 18;
+          targetScale = 1.8;
+          const force = (1 - dist / radius) * 14;
           const tx = (dx / dist) * -force;
           const ty = (dy / dist) * -force;
           gsap.to(word, {
@@ -209,22 +237,26 @@ export function EditorialVarA() {
             overwrite: "auto",
           });
 
-          if (dist < 70 && word.dataset.scrambling !== "1") {
-            scrambleWord(word);
+          if (dist < 80) {
+            disassemble(word);
           }
         } else {
-          const orig = originals.get(word);
-          if (orig) {
-            gsap.to(word, {
-              x: orig.x,
-              y: orig.y,
-              duration: 0.5,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          }
+          targetScale = 1;
+          gsap.to(word, {
+            x: 0,
+            y: 0,
+            duration: 0.5,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
         }
       });
+
+      /* scale up cursor over interactive elements */
+      const el = document.elementFromPoint(mouseX, mouseY);
+      if (el && el.closest("a, button")) {
+        targetScale = 2.2;
+      }
 
       raf = requestAnimationFrame(loop);
     };
@@ -291,33 +323,35 @@ export function EditorialVarA() {
     if (!root.current || reduced) return;
     const ctx = gsap.context(() => {
       const track = document.querySelector(".ea-cases__track");
-      const windowEl = document.querySelector(".ea-cases__window");
       const names = document.querySelectorAll(".ea-cases__name");
       const bgLayers = document.querySelectorAll<HTMLElement>(".ea-cases__bg");
+      const slides = document.querySelectorAll(".ea-cases__slide");
 
-      if (!track || !windowEl) return;
+      if (!track || !slides.length) return;
 
-      const slides = track.querySelectorAll(".ea-cases__slide");
-      const slideHeight = slides[0]
-        ? (slides[0] as HTMLElement).offsetHeight
-        : 300;
-      const scrollDist = (slides.length - 1) * slideHeight;
+      const slideH = (slides[0] as HTMLElement).offsetHeight;
+      const totalDist = (slides.length - 1) * slideH;
 
-      const st = gsap.to(track, {
-        y: -scrollDist,
+      gsap.to(track, {
+        y: -totalDist,
         ease: "none",
         scrollTrigger: {
           trigger: ".ea-cases",
           start: "top top",
-          end: () => `+=${scrollDist + windowEl.clientHeight}`,
+          end: () => `+=${totalDist * 1.5}`,
           scrub: 0.6,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          snap: {
+            snapTo: 1 / (slides.length - 1),
+            duration: { min: 0.2, max: 0.5 },
+            ease: "power1.inOut",
+          },
           onUpdate: (self) => {
             const idx = Math.min(
               projects.length - 1,
-              Math.floor(self.progress * projects.length),
+              Math.round(self.progress * (projects.length - 1)),
             );
             names.forEach((n, i) => {
               n.classList.toggle("is-active", i === idx);
@@ -329,7 +363,7 @@ export function EditorialVarA() {
       bgLayers.forEach((layer) => {
         const speed = parseFloat(layer.dataset.speed || "1");
         gsap.to(layer, {
-          y: () => -200 * speed,
+          y: () => -180 * speed,
           ease: "none",
           scrollTrigger: {
             trigger: ".ea-cases",
@@ -353,14 +387,14 @@ export function EditorialVarA() {
         hidden={reduced}
       />
 
-      {/* right-side menu button */}
+      {/* menu button */}
       <button
         className="ea-menu-btn"
         type="button"
         onClick={openMenu}
         aria-label="Open menu"
       >
-        menu
+        <Menu size={20} strokeWidth={1.5} />
       </button>
 
       {/* slide-in menu */}
@@ -385,7 +419,7 @@ export function EditorialVarA() {
             onClick={closeMenu}
             aria-label="Close menu"
           >
-            close
+            <X size={22} strokeWidth={1.5} />
           </button>
           <nav className="ea-menu-panel__nav" aria-label="Site navigation">
             {MENU_LINKS.map((link) => (
@@ -404,6 +438,7 @@ export function EditorialVarA() {
             href={`mailto:${person.email}`}
             onClick={closeMenu}
           >
+            <Mail size={16} strokeWidth={1.5} />
             Get in touch
           </a>
           <div className="ea-menu-panel__foot">
@@ -424,16 +459,9 @@ export function EditorialVarA() {
       <main>
         {/* ===================== HERO ===================== */}
         <section className="ea-hero" id="ea-top">
-          <div className="ea-hero__glow" aria-hidden="true" />
-          <div className="ea-hero__grain" aria-hidden="true" />
-
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (
-              <span
-                className="ea-hero__word"
-                data-hero-word
-                key={`${w}-${i}`}
-              >
+              <span className="ea-hero__word" data-hero-word key={`${w}-${i}`}>
                 {w}
               </span>
             ))}
@@ -461,7 +489,7 @@ export function EditorialVarA() {
           </h1>
 
           <a className="ea-hero__scroll" href="#ea-bio" data-hero-scroll>
-            Scroll to explore ↓
+            Scroll to explore
           </a>
         </section>
 
@@ -485,6 +513,15 @@ export function EditorialVarA() {
 
         {/* ===================== CASES ===================== */}
         <section className="ea-cases" id="ea-work">
+          <div
+            className="ea-cases__fade ea-cases__fade--top"
+            aria-hidden="true"
+          />
+          <div
+            className="ea-cases__fade ea-cases__fade--bottom"
+            aria-hidden="true"
+          />
+
           <div className="ea-cases__bg-wrap" aria-hidden="true">
             <div className="ea-cases__bg ea-cases__bg--1" data-speed="0.4">
               <Plate from="#23203a" to="#5d4b8a" />
@@ -497,45 +534,31 @@ export function EditorialVarA() {
             </div>
           </div>
 
-          <div className="ea-cases__card">
-            <div className="ea-cases__card-header">
-              <span className="ea-cases__card-name">taim kellizy</span>
-              <span className="ea-cases__card-nav">work</span>
-              <span className="ea-cases__card-nav">about</span>
-              <span className="ea-cases__card-role">
-                Developer & CS Student
-                <br />
-                Egypt
-              </span>
-            </div>
-
-            <div className="ea-cases__window">
-              <div className="ea-cases__track">
-                {projects.map((p, i) => (
-                  <div className="ea-cases__slide" key={p.id}>
-                    <Plate
-                      from={CASES[i].from}
-                      to={CASES[i].to}
-                      label={p.kind}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <span className="ea-cases__title">Cases</span>
-
-            <ul className="ea-cases__names" aria-label="Projects">
+          <div className="ea-cases__window">
+            <div className="ea-cases__track">
               {projects.map((p, i) => (
-                <li
+                <div
+                  className={`ea-cases__slide ea-cases__slide--${CASES[i].h}`}
                   key={p.id}
-                  className={`ea-cases__name${i === 0 ? " is-active" : ""}`}
                 >
-                  {p.title}
-                </li>
+                  <Plate from={CASES[i].from} to={CASES[i].to} label={p.kind} />
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
+
+          <span className="ea-cases__title">Cases</span>
+
+          <ul className="ea-cases__names" aria-label="Projects">
+            {projects.map((p, i) => (
+              <li
+                key={p.id}
+                className={`ea-cases__name${i === 0 ? " is-active" : ""}`}
+              >
+                {p.title}
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ===================== CREDENTIALS ===================== */}
@@ -553,7 +576,7 @@ export function EditorialVarA() {
                   <span className="ea-row__metric">{c.metric}</span>
                   <span className="ea-row__year u-label">{c.year}</span>
                   <span className="ea-row__arrow" aria-hidden="true">
-                    ↗
+                    <ArrowUpRight size={16} strokeWidth={1.5} />
                   </span>
                 </a>
               </li>
@@ -578,7 +601,7 @@ export function EditorialVarA() {
                     {new Date(post.date).getFullYear()}
                   </span>
                   <span className="ea-row__arrow" aria-hidden="true">
-                    ↗
+                    <ArrowUpRight size={16} strokeWidth={1.5} />
                   </span>
                 </a>
               </li>
@@ -643,7 +666,8 @@ export function EditorialVarA() {
 
         <div className="ea-foot__base">
           <a className="ea-foot__top" href="#ea-top">
-            Back to top ↑
+            Back to top
+            <ArrowUp size={16} strokeWidth={1.5} />
           </a>
           <span className="ea-foot__copy">© 2026 {person.name}</span>
         </div>
