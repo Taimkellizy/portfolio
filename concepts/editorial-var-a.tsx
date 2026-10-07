@@ -21,10 +21,10 @@ const BIO_WORDS =
   );
 
 const CASES = [
-  { from: "#23203a", to: "#5d4b8a", h: "tall" },
-  { from: "#1e2b28", to: "#6f8a7d", h: "mid" },
-  { from: "#2c2430", to: "#9b7bb6", h: "short" },
-  { from: "#242428", to: "#6e6e78", h: "mid" },
+  { from: "#23203a", to: "#5d4b8a", ratio: "wide" },
+  { from: "#1e2b28", to: "#6f8a7d", ratio: "landscape" },
+  { from: "#2c2430", to: "#9b7bb6", ratio: "portrait" },
+  { from: "#242428", to: "#6e6e78", ratio: "landscape" },
 ];
 
 const MENU_LINKS = [
@@ -40,6 +40,7 @@ export function EditorialVarA() {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const giantRef = useRef<HTMLHeadingElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
+  const particleCanvasRef = useRef<HTMLCanvasElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
 
@@ -135,8 +136,16 @@ export function EditorialVarA() {
           },
           0.18,
         )
-        .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
-        .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
+        .from(
+          "[data-hero-star]",
+          { scale: 0, opacity: 0, duration: 0.9 },
+          0.55,
+        )
+        .from(
+          "[data-hero-scroll]",
+          { y: 18, opacity: 0, duration: 0.9 },
+          0.75,
+        );
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         gsap.from(el, {
@@ -149,6 +158,74 @@ export function EditorialVarA() {
       });
     }, root);
     return () => ctx.revert();
+  }, [reduced]);
+
+  /* ---------- hero particles ---------- */
+
+  useEffect(() => {
+    const canvas = particleCanvasRef.current;
+    if (!canvas || reduced) return;
+    const ctx2d = canvas.getContext("2d");
+    if (!ctx2d) return;
+
+    let raf = 0;
+    let w = 0;
+    let h = 0;
+    const particles: {
+      x: number;
+      y: number;
+      r: number;
+      vx: number;
+      vy: number;
+      a: number;
+    }[] = [];
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+      w = rect.width;
+      h = rect.height;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const count = 35;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.2 + 0.3,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.12,
+        a: Math.random() * 0.18 + 0.04,
+      });
+    }
+
+    const draw = () => {
+      ctx2d.clearRect(0, 0, w, h);
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+        ctx2d.beginPath();
+        ctx2d.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx2d.fillStyle = `rgba(232, 230, 225, ${p.a})`;
+        ctx2d.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", resize);
+    };
   }, [reduced]);
 
   /* ---------- cursor + letter disassembly ---------- */
@@ -173,7 +250,6 @@ export function EditorialVarA() {
       mouseY = e.clientY;
     };
 
-    /* split words into per-letter spans */
     const words =
       root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
     words.forEach((word) => {
@@ -238,11 +314,8 @@ export function EditorialVarA() {
       scale += (targetScale - scale) * 0.12;
       bubble.style.transform = `translate(${bubbleX - 22}px, ${bubbleY - 22}px) scale(${scale})`;
 
-      /* proximity check every 3rd frame to reduce cost */
       frame++;
       if (frame % 3 === 0) {
-        let nearInteractive = false;
-
         words.forEach((word) => {
           const rect = word.getBoundingClientRect();
           const cx = rect.left + rect.width / 2;
@@ -277,10 +350,8 @@ export function EditorialVarA() {
           }
         });
 
-        /* check interactive elements for cursor scale */
         const el = document.elementFromPoint(mouseX, mouseY);
-        nearInteractive = !!(el && el.closest("a, button"));
-        targetScale = nearInteractive ? 2.2 : 1;
+        targetScale = el && el.closest("a, button") ? 2.2 : 1;
       }
 
       raf = requestAnimationFrame(loop);
@@ -342,102 +413,114 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- cases scroll ---------- */
+  /* ---------- spectrum hover for menu + cases ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
-    const ctx = gsap.context(() => {
-      const track = document.querySelector(".ea-cases__track");
-      const names = document.querySelectorAll(".ea-cases__name");
-      const slides = gsap.utils.toArray<HTMLElement>(".ea-cases__slide");
+    const isTouch = matchMedia("(hover: none)").matches;
+    if (isTouch) return;
 
-      if (!track || !slides.length) return;
+    const containers =
+      root.current.querySelectorAll<HTMLElement>("[data-spectrum]");
+    const rafMap = new Map<HTMLElement, number>();
 
-      const slideH = slides[0].offsetHeight;
-      const totalDist = (slides.length - 1) * slideH;
+    containers.forEach((container) => {
+      const items = container.querySelectorAll<HTMLElement>("[data-spectrum-item]");
+      if (!items.length) return;
 
-      /* smooth scroll: one scrub tween drives everything */
-      gsap.to(track, {
-        y: -totalDist,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".ea-cases",
-          start: "top top",
-          end: () => `+=${totalDist * 2}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onUpdate: () => {
-            const vh = window.innerHeight;
-            const mid = vh * 0.5;
-
-            /* center-focus scale: each plate grows near viewport center */
-            slides.forEach((slide) => {
-              const plate = slide.querySelector(".plate") as HTMLElement;
-              if (!plate) return;
-              const rect = slide.getBoundingClientRect();
-              const slideMid = rect.top + rect.height / 2;
-              const dist = Math.abs(slideMid - mid);
-              const norm = Math.min(dist / (vh * 0.45), 1);
-              const s = 1.2 - norm * 0.4; /* 1.2 at center → 0.8 at edges */
-              plate.style.transform = `scale(${s.toFixed(3)})`;
-            });
-
-            /* active project name */
-            let bestIdx = 0;
-            let bestDist = Infinity;
-            slides.forEach((slide, i) => {
-              const rect = slide.getBoundingClientRect();
-              const d = Math.abs(rect.top + rect.height / 2 - mid);
-              if (d < bestDist) {
-                bestDist = d;
-                bestIdx = i;
+      const onMove = (e: MouseEvent) => {
+        cancelAnimationFrame(rafMap.get(container) || 0);
+        rafMap.set(
+          container,
+          requestAnimationFrame(() => {
+            items.forEach((item) => {
+              const rect = item.getBoundingClientRect();
+              const cx = rect.left + rect.width / 2;
+              const cy = rect.top + rect.height / 2;
+              const dx = e.clientX - cx;
+              const dy = e.clientY - cy;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              const radius = 220;
+              if (dist < radius) {
+                const t = 1 - dist / radius;
+                const peak = t * t; /* quadratic falloff */
+                const s = 1 + peak * 0.15;
+                item.style.transform = `scale(${s.toFixed(4)})`;
+                item.style.opacity = String(0.2 + peak * 0.8);
+              } else {
+                item.style.transform = "scale(1)";
+                item.style.opacity = "0.2";
               }
             });
-            names.forEach((n, i) => {
-              n.classList.toggle("is-active", i === bestIdx);
-            });
-          },
-        },
+          }),
+        );
+      };
+
+      const onLeave = () => {
+        items.forEach((item) => {
+          item.style.transform = "scale(1)";
+          item.style.opacity = "0.2";
+        });
+      };
+
+      container.addEventListener("mousemove", onMove);
+      container.addEventListener("mouseleave", onLeave);
+    });
+
+    return () => {
+      containers.forEach((container) => {
+        cancelAnimationFrame(rafMap.get(container) || 0);
       });
-    }, root);
-    return () => ctx.revert();
+    };
   }, [reduced]);
 
-  /* ---------- hero ambient animations ---------- */
+  /* ---------- cases scroll (joffreyspitzer.com layout) ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
     const ctx = gsap.context(() => {
-      /* star glyph: slow continuous rotation */
-      gsap.to(".ea-giant__star", {
-        rotation: 360,
-        duration: 18,
-        ease: "none",
-        repeat: -1,
-      });
+      const items = gsap.utils.toArray<HTMLElement>(".ea-case");
+      const names = document.querySelectorAll(".ea-case-name");
 
-      /* bio text: gentle breathing scale */
-      gsap.to(".ea-hero__bio", {
-        scale: 1.006,
-        duration: 4,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-        transformOrigin: "left top",
-      });
+      if (!items.length) return;
 
-      /* wordmark: slow shimmer sweep via background-position */
-      gsap.to(".ea-giant__letter", {
-        backgroundPosition: "200% center",
-        duration: 6,
-        ease: "none",
-        repeat: -1,
-        stagger: {
-          each: 0.3,
-          repeat: -1,
+      /* active name based on which item is closest to viewport center */
+      ScrollTrigger.create({
+        trigger: ".ea-cases",
+        start: "top 80%",
+        end: "bottom 20%",
+        onUpdate: () => {
+          const mid = window.innerHeight * 0.5;
+          let bestIdx = 0;
+          let bestDist = Infinity;
+          items.forEach((item, i) => {
+            const rect = item.getBoundingClientRect();
+            const d = Math.abs(rect.top + rect.height / 2 - mid);
+            if (d < bestDist) {
+              bestDist = d;
+              bestIdx = i;
+            }
+          });
+          names.forEach((n, i) => {
+            n.classList.toggle("is-active", i === bestIdx);
+          });
         },
+      });
+
+      /* subtle parallax on each image */
+      items.forEach((item) => {
+        const img = item.querySelector(".ea-case__plate") as HTMLElement;
+        if (!img) return;
+        gsap.to(img, {
+          yPercent: -8,
+          ease: "none",
+          scrollTrigger: {
+            trigger: item,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        });
       });
     }, root);
     return () => ctx.revert();
@@ -487,13 +570,18 @@ export function EditorialVarA() {
           >
             <X size={24} strokeWidth={1.5} />
           </button>
-          <nav className="ea-menu-panel__nav" aria-label="Site navigation">
+          <nav
+            className="ea-menu-panel__nav"
+            aria-label="Site navigation"
+            data-spectrum
+          >
             {MENU_LINKS.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={closeMenu}
                 className="ea-menu-panel__link"
+                data-spectrum-item
               >
                 {link.label}
               </a>
@@ -525,9 +613,19 @@ export function EditorialVarA() {
       <main>
         {/* ===================== HERO ===================== */}
         <section className="ea-hero" id="ea-top">
+          <canvas
+            className="ea-hero__particles"
+            ref={particleCanvasRef}
+            aria-hidden="true"
+          />
+
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (
-              <span className="ea-hero__word" data-hero-word key={`${w}-${i}`}>
+              <span
+                className="ea-hero__word"
+                data-hero-word
+                key={`${w}-${i}`}
+              >
                 {w}
               </span>
             ))}
@@ -577,41 +675,48 @@ export function EditorialVarA() {
           </div>
         </section>
 
-        {/* ===================== CASES ===================== */}
+        {/* ===================== CASES (joffreyspitzer.com layout) ===================== */}
         <section className="ea-cases" id="ea-work">
-          <div className="ea-cases__window">
-            <div
-              className="ea-cases__fade ea-cases__fade--top"
-              aria-hidden="true"
-            />
-            <div
-              className="ea-cases__fade ea-cases__fade--bottom"
-              aria-hidden="true"
-            />
-            <div className="ea-cases__track">
+          <div className="ea-cases__grid">
+            {/* left: sticky "Cases" label */}
+            <div className="ea-cases__left">
+              <h2 className="ea-cases__title">Cases</h2>
+            </div>
+
+            {/* center: scrolling images */}
+            <div className="ea-cases__images" data-spectrum>
               {projects.map((p, i) => (
                 <div
-                  className={`ea-cases__slide ea-cases__slide--${CASES[i].h}`}
+                  className={`ea-case ea-case--${CASES[i].ratio}`}
                   key={p.id}
+                  data-spectrum-item
                 >
-                  <Plate from={CASES[i].from} to={CASES[i].to} label={p.kind} />
+                  <div className="ea-case__plate">
+                    <Plate
+                      from={CASES[i].from}
+                      to={CASES[i].to}
+                      label={p.kind}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
+
+            {/* right: sticky project names */}
+            <div className="ea-cases__names">
+              <div className="ea-cases__names-inner">
+                {projects.map((p, i) => (
+                  <a
+                    key={p.id}
+                    className={`ea-case-name${i === 0 ? " is-active" : ""}`}
+                    href="#ea-work"
+                  >
+                    {p.title}
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
-
-          <span className="ea-cases__title">Cases</span>
-
-          <ul className="ea-cases__names" aria-label="Projects">
-            {projects.map((p, i) => (
-              <li
-                key={p.id}
-                className={`ea-cases__name${i === 0 ? " is-active" : ""}`}
-              >
-                {p.title}
-              </li>
-            ))}
-          </ul>
         </section>
 
         {/* ===================== CREDENTIALS ===================== */}
