@@ -134,7 +134,7 @@
   width: fit-content;
   font-family: var(--font-outfit);
   font-weight: 700;
-  font-size: clamp(18px, 2vw, 28px);
+  font-size: clamp(16px, 1.8vw, 24px);
   letter-spacing: -0.035em;
   line-height: 1.15;
   color: var(--ea-menu-ink);
@@ -374,7 +374,7 @@
   flex-direction: column;
   gap: 32px;
   padding-bottom: 50vh;
-  margin-left: 50%;
+  margin-left: 47%;
   padding-left: 12px;
 }
 
@@ -393,17 +393,17 @@
 }
 
 .ea-case--wide .ea-case__plate {
-  width: 240px;
+  width: 300px;
   aspect-ratio: 16 / 9;
 }
 
 .ea-case--landscape .ea-case__plate {
-  width: 180px;
+  width: 230px;
   aspect-ratio: 520 / 370;
 }
 
 .ea-case--portrait .ea-case__plate {
-  width: 140px;
+  width: 180px;
   aspect-ratio: 370 / 520;
 }
 

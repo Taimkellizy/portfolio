@@ -671,12 +671,11 @@ export function EditorialVarA() {
             </div>
 
             {/* center: scrolling images */}
-            <div className="ea-cases__images" data-spectrum>
+            <div className="ea-cases__images">
               {projects.map((p, i) => (
                 <div
                   className={`ea-case ea-case--${CASES[i].ratio}`}
                   key={p.id}
-                  data-spectrum-item
                 >
                   <div className="ea-case__plate">
                     <Plate
