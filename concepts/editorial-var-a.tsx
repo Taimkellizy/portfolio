@@ -7,6 +7,7 @@ import {
   usePrefersReducedMotion,
   scrollToTop,
 } from "@/lib/motion";
+import { SplitText } from "gsap/SplitText";
 import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
@@ -140,13 +141,43 @@ export function EditorialVarA() {
         .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
-        gsap.from(el, {
-          y: 42,
-          opacity: 0,
-          duration: 1.05,
-          ease: "expo.out",
-          scrollTrigger: { trigger: el, start: "top 88%" },
-        });
+        const isTitle = el.hasAttribute("data-reveal-title");
+        if (isTitle) {
+          const split = new SplitText(el, {
+            type: "words, chars",
+            autoSplit: true,
+            mask: "chars",
+            charsClass: "char",
+            onSplit: (self) => {
+              return gsap.from(self.chars, {
+                duration: 1,
+                yPercent: -120,
+                scale: 1.2,
+                stagger: 0.01,
+                ease: "expo.out",
+                scrollTrigger: { trigger: el, start: "top 88%" },
+              });
+            },
+          });
+          el.setAttribute("data-split", "1");
+        } else {
+          const split = new SplitText(el, {
+            type: "lines, words",
+            autoSplit: true,
+            mask: "lines",
+            linesClass: "line",
+            onSplit: (self) => {
+              return gsap.from(self.lines, {
+                duration: 0.9,
+                yPercent: 105,
+                stagger: 0.04,
+                ease: "expo.out",
+                scrollTrigger: { trigger: el, start: "top 88%" },
+              });
+            },
+          });
+          el.setAttribute("data-split", "1");
+        }
       });
     }, root);
     return () => ctx.revert();
@@ -468,7 +499,7 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- cases: spectrum on scroll (like menu hover) ---------- */
+  /* ---------- cases: ScrollTrigger scrub timeline (Codrops technique) ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -478,6 +509,46 @@ export function EditorialVarA() {
 
       if (!items.length) return;
 
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".ea-cases",
+          start: "top-=6.5% center",
+          end: "bottom center-=0.5%",
+          scrub: true,
+        },
+      });
+
+      items.forEach((item, index) => {
+        const plate = item.querySelector(".plate") as HTMLElement;
+        if (!plate) return;
+
+        /* scale up as it enters center */
+        timeline.to(
+          plate,
+          {
+            scale: 1.25,
+            force3D: true,
+            duration: 0.8,
+            ease: "none",
+          },
+          index,
+        );
+
+        /* scale back to 1 as it leaves */
+        timeline.to(
+          plate,
+          {
+            scale: 1,
+            force3D: true,
+            duration: 1.5,
+            ease: "none",
+            delay: 0.3,
+          },
+          ">",
+        );
+      });
+
+      /* active name sync */
       ScrollTrigger.create({
         trigger: ".ea-cases",
         start: "top 80%",
@@ -486,25 +557,14 @@ export function EditorialVarA() {
           const mid = window.innerHeight * 0.5;
           let bestIdx = 0;
           let bestDist = Infinity;
-
           items.forEach((item, i) => {
             const rect = item.getBoundingClientRect();
-            const cy = rect.top + rect.height / 2;
-            const dist = Math.abs(cy - mid);
-
-            if (dist < bestDist) {
-              bestDist = dist;
+            const d = Math.abs(rect.top + rect.height / 2 - mid);
+            if (d < bestDist) {
+              bestDist = d;
               bestIdx = i;
             }
-
-            /* spectrum: peak at center, falloff with distance */
-            const radius = window.innerHeight * 0.35;
-            const t = Math.max(0, 1 - dist / radius);
-            const peak = t * t * t;
-            const s = 1 + peak * 0.5;
-            item.style.transform = `scale(${s.toFixed(4)})`;
           });
-
           names.forEach((n, i) => {
             n.classList.toggle("is-active", i === bestIdx);
           });
