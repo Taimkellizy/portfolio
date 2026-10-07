@@ -1,0 +1,453 @@
+.vs {
+  /* emissive void; four dust neutrals + one signal amber */
+  --void: #050506;
+  --ash: #2c2f36;
+  --dust: #6b7280;
+  --steel: #9ca8b8;
+  --ivory: #e8e4dc;
+  --amber: #ffb020;
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--void);
+  color: var(--ivory);
+  font-family: var(--font-code);
+  /* one bitmap face at two sizes only */
+  font-size: 13px;
+  line-height: 1.9;
+  letter-spacing: 0.06em;
+  overflow-x: clip;
+  padding-bottom: 130px;
+}
+
+.vs a {
+  color: inherit;
+  transition: color 220ms var(--ease-out);
+}
+
+.vs a:hover {
+  color: var(--amber);
+}
+
+/* ---------- layered drifting dust fields ---------- */
+
+.vs-dust {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.vs-dust--far {
+  z-index: 0;
+  opacity: 0.55;
+}
+
+.vs-dust--mid {
+  z-index: 0;
+  opacity: 0.75;
+}
+
+.vs-dust--near {
+  z-index: 0;
+  opacity: 0.9;
+}
+
+.vs-nav,
+.vs-hero,
+.vs-queue,
+.vs-work,
+.vs-stack,
+.vs-notes,
+.vs-ping,
+.vs-foot {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- nav: a baseline that runs off both edges ---------- */
+
+.vs-nav {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  padding: 22px 26px;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+
+.vs-nav__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.vs-nav__links {
+  display: flex;
+  gap: 22px;
+  color: var(--steel);
+}
+
+/* ---------- signal-strength meter: scroll position as carrier bars ---------- */
+
+.vs-meter-wrap {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vs-meter__tag {
+  color: var(--dust);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+}
+
+.vs-meter {
+  display: inline-flex;
+  flex-direction: column-reverse;
+  gap: 2px;
+  width: 12px;
+}
+
+.vs-meter__seg {
+  height: 3px;
+  background: var(--ash);
+  filter: brightness(1.35);
+  transition: background 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+
+.vs-meter__seg.is-lit {
+  background: var(--amber);
+  box-shadow: 0 0 7px rgba(255, 176, 32, 0.55);
+}
+
+/* amber caret — hero only */
+.vs-caret {
+  display: inline-block;
+  width: 0.62em;
+  height: 1.02em;
+  background: var(--amber);
+  animation: vs-blink 1.06s steps(1) infinite;
+  vertical-align: -0.14em;
+}
+
+.vs-caret--big {
+  width: 0.72em;
+  height: 1.24em;
+  margin-right: 0.5em;
+}
+
+@keyframes vs-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* static prompt block — never blinks */
+.vs-block {
+  display: inline-block;
+  width: 0.62em;
+  height: 1.02em;
+  background: var(--amber);
+  vertical-align: -0.14em;
+  margin-right: 0.55em;
+}
+
+/* ---------- hero: baselines that never end ---------- */
+
+.vs-hero {
+  padding: 12vh 0 10vh;
+  overflow: hidden;
+}
+
+.vs-line {
+  white-space: nowrap;
+  padding-left: 26px;
+  /* every baseline continues past both screen edges */
+  width: max-content;
+  min-width: 106vw;
+}
+
+.vs-line--1 {
+  color: var(--dust);
+  letter-spacing: 0.22em;
+}
+
+.vs-line--2 {
+  /* the second size: the only other size on the surface */
+  font-size: clamp(38px, 7.6vw, 112px);
+  line-height: 1.06;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  color: var(--ivory);
+  text-shadow: 0 0 26px rgba(232, 228, 220, 0.22);
+  margin: 0.22em 0;
+}
+
+.vs-line--3 {
+  color: var(--steel);
+  letter-spacing: 0.12em;
+}
+
+.vs-line--4 {
+  color: var(--ash);
+  letter-spacing: 0.2em;
+  filter: brightness(1.9);
+  margin-top: 0.6em;
+}
+
+.vs-line--5 {
+  color: var(--amber);
+  letter-spacing: 0.18em;
+  margin-top: 2.2em;
+}
+
+.vs-line--soft {
+  color: var(--ivory);
+  opacity: 0.92;
+}
+
+/* ---------- CRT scanline sweep ---------- */
+
+.vs-hero,
+.vs-queue,
+.vs-work,
+.vs-stack,
+.vs-notes,
+.vs-ping {
+  overflow: hidden;
+}
+
+.vs-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 176, 32, 0.16) 12%,
+    rgba(255, 176, 32, 0.8) 50%,
+    rgba(255, 176, 32, 0.16) 88%,
+    transparent
+  );
+  box-shadow: 0 0 18px 3px rgba(255, 176, 32, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  will-change: transform;
+}
+
+/* ---------- queue rows: depth is rank ---------- */
+
+.vs-sec__label {
+  padding-left: 26px;
+  color: var(--ash);
+  filter: brightness(2.1);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 4.2em 0 1.6em;
+}
+
+.vs-queue__list {
+  list-style: none;
+}
+
+.vs-queue__row a {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1.15fr) minmax(0, 1.25fr) 40px;
+  gap: 18px;
+  align-items: baseline;
+  padding: 11px 26px;
+  transition: background 240ms var(--ease-out), letter-spacing 320ms var(--ease-out),
+    color 240ms var(--ease-out);
+}
+
+.vs-queue__idx {
+  color: var(--ash);
+  filter: brightness(2.1);
+}
+
+.vs-queue__label {
+  letter-spacing: 0.14em;
+}
+
+.vs-queue__detail {
+  color: var(--dust);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vs-queue__mark {
+  justify-self: end;
+  color: var(--steel);
+}
+
+/* depth steps: brightness + letterspacing + drift rate */
+.vs-depth-1 .vs-queue__label {
+  color: var(--ivory);
+  letter-spacing: 0.17em;
+  font-weight: 700;
+  text-shadow: 0 0 22px rgba(232, 228, 220, 0.16);
+}
+
+.vs-depth-2 .vs-queue__label {
+  color: var(--steel);
+  letter-spacing: 0.12em;
+}
+
+.vs-depth-3 .vs-queue__label {
+  color: var(--dust);
+  letter-spacing: 0.08em;
+  opacity: 0.82;
+}
+
+/* focus pulls the layer forward: brighter, wider, still */
+.vs-queue__row a:hover,
+.vs-queue__row a:focus-visible {
+  background: rgba(255, 176, 32, 0.05);
+  letter-spacing: 0.12em;
+  outline: none;
+}
+
+/* hover glitch: RGB channel split, then snap back */
+.vs-queue__row a:hover .vs-queue__label,
+.vs-queue__row a:focus-visible .vs-queue__label {
+  color: var(--amber);
+  letter-spacing: 0.22em;
+  text-shadow: 0 0 22px rgba(255, 176, 32, 0.3);
+  animation: vs-glitch 360ms steps(2, end) 1;
+}
+
+.vs-queue__row a:hover .vs-queue__detail,
+.vs-queue__row a:focus-visible .vs-queue__detail {
+  color: var(--steel);
+  animation: vs-glitch 360ms steps(2, end) 1;
+}
+
+@keyframes vs-glitch {
+  0% {
+    text-shadow: none;
+    transform: translate3d(0, 0, 0);
+  }
+  22% {
+    text-shadow: -3px 0 rgba(255, 48, 64, 0.85), 3px 0 rgba(32, 176, 255, 0.85);
+    transform: translate3d(1px, 0, 0);
+  }
+  47% {
+    text-shadow: 2px 0 rgba(255, 48, 64, 0.65), -2px 0 rgba(32, 176, 255, 0.65);
+    transform: translate3d(-2px, 0, 0);
+  }
+  74% {
+    text-shadow: -1px 0 rgba(255, 48, 64, 0.4), 1px 0 rgba(32, 176, 255, 0.4);
+    transform: translate3d(1px, 0, 0);
+  }
+  100% {
+    text-shadow: 0 0 22px rgba(255, 176, 32, 0.3);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.vs-queue__row a:hover .vs-queue__mark {
+  color: var(--amber);
+}
+
+/* reversed glyph cell — the one hard mark in the void */
+.vs-queue__mark {
+  display: inline-block;
+  padding: 0 0.28em;
+  background: transparent;
+}
+
+.vs-queue__row a:hover .vs-queue__mark {
+  background: var(--amber);
+  color: var(--void);
+}
+
+/* ---------- stack line ---------- */
+
+.vs-stack__line {
+  padding-left: 26px;
+  color: var(--steel);
+  letter-spacing: 0.11em;
+  white-space: nowrap;
+  min-width: 104vw;
+}
+
+/* ---------- ping ---------- */
+
+.vs-ping {
+  padding: 10vh 0 6vh;
+  overflow: hidden;
+}
+
+.vs-ping a {
+  color: var(--amber);
+}
+
+.vs-ping a:hover {
+  color: var(--ivory);
+}
+
+/* ---------- footer ---------- */
+
+.vs-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 6vh 26px 70px;
+  color: var(--ash);
+  filter: brightness(2.1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .vs-nav__links {
+    gap: 14px;
+    font-size: 11px;
+  }
+  .vs-queue__row a {
+    grid-template-columns: 42px minmax(0, 1fr) 30px;
+    gap: 12px;
+    padding: 11px 18px;
+  }
+  .vs-queue__detail {
+    display: none;
+  }
+  .vs-line,
+  .vs-sec__label,
+  .vs-stack__line {
+    padding-left: 18px;
+  }
+}
+
+/* reduced motion: drift parks, caret holds, glitch never fires */
+@media (prefers-reduced-motion: reduce) {
+  .vs-caret {
+    animation: none;
+  }
+  .vs-queue__row a:hover .vs-queue__label,
+  .vs-queue__row a:focus-visible .vs-queue__label,
+  .vs-queue__row a:hover .vs-queue__detail,
+  .vs-queue__row a:focus-visible .vs-queue__detail {
+    animation: none;
+  }
+}

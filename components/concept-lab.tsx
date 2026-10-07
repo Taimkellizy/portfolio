@@ -3,9 +3,19 @@
 import { useEffect, useState } from "react";
 import { useSmoothScroll } from "@/lib/motion";
 import { EditorialScatter } from "@/concepts/editorial-scatter";
+import { EditorialVarA } from "@/concepts/editorial-var-a";
+import { EditorialVarB } from "@/concepts/editorial-var-b";
 import { CracktroVoid } from "@/concepts/cracktro-void";
+import { VoidSignal } from "@/concepts/void-signal";
+import { VoidDeep } from "@/concepts/void-deep";
 
-type ConceptId = "editorial" | "void";
+type ConceptId =
+  | "editorial"
+  | "editorial-a"
+  | "editorial-b"
+  | "void"
+  | "void-a"
+  | "void-b";
 
 const CONCEPTS: {
   id: ConceptId;
@@ -24,12 +34,44 @@ const CONCEPTS: {
     Component: EditorialScatter,
   },
   {
+    id: "editorial-a",
+    name: "Ed Var A — Variable Stroke",
+    key: "2",
+    dot: "#c4a1ff",
+    blurb: "Per-char variable weight on hover, split-diagonal hero",
+    Component: EditorialVarA,
+  },
+  {
+    id: "editorial-b",
+    name: "Ed Var B — Layered Depth",
+    key: "3",
+    dot: "#9b7dd4",
+    blurb: "3-layer KELLIZY parallax, per-char alternating reveal",
+    Component: EditorialVarB,
+  },
+  {
     id: "void",
     name: "Cracktro Void",
-    key: "5",
+    key: "4",
     dot: "#97affe",
     blurb: "Depth as rank, drifting dust fields, emissive black",
     Component: CracktroVoid,
+  },
+  {
+    id: "void-a",
+    name: "Void Var A — Signal Chain",
+    key: "5",
+    dot: "#7a9fd4",
+    blurb: "Scanline sweep, row glitch, signal meter, fixed caret",
+    Component: VoidSignal,
+  },
+  {
+    id: "void-b",
+    name: "Void Var B — Deep Stack",
+    key: "6",
+    dot: "#5a8bc4",
+    blurb: "Depth-of-field rows, particle stream, terminal wipe",
+    Component: VoidDeep,
   },
 ];
 
