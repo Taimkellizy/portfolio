@@ -356,56 +356,88 @@ export function EditorialVarA() {
       const slideH = slides[0].offsetHeight;
       const totalDist = (slides.length - 1) * slideH;
 
+      /* smooth scroll: one scrub tween drives everything */
       gsap.to(track, {
         y: -totalDist,
         ease: "none",
         scrollTrigger: {
           trigger: ".ea-cases",
           start: "top top",
-          end: () => `+=${totalDist * 1.5}`,
-          scrub: 0.6,
+          end: () => `+=${totalDist * 2}`,
+          scrub: 1,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
-          snap: {
-            snapTo: 1 / (slides.length - 1),
-            duration: { min: 0.2, max: 0.5 },
-            ease: "power1.inOut",
-          },
-          onUpdate: (self) => {
-            const idx = Math.min(
-              projects.length - 1,
-              Math.round(self.progress * (projects.length - 1)),
-            );
+          onUpdate: () => {
+            const vh = window.innerHeight;
+            const mid = vh * 0.5;
+
+            /* center-focus scale: each plate grows near viewport center */
+            slides.forEach((slide) => {
+              const plate = slide.querySelector(".plate") as HTMLElement;
+              if (!plate) return;
+              const rect = slide.getBoundingClientRect();
+              const slideMid = rect.top + rect.height / 2;
+              const dist = Math.abs(slideMid - mid);
+              const norm = Math.min(dist / (vh * 0.45), 1);
+              const s = 1.2 - norm * 0.4; /* 1.2 at center → 0.8 at edges */
+              plate.style.transform = `scale(${s.toFixed(3)})`;
+            });
+
+            /* active project name */
+            let bestIdx = 0;
+            let bestDist = Infinity;
+            slides.forEach((slide, i) => {
+              const rect = slide.getBoundingClientRect();
+              const d = Math.abs(rect.top + rect.height / 2 - mid);
+              if (d < bestDist) {
+                bestDist = d;
+                bestIdx = i;
+              }
+            });
             names.forEach((n, i) => {
-              n.classList.toggle("is-active", i === idx);
+              n.classList.toggle("is-active", i === bestIdx);
             });
           },
         },
       });
+    }, root);
+    return () => ctx.revert();
+  }, [reduced]);
 
-      /* center-scale morph: each slide grows near viewport center */
-      slides.forEach((slide) => {
-        gsap.to(slide.querySelector(".plate"), {
-          scale: 1.18,
-          ease: "none",
-          scrollTrigger: {
-            trigger: slide,
-            start: "top 70%",
-            end: "center center",
-            scrub: 0.5,
-          },
-        });
-        gsap.to(slide.querySelector(".plate"), {
-          scale: 0.85,
-          ease: "none",
-          scrollTrigger: {
-            trigger: slide,
-            start: "center center",
-            end: "bottom 30%",
-            scrub: 0.5,
-          },
-        });
+  /* ---------- hero ambient animations ---------- */
+
+  useEffect(() => {
+    if (!root.current || reduced) return;
+    const ctx = gsap.context(() => {
+      /* star glyph: slow continuous rotation */
+      gsap.to(".ea-giant__star", {
+        rotation: 360,
+        duration: 18,
+        ease: "none",
+        repeat: -1,
+      });
+
+      /* bio text: gentle breathing scale */
+      gsap.to(".ea-hero__bio", {
+        scale: 1.006,
+        duration: 4,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        transformOrigin: "left top",
+      });
+
+      /* wordmark: slow shimmer sweep via background-position */
+      gsap.to(".ea-giant__letter", {
+        backgroundPosition: "200% center",
+        duration: 6,
+        ease: "none",
+        repeat: -1,
+        stagger: {
+          each: 0.3,
+          repeat: -1,
+        },
       });
     }, root);
     return () => ctx.revert();

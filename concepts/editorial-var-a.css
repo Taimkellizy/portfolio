@@ -257,6 +257,16 @@
 .ea-giant__letter {
   display: inline-block;
   transition: transform 0.15s ease-out;
+  background: linear-gradient(
+    105deg,
+    var(--ea-ink) 40%,
+    rgba(232, 230, 225, 0.55) 50%,
+    var(--ea-ink) 60%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .ea-giant__star-wrap {
@@ -403,6 +413,7 @@
   border-radius: 4px;
   overflow: hidden;
   transform-origin: center center;
+  will-change: transform;
 }
 
 .ea-cases__slide--tall .plate {
