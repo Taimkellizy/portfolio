@@ -372,10 +372,9 @@
 .ea-cases__images {
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 12px;
   padding-bottom: 50vh;
-  margin-left: 42%;
-  padding-left: 12px;
+  width: 17.55vw;
 }
 
 .ea-case {
@@ -393,17 +392,17 @@
 }
 
 .ea-case--wide .ea-case__plate {
-  width: 300px;
+  width: 100%;
   aspect-ratio: 16 / 9;
 }
 
 .ea-case--landscape .ea-case__plate {
-  width: 230px;
+  width: 100%;
   aspect-ratio: 520 / 370;
 }
 
 .ea-case--portrait .ea-case__plate {
-  width: 180px;
+  width: 100%;
   aspect-ratio: 370 / 520;
 }
 
