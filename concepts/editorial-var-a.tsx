@@ -40,13 +40,9 @@ export function EditorialVarA() {
             duration: 1.35,
             stagger: 0.055,
           },
-          0.18
+          0.18,
         )
-        .from(
-          "[data-hero-star]",
-          { scale: 0, opacity: 0, duration: 0.9 },
-          0.55
-        )
+        .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
         .from(
           "[data-hero-plate]",
           {
@@ -56,13 +52,9 @@ export function EditorialVarA() {
             duration: 1.5,
             stagger: 0.1,
           },
-          0.3
+          0.3,
         )
-        .from(
-          "[data-hero-scroll]",
-          { y: 18, opacity: 0, duration: 0.9 },
-          0.75
-        );
+        .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
 
       gsap.utils.toArray<HTMLElement>("[data-drift]").forEach((el) => {
         const speed = parseFloat(el.dataset.drift || "1");
@@ -124,34 +116,22 @@ export function EditorialVarA() {
           </p>
 
           <div className="ea-hero__plates" aria-hidden="true">
-            <div
-              className="ea-hero__plate ea-hero__plate--a"
-              data-hero-plate
-            >
+            <div className="ea-hero__plate ea-hero__plate--a" data-hero-plate>
               <div className="ea-drift" data-drift="1.6">
                 <Plate from="#23203a" to="#5d4b8a" label="Plate 01" />
               </div>
             </div>
-            <div
-              className="ea-hero__plate ea-hero__plate--b"
-              data-hero-plate
-            >
+            <div className="ea-hero__plate ea-hero__plate--b" data-hero-plate>
               <div className="ea-drift" data-drift="0.7">
                 <Plate from="#1e2b28" to="#6f8a7d" label="Plate 02" />
               </div>
             </div>
-            <div
-              className="ea-hero__plate ea-hero__plate--c"
-              data-hero-plate
-            >
+            <div className="ea-hero__plate ea-hero__plate--c" data-hero-plate>
               <div className="ea-drift" data-drift="1.25">
                 <Plate from="#2c2430" to="#9b7bb6" label="Plate 03" />
               </div>
             </div>
-            <div
-              className="ea-hero__plate ea-hero__plate--d"
-              data-hero-plate
-            >
+            <div className="ea-hero__plate ea-hero__plate--d" data-hero-plate>
               <div className="ea-drift" data-drift="0.55">
                 <Plate from="#242428" to="#6e6e78" label="Plate 04" />
               </div>

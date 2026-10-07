@@ -482,7 +482,9 @@
 .ea-row__arrow {
   justify-self: end;
   opacity: 0.45;
-  transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out);
+  transition:
+    opacity 280ms var(--ease-out),
+    transform 280ms var(--ease-out);
 }
 
 .ea-row a:hover .ea-row__arrow {
