@@ -7,9 +7,7 @@
 }
 
 /* ============================================================
-   Editorial Var A — Ollef-style: near-black field, extreme
-   negative space, massive lowercase wordmark. Right-side menu,
-   Cases scroll animation, magnetic type, grain drift.
+   Editorial Var A — Ollef-style editorial portfolio
    ============================================================ */
 
 .ea {
@@ -28,6 +26,23 @@
   color: var(--ea-ink);
   min-height: 100vh;
   overflow-x: clip;
+}
+
+/* ---------- cursor bubble ---------- */
+
+.ea-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(232, 230, 225, 0.35);
+  background: rgba(232, 230, 225, 0.06);
+  pointer-events: none;
+  z-index: 500;
+  will-change: transform;
+  mix-blend-mode: difference;
 }
 
 /* ---------- right-side menu button ---------- */
@@ -202,16 +217,30 @@
   overflow: clip;
 }
 
-/* subtle grain drift filling the negative space */
+/* subtle white glow so grain is visible on dark bg */
+.ea-hero__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 70% 55% at 55% 42%,
+    rgba(232, 230, 225, 0.07) 0%,
+    rgba(232, 230, 225, 0.03) 40%,
+    transparent 75%
+  );
+}
+
+/* grain texture — visible against the glow above */
 .ea-hero__grain {
   position: absolute;
   inset: -20%;
   pointer-events: none;
-  z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   background-size: 200px 200px;
-  opacity: 0.18;
-  animation: ea-grain-drift 12s steps(8) infinite;
+  opacity: 0.3;
+  animation: ea-grain-drift 10s steps(6) infinite;
   mix-blend-mode: overlay;
 }
 
@@ -219,26 +248,20 @@
   0% {
     transform: translate(0, 0);
   }
-  12.5% {
+  16% {
     transform: translate(-3%, 2%);
   }
-  25% {
+  33% {
     transform: translate(2%, -4%);
   }
-  37.5% {
+  50% {
     transform: translate(-4%, -2%);
   }
-  50% {
+  66% {
     transform: translate(3%, 3%);
   }
-  62.5% {
+  83% {
     transform: translate(-2%, 4%);
-  }
-  75% {
-    transform: translate(4%, -3%);
-  }
-  87.5% {
-    transform: translate(-3%, -4%);
   }
   100% {
     transform: translate(0, 0);
@@ -262,9 +285,11 @@
 .ea-hero__word {
   display: inline-block;
   margin-right: 0.28em;
+  will-change: transform;
+  cursor: default;
 }
 
-/* ---------- the giant wordmark ---------- */
+/* ---------- giant wordmark ---------- */
 
 .ea-giant {
   margin: 0;
@@ -361,23 +386,14 @@
 
 .ea-cases {
   position: relative;
-  height: 320vh;
-}
-
-.ea-cases__sticky {
-  position: sticky;
-  top: 0;
   height: 100vh;
-  height: 100svh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
+  background: #1a1a1e;
 }
 
 .ea-cases__bg-wrap {
   position: absolute;
-  inset: 0;
+  inset: -20% 0;
   pointer-events: none;
   z-index: 0;
 }
@@ -386,7 +402,7 @@
   position: absolute;
   overflow: hidden;
   border-radius: 4px;
-  opacity: 0.3;
+  opacity: 0.35;
 }
 
 .ea-cases__bg .plate {
@@ -397,7 +413,7 @@
 .ea-cases__bg--1 {
   width: clamp(280px, 32vw, 520px);
   height: clamp(200px, 24vw, 380px);
-  top: -5%;
+  top: 10%;
   left: 5%;
   transform: rotate(-3deg);
 }
@@ -405,7 +421,7 @@
 .ea-cases__bg--2 {
   width: clamp(240px, 26vw, 440px);
   height: clamp(180px, 20vw, 320px);
-  bottom: -3%;
+  bottom: 5%;
   right: 8%;
   transform: rotate(4deg);
 }
@@ -413,39 +429,74 @@
 .ea-cases__bg--3 {
   width: clamp(200px, 22vw, 360px);
   height: clamp(150px, 17vw, 270px);
-  top: 20%;
-  right: 22%;
+  top: 30%;
+  right: 25%;
   transform: rotate(-5deg);
-  opacity: 0.18;
+  opacity: 0.2;
 }
 
-/* central window */
+/* the white card — viewport window */
+
+.ea-cases__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(820px, 72vw);
+  height: min(480px, 62vh);
+  background: #e8e5df;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow:
+    0 40px 100px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #111;
+}
+
+.ea-cases__card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ea-cases__card-name {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.ea-cases__card-nav {
+  font-family: var(--font-outfit);
+  font-weight: 500;
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+.ea-cases__card-role {
+  margin-left: auto;
+  font-family: var(--font-outfit);
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: right;
+  opacity: 0.5;
+}
+
+/* image strip inside the card */
 
 .ea-cases__window {
-  position: relative;
-  z-index: 2;
-  width: min(480px, 42vw);
-  height: min(360px, 48vh);
-  border: 1px solid var(--ea-line);
-  border-radius: 8px;
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: clamp(180px, 20vw, 260px);
+  height: calc(100% - 120px);
   overflow: hidden;
-  background: var(--ea-bg);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-}
-
-.ea-cases__window-bar {
-  display: flex;
-  align-items: center;
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--ea-line);
-}
-
-.ea-cases__window-title {
-  font-family: var(--font-outfit);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -0.02em;
-  text-transform: lowercase;
+  z-index: 2;
 }
 
 .ea-cases__track {
@@ -453,54 +504,49 @@
 }
 
 .ea-cases__slide {
-  padding: 18px;
+  padding: 8px 0;
 }
 
 .ea-cases__slide .plate {
   width: 100%;
-  height: 240px;
-  border-radius: 4px;
+  height: clamp(160px, 20vw, 240px);
+  border-radius: 3px;
 }
 
-.ea-cases__slide-meta {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-top: 10px;
+.ea-cases__title {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  z-index: 3;
   font-family: var(--font-outfit);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.012em;
+  font-weight: 700;
+  font-size: clamp(28px, 3.5vw, 42px);
+  letter-spacing: -0.03em;
+  color: #111;
 }
-
-.ea-cases__slide-meta .u-label {
-  opacity: 0.5;
-}
-
-/* project names on the right */
 
 .ea-cases__names {
   position: absolute;
-  right: clamp(24px, 5vw, 80px);
-  top: 50%;
-  transform: translateY(-50%);
+  right: 28px;
+  bottom: 28px;
   z-index: 3;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 3px;
+  text-align: right;
 }
 
 .ea-cases__name {
   font-family: var(--font-outfit);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: -0.005em;
+  color: #111;
   opacity: 0.3;
   transition:
     opacity 300ms ease,
     font-weight 300ms ease;
-  cursor: default;
 }
 
 .ea-cases__name.is-active {
@@ -707,11 +753,8 @@
   .ea-hero__bio {
     width: min(44vw, 560px);
   }
-  .ea-cases__names {
-    right: 16px;
-  }
-  .ea-cases__window {
-    width: min(420px, 50vw);
+  .ea-cases__card {
+    width: min(680px, 82vw);
   }
 }
 
@@ -731,19 +774,12 @@
   .ea-cases__bg {
     display: none;
   }
-  .ea-cases__window {
-    width: min(360px, 70vw);
+  .ea-cases__card {
+    width: min(440px, 88vw);
+    height: min(400px, 55vh);
   }
-  .ea-cases__names {
-    position: absolute;
-    right: auto;
-    left: var(--ea-pad);
-    top: auto;
-    bottom: 24px;
-    transform: none;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px 14px;
+  .ea-cases__window {
+    width: clamp(140px, 24vw, 200px);
   }
   .ea-menu-panel {
     width: 100%;
@@ -755,6 +791,9 @@
   .ea-foot__col-title,
   .ea-foot__col a {
     font-size: 18px;
+  }
+  .ea-cursor {
+    display: none;
   }
 }
 
@@ -783,13 +822,13 @@
     gap: 16px;
     font-size: 15px;
   }
-  .ea-cases {
-    height: 260vh;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ea-hero__grain {
     animation: none;
+  }
+  .ea-cursor {
+    display: none;
   }
 }

@@ -28,16 +28,18 @@ const MENU_LINKS = [
   { label: "Contact", href: "#ea-contact" },
 ];
 
+const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*";
+
 export function EditorialVarA() {
   const root = useRef<HTMLDivElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const giantRef = useRef<HTMLHeadingElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
 
-  /* ---------- menu open / close ---------- */
+  /* ---------- menu ---------- */
 
   const openMenu = useCallback(() => setMenuOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
@@ -59,7 +61,14 @@ export function EditorialVarA() {
     if (!menuPanelRef.current || !menuOverlayRef.current) return;
     if (reduced) return;
     if (menuOpen) {
-      gsap.to(menuOverlayRef.current, { opacity: 1, duration: 0.35 });
+      gsap.to(menuOverlayRef.current, {
+        opacity: 1,
+        duration: 0.35,
+        onStart: () => {
+          if (menuOverlayRef.current)
+            menuOverlayRef.current.style.pointerEvents = "auto";
+        },
+      });
       gsap.to(menuPanelRef.current, { x: 0, duration: 0.55, ease: "expo.out" });
     } else {
       gsap.to(menuOverlayRef.current, {
@@ -86,7 +95,7 @@ export function EditorialVarA() {
     }
   }, [reduced]);
 
-  /* ---------- hero entrance + word-by-word bio ---------- */
+  /* ---------- hero entrance ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -99,16 +108,6 @@ export function EditorialVarA() {
         duration: 0.95,
         stagger: 0.09,
       })
-        .from(
-          "[data-hero-word]",
-          {
-            y: 14,
-            opacity: 0,
-            duration: 0.7,
-            stagger: 0.028,
-          },
-          0.12,
-        )
         .from(
           "[data-hero-letter]",
           {
@@ -135,60 +134,108 @@ export function EditorialVarA() {
     return () => ctx.revert();
   }, [reduced]);
 
-  /* ---------- cases scroll animation ---------- */
+  /* ---------- cursor bubble + text interaction ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
-    const ctx = gsap.context(() => {
-      const track = root.current!.querySelector(".ea-cases__track");
-      const names = root.current!.querySelectorAll(".ea-cases__name");
-      const bgLayers =
-        root.current!.querySelectorAll<HTMLElement>(".ea-cases__bg");
+    const bubble = cursorRef.current;
+    const isTouch = matchMedia("(hover: none)").matches;
+    if (!bubble || isTouch) return;
 
-      if (!track) return;
+    const words = root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
+    const originals = new Map<HTMLElement, { x: number; y: number }>();
+    words.forEach((w) => originals.set(w, { x: 0, y: 0 }));
 
-      gsap.to(track, {
-        y: () =>
-          -(
-            track.scrollHeight -
-            (root.current!.querySelector(".ea-cases__window")?.clientHeight ||
-              320)
-          ),
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".ea-cases",
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0.8,
-          pin: ".ea-cases__sticky",
-          anticipatePin: 1,
-          onUpdate: (self) => {
-            const idx = Math.min(
-              projects.length - 1,
-              Math.floor(self.progress * projects.length),
-            );
-            names.forEach((n, i) => {
-              n.classList.toggle("is-active", i === idx);
+    let mouseX = -100;
+    let mouseY = -100;
+    let bubbleX = -100;
+    let bubbleY = -100;
+    let raf = 0;
+
+    const scrambleWord = (el: HTMLElement) => {
+      const original = el.textContent || "";
+      if (!original || el.dataset.scrambling === "1") return;
+      el.dataset.scrambling = "1";
+      let iteration = 0;
+      const maxIterations = 8;
+      const interval = setInterval(() => {
+        el.textContent = original
+          .split("")
+          .map((ch, i) => {
+            if (ch === " ") return " ";
+            if (i < iteration) return original[i];
+            return SCRAMBLE_CHARS[
+              Math.floor(Math.random() * SCRAMBLE_CHARS.length)
+            ];
+          })
+          .join("");
+        iteration += 1;
+        if (iteration >= maxIterations) {
+          clearInterval(interval);
+          el.textContent = original;
+          el.dataset.scrambling = "0";
+        }
+      }, 40);
+    };
+
+    const onMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+
+    const loop = () => {
+      bubbleX += (mouseX - bubbleX) * 0.12;
+      bubbleY += (mouseY - bubbleY) * 0.12;
+      bubble.style.transform = `translate(${bubbleX - 24}px, ${bubbleY - 24}px)`;
+
+      words.forEach((word) => {
+        const rect = word.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = mouseX - cx;
+        const dy = mouseY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 180;
+
+        if (dist < radius) {
+          const force = (1 - dist / radius) * 18;
+          const tx = (dx / dist) * -force;
+          const ty = (dy / dist) * -force;
+          gsap.to(word, {
+            x: tx,
+            y: ty,
+            duration: 0.4,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
+
+          if (dist < 70 && word.dataset.scrambling !== "1") {
+            scrambleWord(word);
+          }
+        } else {
+          const orig = originals.get(word);
+          if (orig) {
+            gsap.to(word, {
+              x: orig.x,
+              y: orig.y,
+              duration: 0.5,
+              ease: "power2.out",
+              overwrite: "auto",
             });
-          },
-        },
+          }
+        }
       });
 
-      bgLayers.forEach((layer) => {
-        const speed = parseFloat(layer.dataset.speed || "1");
-        gsap.to(layer, {
-          y: () => -120 * speed,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".ea-cases",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-        });
-      });
-    }, root);
-    return () => ctx.revert();
+      raf = requestAnimationFrame(loop);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+    };
   }, [reduced]);
 
   /* ---------- magnetic wordmark ---------- */
@@ -211,7 +258,7 @@ export function EditorialVarA() {
           const dy = e.clientY - cy;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const radius = 380;
-          if (dist < radius) {
+          if (dist < radius && dist > 0) {
             const force = (1 - dist / radius) * 6;
             const tx = (dx / dist) * force;
             const ty = (dy / dist) * force;
@@ -238,20 +285,85 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
+  /* ---------- cases scroll animation ---------- */
+
+  useEffect(() => {
+    if (!root.current || reduced) return;
+    const ctx = gsap.context(() => {
+      const track = document.querySelector(".ea-cases__track");
+      const windowEl = document.querySelector(".ea-cases__window");
+      const names = document.querySelectorAll(".ea-cases__name");
+      const bgLayers = document.querySelectorAll<HTMLElement>(".ea-cases__bg");
+
+      if (!track || !windowEl) return;
+
+      const slides = track.querySelectorAll(".ea-cases__slide");
+      const slideHeight = slides[0]
+        ? (slides[0] as HTMLElement).offsetHeight
+        : 300;
+      const scrollDist = (slides.length - 1) * slideHeight;
+
+      const st = gsap.to(track, {
+        y: -scrollDist,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".ea-cases",
+          start: "top top",
+          end: () => `+=${scrollDist + windowEl.clientHeight}`,
+          scrub: 0.6,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            const idx = Math.min(
+              projects.length - 1,
+              Math.floor(self.progress * projects.length),
+            );
+            names.forEach((n, i) => {
+              n.classList.toggle("is-active", i === idx);
+            });
+          },
+        },
+      });
+
+      bgLayers.forEach((layer) => {
+        const speed = parseFloat(layer.dataset.speed || "1");
+        gsap.to(layer, {
+          y: () => -200 * speed,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".ea-cases",
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.2,
+          },
+        });
+      });
+    }, root);
+    return () => ctx.revert();
+  }, [reduced]);
+
   return (
     <div className="ea" ref={root}>
-      {/* ---- right-side menu button ---- */}
+      {/* cursor bubble */}
+      <div
+        className="ea-cursor"
+        ref={cursorRef}
+        aria-hidden="true"
+        hidden={reduced}
+      />
+
+      {/* right-side menu button */}
       <button
         className="ea-menu-btn"
         type="button"
         onClick={openMenu}
         aria-label="Open menu"
-        data-hero-nav
       >
         menu
       </button>
 
-      {/* ---- slide-in menu panel ---- */}
+      {/* slide-in menu */}
       <div
         className="ea-menu-overlay"
         ref={menuOverlayRef}
@@ -312,11 +424,16 @@ export function EditorialVarA() {
       <main>
         {/* ===================== HERO ===================== */}
         <section className="ea-hero" id="ea-top">
+          <div className="ea-hero__glow" aria-hidden="true" />
           <div className="ea-hero__grain" aria-hidden="true" />
 
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (
-              <span className="ea-hero__word" data-hero-word key={`${w}-${i}`}>
+              <span
+                className="ea-hero__word"
+                data-hero-word
+                key={`${w}-${i}`}
+              >
                 {w}
               </span>
             ))}
@@ -366,25 +483,33 @@ export function EditorialVarA() {
           </div>
         </section>
 
-        {/* ===================== CASES (scroll animation) ===================== */}
+        {/* ===================== CASES ===================== */}
         <section className="ea-cases" id="ea-work">
-          <div className="ea-cases__sticky">
-            <div className="ea-cases__bg-wrap" aria-hidden="true">
-              <div className="ea-cases__bg ea-cases__bg--1" data-speed="0.4">
-                <Plate from="#23203a" to="#5d4b8a" />
-              </div>
-              <div className="ea-cases__bg ea-cases__bg--2" data-speed="0.8">
-                <Plate from="#1e2b28" to="#6f8a7d" />
-              </div>
-              <div className="ea-cases__bg ea-cases__bg--3" data-speed="0.2">
-                <Plate from="#2c2430" to="#9b7bb6" />
-              </div>
+          <div className="ea-cases__bg-wrap" aria-hidden="true">
+            <div className="ea-cases__bg ea-cases__bg--1" data-speed="0.4">
+              <Plate from="#23203a" to="#5d4b8a" />
+            </div>
+            <div className="ea-cases__bg ea-cases__bg--2" data-speed="0.8">
+              <Plate from="#1e2b28" to="#6f8a7d" />
+            </div>
+            <div className="ea-cases__bg ea-cases__bg--3" data-speed="0.2">
+              <Plate from="#2c2430" to="#9b7bb6" />
+            </div>
+          </div>
+
+          <div className="ea-cases__card">
+            <div className="ea-cases__card-header">
+              <span className="ea-cases__card-name">taim kellizy</span>
+              <span className="ea-cases__card-nav">work</span>
+              <span className="ea-cases__card-nav">about</span>
+              <span className="ea-cases__card-role">
+                Developer & CS Student
+                <br />
+                Egypt
+              </span>
             </div>
 
             <div className="ea-cases__window">
-              <div className="ea-cases__window-bar">
-                <span className="ea-cases__window-title">Cases</span>
-              </div>
               <div className="ea-cases__track">
                 {projects.map((p, i) => (
                   <div className="ea-cases__slide" key={p.id}>
@@ -393,14 +518,12 @@ export function EditorialVarA() {
                       to={CASES[i].to}
                       label={p.kind}
                     />
-                    <div className="ea-cases__slide-meta">
-                      <span>{p.title}</span>
-                      <span className="u-label">{p.year}</span>
-                    </div>
                   </div>
                 ))}
               </div>
             </div>
+
+            <span className="ea-cases__title">Cases</span>
 
             <ul className="ea-cases__names" aria-label="Projects">
               {projects.map((p, i) => (
