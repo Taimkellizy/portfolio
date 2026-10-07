@@ -136,16 +136,8 @@ export function EditorialVarA() {
           },
           0.18,
         )
-        .from(
-          "[data-hero-star]",
-          { scale: 0, opacity: 0, duration: 0.9 },
-          0.55,
-        )
-        .from(
-          "[data-hero-scroll]",
-          { y: 18, opacity: 0, duration: 0.9 },
-          0.75,
-        );
+        .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
+        .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         gsap.from(el, {
@@ -425,7 +417,9 @@ export function EditorialVarA() {
     const rafMap = new Map<HTMLElement, number>();
 
     containers.forEach((container) => {
-      const items = container.querySelectorAll<HTMLElement>("[data-spectrum-item]");
+      const items = container.querySelectorAll<HTMLElement>(
+        "[data-spectrum-item]",
+      );
       if (!items.length) return;
 
       const onMove = (e: MouseEvent) => {
@@ -621,11 +615,7 @@ export function EditorialVarA() {
 
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (
-              <span
-                className="ea-hero__word"
-                data-hero-word
-                key={`${w}-${i}`}
-              >
+              <span className="ea-hero__word" data-hero-word key={`${w}-${i}`}>
                 {w}
               </span>
             ))}
