@@ -3,12 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSmoothScroll } from "@/lib/motion";
 import { EditorialScatter } from "@/concepts/editorial-scatter";
-import { GrainyBloom } from "@/concepts/grainy-bloom";
-import { SwissMonoFlood } from "@/concepts/swiss-monoflood";
-import { SlideRack } from "@/concepts/slide-rack";
 import { CracktroVoid } from "@/concepts/cracktro-void";
 
-type ConceptId = "editorial" | "bloom" | "swiss" | "rack" | "void";
+type ConceptId = "editorial" | "void";
 
 const CONCEPTS: {
   id: ConceptId;
@@ -25,30 +22,6 @@ const CONCEPTS: {
     dot: "#b794e9",
     blurb: "Giant type, drifting rotated plates, asymmetric calm",
     Component: EditorialScatter,
-  },
-  {
-    id: "bloom",
-    name: "Grainy Bloom",
-    key: "2",
-    dot: "#ed7aba",
-    blurb: "Dithered gradient field, slab lettering, star marquees",
-    Component: GrainyBloom,
-  },
-  {
-    id: "swiss",
-    name: "Swiss MonoFlood",
-    key: "3",
-    dot: "#4ba7c6",
-    blurb: "One saturated flood, product precision, ticker",
-    Component: SwissMonoFlood,
-  },
-  {
-    id: "rack",
-    name: "Slide Rack",
-    key: "4",
-    dot: "#fcae1e",
-    blurb: "Raked glass slides, one type size, traveling light",
-    Component: SlideRack,
   },
   {
     id: "void",
