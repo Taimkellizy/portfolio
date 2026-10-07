@@ -437,8 +437,8 @@ export function EditorialVarA() {
               const radius = 280;
               if (dist < radius) {
                 const t = 1 - dist / radius;
-                const peak = t * t; /* quadratic falloff */
-                const s = 1 + peak * 2;
+                const peak = t * t * t; /* steep cubic falloff */
+                const s = 1 + peak * 3;
                 item.style.transform = `scale(${s.toFixed(4)})`;
                 item.style.opacity = String(0.2 + peak * 0.8);
               } else {
@@ -500,11 +500,9 @@ export function EditorialVarA() {
             /* spectrum: peak at center, falloff with distance */
             const radius = window.innerHeight * 0.35;
             const t = Math.max(0, 1 - dist / radius);
-            const peak = t * t;
-            const s = 1 + peak * 0.6;
-            const opacity = 0.15 + peak * 0.85;
+            const peak = t * t * t;
+            const s = 1 + peak * 0.5;
             item.style.transform = `scale(${s.toFixed(4)})`;
-            item.style.opacity = String(opacity.toFixed(3));
           });
 
           names.forEach((n, i) => {
@@ -689,19 +687,17 @@ export function EditorialVarA() {
             </div>
 
             {/* right: sticky project names */}
-            <div className="ea-cases__names">
-              <div className="ea-cases__names-inner">
-                {projects.map((p, i) => (
-                  <a
-                    key={p.id}
-                    className={`ea-case-name${i === 0 ? " is-active" : ""}`}
-                    href="#ea-work"
-                  >
-                    {p.title}
-                  </a>
-                ))}
-              </div>
-            </div>
+          <div className="ea-cases__names">
+            {projects.map((p, i) => (
+              <a
+                key={p.id}
+                className={`ea-case-name${i === 0 ? " is-active" : ""}`}
+                href="#ea-work"
+              >
+                {p.title}
+              </a>
+            ))}
+          </div>
           </div>
         </section>
 
