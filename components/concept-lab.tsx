@@ -5,17 +5,9 @@ import { useSmoothScroll } from "@/lib/motion";
 import { EditorialScatter } from "@/concepts/editorial-scatter";
 import { EditorialVarA } from "@/concepts/editorial-var-a";
 import { EditorialVarB } from "@/concepts/editorial-var-b";
-import { CracktroVoid } from "@/concepts/cracktro-void";
-import { VoidSignal } from "@/concepts/void-signal";
-import { VoidDeep } from "@/concepts/void-deep";
+import { EditorialVarC } from "@/concepts/editorial-var-c";
 
-type ConceptId =
-  | "editorial"
-  | "editorial-a"
-  | "editorial-b"
-  | "void"
-  | "void-a"
-  | "void-b";
+type ConceptId = "editorial" | "editorial-a" | "editorial-b" | "editorial-c";
 
 const CONCEPTS: {
   id: ConceptId;
@@ -35,43 +27,27 @@ const CONCEPTS: {
   },
   {
     id: "editorial-a",
-    name: "Ed Var A — Variable Stroke",
+    name: "Ed A — Geometric Wordmark",
     key: "2",
     dot: "#c4a1ff",
-    blurb: "Per-char variable weight on hover, split-diagonal hero",
+    blurb: "Massive lowercase Outfit wordmark, extreme negative space, Ollef-inspired",
     Component: EditorialVarA,
   },
   {
     id: "editorial-b",
-    name: "Ed Var B — Layered Depth",
+    name: "Ed B — Scattered Editorial",
     key: "3",
-    dot: "#9b7dd4",
-    blurb: "3-layer KELLIZY parallax, per-char alternating reveal",
+    dot: "#e8a0c0",
+    blurb: "Light bg, massive type + pill labels, playful grid, Mia Brooks-inspired",
     Component: EditorialVarB,
   },
   {
-    id: "void",
-    name: "Cracktro Void",
+    id: "editorial-c",
+    name: "Ed C — Cinematic Serif",
     key: "4",
-    dot: "#97affe",
-    blurb: "Depth as rank, drifting dust fields, emissive black",
-    Component: CracktroVoid,
-  },
-  {
-    id: "void-a",
-    name: "Void Var A — Signal Chain",
-    key: "5",
-    dot: "#7a9fd4",
-    blurb: "Scanline sweep, row glitch, signal meter, fixed caret",
-    Component: VoidSignal,
-  },
-  {
-    id: "void-b",
-    name: "Void Var B — Deep Stack",
-    key: "6",
-    dot: "#5a8bc4",
-    blurb: "Depth-of-field rows, particle stream, terminal wipe",
-    Component: VoidDeep,
+    dot: "#d4a574",
+    blurb: "Full-bleed cinematic hero, sans + italic serif mix, Katrine Pil-inspired",
+    Component: EditorialVarC,
   },
 ];
 

@@ -7,8 +7,12 @@ import { StarGlyph } from "@/components/star-glyph";
 import { person, projects, credentials, posts } from "@/lib/content";
 import "./editorial-var-b.css";
 
-const FIRST = person.firstName.toUpperCase().split("");
-const LAST = person.lastName.toUpperCase().split("");
+const PLATE = [
+  { from: "#2a2440", to: "#673a94" },
+  { from: "#1d3a2e", to: "#788b5f" },
+  { from: "#402a38", to: "#b794e9" },
+  { from: "#232326", to: "#6b6b74" },
+];
 
 export function EditorialVarB() {
   const root = useRef<HTMLDivElement>(null);
@@ -17,11 +21,37 @@ export function EditorialVarB() {
   useEffect(() => {
     if (!root.current || reduced) return;
     const ctx = gsap.context(() => {
+      gsap.from("[data-hero-line]", {
+        yPercent: 34,
+        opacity: 0,
+        duration: 1.3,
+        ease: "expo.out",
+        stagger: 0.14,
+      });
+
+      gsap.from("[data-hero-pill]", {
+        scale: 0.5,
+        opacity: 0,
+        duration: 0.85,
+        ease: "back.out(2.6)",
+        stagger: 0.07,
+        delay: 0.45,
+      });
+
+      gsap.from("[data-hero-plate]", {
+        y: 72,
+        opacity: 0,
+        duration: 1.45,
+        ease: "expo.out",
+        stagger: 0.1,
+        delay: 0.2,
+      });
+
       gsap.utils.toArray<HTMLElement>("[data-drift]").forEach((el) => {
         const speed = parseFloat(el.dataset.drift || "1");
         gsap.to(el, {
-          yPercent: -14 * speed,
-          rotate: `+=${speed > 1 ? 2.4 : -1.8}`,
+          yPercent: -13 * speed,
+          rotate: `+=${speed > 1 ? 2.2 : -1.7}`,
           ease: "none",
           scrollTrigger: {
             trigger: el,
@@ -32,75 +62,9 @@ export function EditorialVarB() {
         });
       });
 
-      gsap.from("[data-bchar]", {
-        xPercent: (i: number, el: HTMLElement) =>
-          el.dataset.dir === "1" ? 52 : -52,
-        opacity: 0,
-        "--eb-w": 120,
-        duration: 1.25,
-        ease: "expo.out",
-        stagger: 0.055,
-      });
-
-      gsap.from("[data-layer-mid]", {
-        opacity: 0,
-        scale: 1.05,
-        duration: 1.6,
-        ease: "expo.out",
-        delay: 0.24,
-      });
-
-      gsap.from("[data-layer-ghost]", {
-        opacity: 0,
-        scale: 1.09,
-        duration: 1.9,
-        ease: "expo.out",
-        delay: 0.38,
-      });
-
-      gsap.from("[data-hero-plate]", {
-        y: 70,
-        opacity: 0,
-        rotate: (i: number) => (i % 2 ? 5 : -5),
-        duration: 1.6,
-        ease: "expo.out",
-        stagger: 0.12,
-        delay: 0.2,
-      });
-
-      const layers: [string, number, number][] = [
-        ["[data-layer-ghost]", -30, -8],
-        ["[data-layer-mid]", -14, -3],
-        ["[data-layer-front]", 10, 3],
-      ];
-      layers.forEach(([sel, y, x]) => {
-        gsap.to(sel, {
-          yPercent: y,
-          xPercent: x,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".eb-hero",
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.2,
-          },
-        });
-      });
-
-      gsap.to("[data-hero-word-a]", {
-        yPercent: 22,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ".eb-hero",
-          start: "top top",
-          end: "bottom top",
-          scrub: 1.2,
-        },
-      });
-
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         gsap.from(el, {
-          y: 42,
+          y: 40,
           opacity: 0,
           duration: 1.05,
           ease: "expo.out",
@@ -117,144 +81,142 @@ export function EditorialVarB() {
       <header className="eb-nav">
         <a className="eb-nav__mark u-label" href="#top">
           {person.name}
+          <StarGlyph className="eb-nav__star" />
         </a>
-        <nav className="eb-nav__links" aria-label="Primary">
-          <a href="#work">Work</a>
-          <a href="#credentials">Credentials</a>
-          <a href="#writing">Writing</a>
-          <a href="#contact">Contact</a>
+        <nav className="eb-nav__pills" aria-label="Primary">
+          <a className="eb-nav__pill" href="#top">
+            Home
+          </a>
+          <a className="eb-nav__pill" href="#work">
+            Work
+          </a>
+          <a className="eb-nav__pill" href="#about">
+            About
+          </a>
+          <a className="eb-nav__pill" href="#contact">
+            Contact
+          </a>
         </nav>
-        <span className="eb-nav__meta u-label">Archive · MMXXVI</span>
+        <span className="eb-nav__meta u-label">Concept lab · B</span>
       </header>
 
       <main id="top">
         <section className="eb-hero">
-          <p className="eb-hero__kicker u-label">
-            <StarGlyph />
-            <span>
+          <div className="eb-hero__top">
+            <p className="u-label">
               {person.role} — {person.location}
-            </span>
-          </p>
+            </p>
+            <p className="u-label eb-hero__top-end">Portfolio · MMXXVI</p>
+          </div>
 
-          <h1 className="eb-hero__title" aria-label={person.name}>
-            <span className="eb-hero__word-a" data-hero-word-a>
-              {FIRST.map((ch, i) => (
-                <span
-                  key={`${ch}-${i}`}
-                  className="eb-char eb-char--a"
-                  data-bchar
-                  data-dir={i % 2 ? "1" : "-1"}
-                >
-                  {ch}
-                </span>
-              ))}
+          <h1
+            className="eb-hero__type"
+            aria-label={`${person.firstName}, creative developer and CS student`}
+          >
+            <span className="eb-hero__line" data-hero-line>
+              <span className="eb-hero__word">HI</span>
+              <span className="eb-chip" data-hero-pill>
+                Hey there
+              </span>
+              <span className="eb-hero__word">
+                I&apos;M {person.firstName.toUpperCase()}!
+              </span>
             </span>
-            <span className="eb-hero__stack">
-              <span
-                className="eb-layer eb-layer--ghost"
-                data-layer-ghost
-                aria-hidden="true"
-              >
-                {LAST.map((ch, i) => (
-                  <span key={`${ch}-${i}`} className="eb-char">
-                    {ch}
-                  </span>
-                ))}
+            <span className="eb-hero__line eb-hero__line--mid" data-hero-line>
+              <span className="eb-hero__word">CREATIVE</span>
+              <span className="eb-chip" data-hero-pill>
+                CS Student
               </span>
-              <span
-                className="eb-layer eb-layer--mid"
-                data-layer-mid
-                aria-hidden="true"
-              >
-                {LAST.map((ch, i) => (
-                  <span key={`${ch}-${i}`} className="eb-char">
-                    {ch}
-                  </span>
-                ))}
+              <span className="eb-hero__word">DEVELOPER</span>
+            </span>
+            <span className="eb-hero__line" data-hero-line>
+              <span className="eb-chip" data-hero-pill>
+                Based in Egypt
               </span>
-              <span className="eb-layer eb-layer--front" data-layer-front>
-                {LAST.map((ch, i) => (
-                  <span
-                    key={`${ch}-${i}`}
-                    className="eb-char"
-                    data-bchar
-                    data-dir={i % 2 ? "1" : "-1"}
-                  >
-                    {ch}
-                  </span>
-                ))}
-              </span>
+              <span className="eb-hero__word">&amp; ENGINEER</span>
             </span>
           </h1>
 
           <div className="eb-hero__scatter" aria-hidden="true">
             <div
-              className="eb-hero__plate eb-hero__plate--l eb-hero__plate--front"
+              className="eb-hero__plate eb-hero__plate--a"
               data-hero-plate
               data-drift="1.5"
             >
-              <Plate from="#2a2440" to="#673a94" label="Plate 01" />
+              <Plate from={PLATE[0].from} to={PLATE[0].to} label="Plate 01" />
             </div>
             <div
-              className="eb-hero__plate eb-hero__plate--r eb-hero__plate--back"
+              className="eb-hero__plate eb-hero__plate--b"
               data-hero-plate
-              data-drift="0.8"
+              data-drift="0.7"
             >
-              <Plate from="#1d3a2e" to="#788b5f" label="Plate 02" />
+              <Plate from={PLATE[1].from} to={PLATE[1].to} label="Plate 02" />
             </div>
             <div
-              className="eb-hero__plate eb-hero__plate--c eb-hero__plate--front"
+              className="eb-hero__plate eb-hero__plate--c"
               data-hero-plate
-              data-drift="1.1"
+              data-drift="1.2"
             >
-              <Plate from="#402a38" to="#b794e9" label="Plate 03" />
+              <Plate from={PLATE[2].from} to={PLATE[2].to} label="Plate 03" />
             </div>
+            <div
+              className="eb-hero__plate eb-hero__plate--d"
+              data-hero-plate
+              data-drift="0.55"
+            >
+              <Plate from={PLATE[3].from} to={PLATE[3].to} label="Plate 04" />
+            </div>
+            <span className="eb-chip eb-chip--float eb-chip--a" data-hero-pill>
+              Taim Kellizy
+            </span>
+            <span className="eb-chip eb-chip--float eb-chip--b" data-hero-pill>
+              Egypt
+            </span>
           </div>
 
           <div className="eb-hero__foot">
-            <p className="eb-hero__line">
-              Building interfaces with the patience of a translator and the
-              curiosity of a first-year CS student.
+            <p className="eb-hero__blurb">
+              First-year CS student who ships interfaces. React and Flask on the
+              desk, 850+ minutes of TED talks translated behind me, and a habit
+              of checking claims against the work.
             </p>
-            <a className="eb-plus" href="#work" aria-label="See selected work">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
+            <a className="eb-hero__cue u-label" href="#work">
+              <StarGlyph className="eb-hero__cue-star" />
+              Selected work
             </a>
           </div>
         </section>
 
-        <section className="eb-bio" data-reveal>
-          <div className="eb-bio__orbit" aria-hidden="true">
-            <div className="eb-bio__tile eb-bio__tile--1" data-drift="1.3">
-              <Plate from="#2a2440" to="#673a94" />
-            </div>
-            <div className="eb-bio__tile eb-bio__tile--2" data-drift="0.7">
-              <Plate from="#1d3a2e" to="#788b5f" />
-            </div>
-            <div className="eb-bio__tile eb-bio__tile--3" data-drift="1.1">
-              <Plate from="#402a38" to="#b794e9" />
-            </div>
-            <div className="eb-bio__tile eb-bio__tile--4" data-drift="0.6">
-              <Plate from="#2b2b30" to="#8a8a94" />
-            </div>
-            <div className="eb-bio__tile eb-bio__tile--5" data-drift="1.2">
-              <Plate from="#0e2d3c" to="#2c67a6" />
-            </div>
-          </div>
-          <p className="eb-bio__text">
-            I started with HTML and CSS, kept going through CS50x, and now spend
-            my time between React components, Flask routes, and translating
-            talks that reach millions. Proof over claims — the work below is
-            checkable.
+        <section className="eb-about" id="about" data-reveal>
+          <p className="eb-about__label u-label">About</p>
+          <p className="eb-about__text">
+            I started with HTML and CSS, moved through CS50x, and now spend my
+            days between React components, Flask routes, and translating talks
+            that reach millions. Proof over claims — every link below opens.
           </p>
+          <ul className="eb-about__chips">
+            <li>
+              <span className="eb-chip">Taim Kellizy</span>
+            </li>
+            <li>
+              <span className="eb-chip">CS Student</span>
+            </li>
+            <li>
+              <span className="eb-chip">Developer</span>
+            </li>
+            <li>
+              <span className="eb-chip">Egypt</span>
+            </li>
+          </ul>
         </section>
 
         <section className="eb-work" id="work">
           <header className="eb-sec" data-reveal>
-            <h2 className="eb-sec__title">Selected work</h2>
+            <h2 className="eb-sec__title">
+              <StarGlyph className="eb-sec__star" />
+              Selected work
+            </h2>
             <span className="eb-sec__count u-label">
-              <StarGlyph />
               {String(projects.length).padStart(2, "0")} entries
             </span>
           </header>
@@ -262,22 +224,31 @@ export function EditorialVarB() {
             {projects.map((p, i) => (
               <li
                 key={p.id}
-                className={`eb-work__item eb-work__item--${i}`}
+                className={`eb-work__card eb-work__card--${i}`}
                 data-reveal
               >
                 <a href="#work">
                   <div className="eb-work__media">
                     <Plate
-                      from={["#2a2440", "#1d3a2e", "#402a38", "#232326"][i]}
-                      to={["#673a94", "#788b5f", "#b794e9", "#6b6b74"][i]}
+                      from={PLATE[i % PLATE.length].from}
+                      to={PLATE[i % PLATE.length].to}
                       label={p.kind}
                     />
                   </div>
-                  <div className="eb-work__meta">
-                    <h3>{p.title}</h3>
-                    <span className="u-label">{p.year}</span>
-                  </div>
-                  <p className="eb-work__stack">{p.stack.join(" · ")}</p>
+                  <p className="eb-card__caption">
+                    <span className="eb-card__num">
+                      [{String(i + 1).padStart(2, "0")}]
+                    </span>
+                    <span className="eb-card__name">{p.title}</span>
+                    <span className="eb-card__kind">— {p.kind}</span>
+                  </p>
+                  <ul className="eb-card__tags">
+                    {p.stack.map((s) => (
+                      <li key={s} className="eb-tag">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
                 </a>
               </li>
             ))}
@@ -286,22 +257,23 @@ export function EditorialVarB() {
 
         <section className="eb-cred" id="credentials">
           <header className="eb-sec" data-reveal>
-            <h2 className="eb-sec__title">Credentials</h2>
-            <span className="eb-sec__count u-label">
-              <StarGlyph />
-              Verified
-            </span>
+            <h2 className="eb-sec__title">
+              <StarGlyph className="eb-sec__star" />
+              Credentials
+            </h2>
+            <span className="eb-sec__count u-label">Verified</span>
           </header>
           <ul className="eb-rows">
             {credentials.map((c) => (
-              <li key={c.id} className="eb-row" data-reveal>
+              <li key={c.id} className="eb-row eb-row--cred" data-reveal>
                 <a href={c.href} target="_blank" rel="noreferrer">
-                  <span className="eb-row__org u-label">{c.org}</span>
                   <span className="eb-row__title">{c.title}</span>
+                  <span className="eb-row__org u-label">{c.org}</span>
                   <span className="eb-row__metric">{c.metric}</span>
                   <span className="eb-row__year u-label">{c.year}</span>
+                  <span className="eb-badge">{c.mark}</span>
                   <span className="eb-row__arrow" aria-hidden="true">
-                    &#8599;
+                    ↗
                   </span>
                 </a>
               </li>
@@ -311,17 +283,17 @@ export function EditorialVarB() {
 
         <section className="eb-writing" id="writing">
           <header className="eb-sec" data-reveal>
-            <h2 className="eb-sec__title">Writing</h2>
-            <span className="eb-sec__count u-label">
-              <StarGlyph />
-              Journal
-            </span>
+            <h2 className="eb-sec__title">
+              <StarGlyph className="eb-sec__star" />
+              Writing
+            </h2>
+            <span className="eb-sec__count u-label">Journal</span>
           </header>
           <ul className="eb-rows">
             {posts.map((post) => (
               <li key={post.slug} className="eb-row eb-row--post" data-reveal>
                 <a href="#writing">
-                  <span className="eb-row__org u-label">{post.tag}</span>
+                  <span className="eb-tag eb-tag--solid">{post.tag}</span>
                   <span className="eb-row__title">{post.title}</span>
                   <span className="eb-row__excerpt">{post.excerpt}</span>
                   <span className="eb-row__year u-label">
@@ -335,39 +307,34 @@ export function EditorialVarB() {
       </main>
 
       <footer className="eb-foot" id="contact">
+        <div className="eb-foot__row" data-reveal>
+          <p className="eb-foot__say">
+            <StarGlyph className="eb-foot__star" />
+            Let&apos;s build something checkable.
+          </p>
+          <a className="eb-foot__mail eb-chip" href={`mailto:${person.email}`}>
+            {person.email}
+          </a>
+        </div>
         <div className="eb-foot__links" data-reveal>
-          <a href={`mailto:${person.email}`}>{person.email}</a>
           <a href={person.linkedin} target="_blank" rel="noreferrer">
             LinkedIn
           </a>
           <a href={person.instagram} target="_blank" rel="noreferrer">
             Instagram
           </a>
+          <a href={person.resume} target="_blank" rel="noreferrer">
+            Resume
+          </a>
         </div>
         <p className="eb-foot__word" aria-hidden="true">
-          <span className="eb-foot__word-ghost">
-            {LAST.map((ch, i) => (
-              <span key={`${ch}-${i}`} className="eb-char">
-                {ch}
-              </span>
-            ))}
-          </span>
-          <span className="eb-foot__word-front">
-            {LAST.map((ch, i) => (
-              <span key={`${ch}-${i}`} className="eb-char">
-                {ch}
-              </span>
-            ))}
-          </span>
+          KELLIZY
         </p>
         <div className="eb-foot__base u-label">
-          <span>
-            © MMXXVI {person.name} <StarGlyph />
-          </span>
-          <span>Design exploration — Layered Depth</span>
+          <span>© MMXXVI {person.name}</span>
+          <span>Design exploration — concept B</span>
         </div>
       </footer>
     </div>
   );
 }
-
