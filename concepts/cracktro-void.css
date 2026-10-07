@@ -1,0 +1,343 @@
+.vo {
+  /* emissive void; four dust neutrals + one signal amber */
+  --void: #050506;
+  --ash: #2c2f36;
+  --dust: #6b7280;
+  --steel: #9ca8b8;
+  --ivory: #e8e4dc;
+  --amber: #ffb020;
+
+  position: relative;
+  min-height: 100vh;
+  background: var(--void);
+  color: var(--ivory);
+  font-family: var(--font-code);
+  /* one bitmap face at two sizes only */
+  font-size: 13px;
+  line-height: 1.9;
+  letter-spacing: 0.06em;
+  overflow-x: clip;
+  padding-bottom: 130px;
+}
+
+.vo a {
+  color: inherit;
+  transition: color 220ms var(--ease-out);
+}
+
+.vo a:hover {
+  color: var(--amber);
+}
+
+/* ---------- layered drifting dust fields ---------- */
+
+.vo-dust {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.vo-dust--far {
+  z-index: 0;
+  opacity: 0.55;
+}
+
+.vo-dust--mid {
+  z-index: 0;
+  opacity: 0.75;
+}
+
+.vo-dust--near {
+  z-index: 0;
+  opacity: 0.9;
+}
+
+.vo-nav,
+.vo-hero,
+.vo-queue,
+.vo-work,
+.vo-stack,
+.vo-notes,
+.vo-ping,
+.vo-foot {
+  position: relative;
+  z-index: 2;
+}
+
+/* ---------- nav: a baseline that runs off both edges ---------- */
+
+.vo-nav {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  padding: 22px 26px;
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+}
+
+.vo-nav__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.vo-nav__links {
+  display: flex;
+  gap: 22px;
+  color: var(--steel);
+}
+
+/* amber caret */
+.vo-caret {
+  display: inline-block;
+  width: 0.62em;
+  height: 1.02em;
+  background: var(--amber);
+  animation: vo-blink 1.06s steps(1) infinite;
+  vertical-align: -0.14em;
+}
+
+.vo-caret--big {
+  width: 0.72em;
+  height: 1.24em;
+  margin-right: 0.5em;
+}
+
+@keyframes vo-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- hero: baselines that never end ---------- */
+
+.vo-hero {
+  padding: 12vh 0 10vh;
+  overflow: hidden;
+}
+
+.vo-line {
+  white-space: nowrap;
+  padding-left: 26px;
+  /* every baseline continues past both screen edges */
+  width: max-content;
+  min-width: 106vw;
+}
+
+.vo-line--1 {
+  color: var(--dust);
+  letter-spacing: 0.22em;
+}
+
+.vo-line--2 {
+  /* the second size: the only other size on the surface */
+  font-size: clamp(38px, 7.6vw, 112px);
+  line-height: 1.06;
+  letter-spacing: 0.02em;
+  font-weight: 700;
+  color: var(--ivory);
+  text-shadow: 0 0 26px rgba(232, 228, 220, 0.22);
+  margin: 0.22em 0;
+}
+
+.vo-line--3 {
+  color: var(--steel);
+  letter-spacing: 0.12em;
+}
+
+.vo-line--4 {
+  color: var(--ash);
+  letter-spacing: 0.2em;
+  filter: brightness(1.9);
+  margin-top: 0.6em;
+}
+
+.vo-line--5 {
+  color: var(--amber);
+  letter-spacing: 0.18em;
+  margin-top: 2.2em;
+}
+
+.vo-line--soft {
+  color: var(--ivory);
+  opacity: 0.92;
+}
+
+/* ---------- queue rows: depth is rank ---------- */
+
+.vo-sec__label {
+  padding-left: 26px;
+  color: var(--ash);
+  filter: brightness(2.1);
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 4.2em 0 1.6em;
+}
+
+.vo-queue__list {
+  list-style: none;
+}
+
+.vo-queue__row a {
+  display: grid;
+  grid-template-columns: 66px minmax(0, 1.15fr) minmax(0, 1.25fr) 40px;
+  gap: 18px;
+  align-items: baseline;
+  padding: 11px 26px;
+  transition: background 240ms var(--ease-out), letter-spacing 320ms var(--ease-out),
+    color 240ms var(--ease-out);
+}
+
+.vo-queue__idx {
+  color: var(--ash);
+  filter: brightness(2.1);
+}
+
+.vo-queue__label {
+  letter-spacing: 0.14em;
+}
+
+.vo-queue__detail {
+  color: var(--dust);
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vo-queue__mark {
+  justify-self: end;
+  color: var(--steel);
+}
+
+/* depth steps: brightness + letterspacing + drift rate */
+.vo-depth-1 .vo-queue__label {
+  color: var(--ivory);
+  letter-spacing: 0.17em;
+  font-weight: 700;
+  text-shadow: 0 0 22px rgba(232, 228, 220, 0.16);
+}
+
+.vo-depth-2 .vo-queue__label {
+  color: var(--steel);
+  letter-spacing: 0.12em;
+}
+
+.vo-depth-3 .vo-queue__label {
+  color: var(--dust);
+  letter-spacing: 0.08em;
+  opacity: 0.82;
+}
+
+/* focus pulls the layer forward: brighter, wider, still */
+.vo-queue__row a:hover,
+.vo-queue__row a:focus-visible {
+  background: rgba(255, 176, 32, 0.05);
+  letter-spacing: 0.12em;
+  outline: none;
+}
+
+.vo-queue__row a:hover .vo-queue__label,
+.vo-queue__row a:focus-visible .vo-queue__label {
+  color: var(--amber);
+  letter-spacing: 0.22em;
+  text-shadow: 0 0 22px rgba(255, 176, 32, 0.3);
+}
+
+.vo-queue__row a:hover .vo-queue__detail {
+  color: var(--steel);
+}
+
+.vo-queue__row a:hover .vo-queue__mark {
+  color: var(--amber);
+}
+
+/* reversed glyph cell — the one hard mark in the void */
+.vo-queue__mark {
+  display: inline-block;
+  padding: 0 0.28em;
+  background: transparent;
+}
+
+.vo-queue__row a:hover .vo-queue__mark {
+  background: var(--amber);
+  color: var(--void);
+}
+
+/* ---------- stack line ---------- */
+
+.vo-stack__line {
+  padding-left: 26px;
+  color: var(--steel);
+  letter-spacing: 0.11em;
+  white-space: nowrap;
+  min-width: 104vw;
+}
+
+/* ---------- ping ---------- */
+
+.vo-ping {
+  padding: 10vh 0 6vh;
+  overflow: hidden;
+}
+
+.vo-ping a {
+  color: var(--amber);
+}
+
+.vo-ping a:hover {
+  color: var(--ivory);
+}
+
+/* ---------- footer ---------- */
+
+.vo-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 6vh 26px 70px;
+  color: var(--ash);
+  filter: brightness(2.1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .vo-nav__links {
+    gap: 14px;
+    font-size: 11px;
+  }
+  .vo-queue__row a {
+    grid-template-columns: 42px minmax(0, 1fr) 30px;
+    gap: 12px;
+    padding: 11px 18px;
+  }
+  .vo-queue__detail {
+    display: none;
+  }
+  .vo-line,
+  .vo-sec__label,
+  .vo-stack__line {
+    padding-left: 18px;
+  }
+}
+
+/* reduced motion: drift parks, depth steps remain readable */
+@media (prefers-reduced-motion: reduce) {
+  .vo-caret {
+    animation: none;
+  }
+}

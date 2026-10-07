@@ -1,0 +1,46 @@
+.plate {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  isolation: isolate;
+}
+
+.plate__field {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    var(--plate-angle, 145deg),
+    var(--plate-from) 0%,
+    var(--plate-to) 100%
+  );
+}
+
+.plate__grain {
+  position: absolute;
+  inset: -20%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.plate__label {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  z-index: 2;
+  font-family: var(--font-code);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.plate__label--dark {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.plate__label--light {
+  color: rgba(0, 0, 0, 0.7);
+}
