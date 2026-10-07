@@ -334,21 +334,30 @@
   color: var(--ea-ink-soft);
 }
 
-/* ---------- cases: joffreyspitzer.com layout ---------- */
+/* ---------- cases: center line + spectrum scroll ---------- */
 
 .ea-cases {
   position: relative;
   padding: clamp(60px, 10vh, 120px) var(--ea-pad);
 }
 
-.ea-cases__grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0;
-  align-items: start;
+.ea-cases__line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(232, 230, 225, 0.1);
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* left: sticky "Cases" label */
+.ea-cases__grid {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
 .ea-cases__left {
   position: sticky;
   top: 55vh;
@@ -356,6 +365,9 @@
   display: flex;
   align-items: flex-end;
   padding-bottom: 20px;
+  width: 50%;
+  padding-right: 40px;
+  box-sizing: border-box;
 }
 
 .ea-cases__title {
@@ -366,26 +378,22 @@
   color: var(--ea-ink);
 }
 
-/* center: scrolling images */
 .ea-cases__images {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  width: clamp(180px, 17.5vw, 280px);
+  gap: 32px;
   padding-bottom: 50vh;
+  padding-left: 24px;
 }
 
 .ea-case {
-  width: 100%;
-  transform-origin: center center;
-  transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 
 .ea-case__plate {
-  width: 100%;
   overflow: hidden;
   border-radius: 3px;
-  will-change: transform;
 }
 
 .ea-case__plate .plate {
@@ -394,18 +402,20 @@
 }
 
 .ea-case--wide .ea-case__plate {
+  width: 240px;
   aspect-ratio: 16 / 9;
 }
 
 .ea-case--landscape .ea-case__plate {
+  width: 180px;
   aspect-ratio: 520 / 370;
 }
 
 .ea-case--portrait .ea-case__plate {
+  width: 140px;
   aspect-ratio: 370 / 520;
 }
 
-/* right: sticky project names */
 .ea-cases__names {
   position: sticky;
   top: 55vh;
@@ -414,6 +424,9 @@
   align-items: flex-end;
   justify-content: flex-end;
   padding-bottom: 20px;
+  width: 50%;
+  padding-left: 40px;
+  box-sizing: border-box;
 }
 
 .ea-cases__names-inner {
@@ -654,7 +667,19 @@
     width: min(44vw, 560px);
   }
   .ea-cases__images {
-    width: clamp(160px, 22vw, 240px);
+    gap: 24px;
+  }
+
+  .ea-case--wide .ea-case__plate {
+    width: 180px;
+  }
+
+  .ea-case--landscape .ea-case__plate {
+    width: 140px;
+  }
+
+  .ea-case--portrait .ea-case__plate {
+    width: 110px;
   }
 }
 
