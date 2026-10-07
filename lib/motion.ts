@@ -26,6 +26,16 @@ export function usePrefersReducedMotion() {
  * Lenis smooth scroll driven from the GSAP ticker so a single clock
  * governs scroll and animation. Disabled entirely under reduced motion.
  */
+let _lenis: import("lenis").default | null = null;
+
+export function scrollToTop() {
+  if (_lenis) {
+    _lenis.scrollTo(0, { duration: 1.8, easing: (t: number) => 1 - Math.pow(1 - t, 3) });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
 export function useSmoothScroll(enabled = true) {
   const reduced = usePrefersReducedMotion();
 
@@ -43,6 +53,7 @@ export function useSmoothScroll(enabled = true) {
         touchMultiplier: 1.4,
       });
 
+      _lenis = lenis;
       lenis.on("scroll", ScrollTrigger.update);
 
       const tick = (time: number) => {
@@ -55,6 +66,7 @@ export function useSmoothScroll(enabled = true) {
       cleanup = () => {
         gsap.ticker.remove(tick);
         lenis.destroy();
+        _lenis = null;
       };
     })();
 

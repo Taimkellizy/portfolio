@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { gsap, ScrollTrigger, usePrefersReducedMotion } from "@/lib/motion";
+import {
+  gsap,
+  ScrollTrigger,
+  usePrefersReducedMotion,
+  scrollToTop,
+} from "@/lib/motion";
 import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
@@ -58,21 +63,34 @@ export function EditorialVarA() {
 
   useEffect(() => {
     if (!menuPanelRef.current || !menuOverlayRef.current) return;
-    if (reduced) return;
+    if (reduced) {
+      menuPanelRef.current.style.transform = menuOpen
+        ? "translateX(0)"
+        : "translateX(100%)";
+      menuOverlayRef.current.style.opacity = menuOpen ? "1" : "0";
+      menuOverlayRef.current.style.pointerEvents = menuOpen ? "auto" : "none";
+      return;
+    }
     if (menuOpen) {
       gsap.to(menuOverlayRef.current, {
         opacity: 1,
-        duration: 0.35,
+        duration: 0.4,
+        ease: "power2.out",
         onStart: () => {
           if (menuOverlayRef.current)
             menuOverlayRef.current.style.pointerEvents = "auto";
         },
       });
-      gsap.to(menuPanelRef.current, { x: 0, duration: 0.55, ease: "expo.out" });
+      gsap.to(menuPanelRef.current, {
+        x: 0,
+        duration: 0.65,
+        ease: "expo.out",
+      });
     } else {
       gsap.to(menuOverlayRef.current, {
         opacity: 0,
-        duration: 0.3,
+        duration: 0.35,
+        ease: "power2.in",
         onComplete: () => {
           if (menuOverlayRef.current)
             menuOverlayRef.current.style.pointerEvents = "none";
@@ -80,7 +98,7 @@ export function EditorialVarA() {
       });
       gsap.to(menuPanelRef.current, {
         x: "100%",
-        duration: 0.45,
+        duration: 0.55,
         ease: "expo.in",
       });
     }
@@ -133,7 +151,7 @@ export function EditorialVarA() {
     return () => ctx.revert();
   }, [reduced]);
 
-  /* ---------- cursor bubble + letter disassembly ---------- */
+  /* ---------- cursor + letter disassembly ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -148,13 +166,14 @@ export function EditorialVarA() {
     let scale = 1;
     let targetScale = 1;
     let raf = 0;
+    let frame = 0;
 
     const onMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
     };
 
-    /* split words into per-letter spans for disassembly */
+    /* split words into per-letter spans */
     const words =
       root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
     words.forEach((word) => {
@@ -175,29 +194,33 @@ export function EditorialVarA() {
         ".ea-hero__ch:not([data-space])",
       );
       const n = chars.length;
+      if (n === 0) {
+        word.dataset.busy = "0";
+        return;
+      }
       chars.forEach((ch, i) => {
-        const angle = (i / Math.max(n, 1)) * Math.PI * 2;
-        const radius = 20 + Math.random() * 18;
+        const angle = (i / n) * Math.PI * 2;
+        const radius = 22 + Math.random() * 16;
         gsap.to(ch, {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius,
-          rotation: (Math.random() - 0.5) * 60,
-          opacity: 0.35,
-          duration: 0.35,
+          rotation: (Math.random() - 0.5) * 50,
+          opacity: 0.3,
+          duration: 0.3,
           ease: "power2.out",
-          delay: i * 0.015,
+          delay: i * 0.012,
         });
       });
-      gsap.delayedCall(0.55, () => {
+      gsap.delayedCall(0.5, () => {
         chars.forEach((ch, i) => {
           gsap.to(ch, {
             x: 0,
             y: 0,
             rotation: 0,
             opacity: 1,
-            duration: 0.45,
+            duration: 0.4,
             ease: "power2.inOut",
-            delay: i * 0.018,
+            delay: i * 0.015,
             onComplete:
               i === n - 1
                 ? () => {
@@ -210,52 +233,54 @@ export function EditorialVarA() {
     };
 
     const loop = () => {
-      bubbleX += (mouseX - bubbleX) * 0.14;
-      bubbleY += (mouseY - bubbleY) * 0.14;
-      scale += (targetScale - scale) * 0.1;
+      bubbleX += (mouseX - bubbleX) * 0.18;
+      bubbleY += (mouseY - bubbleY) * 0.18;
+      scale += (targetScale - scale) * 0.12;
       bubble.style.transform = `translate(${bubbleX - 22}px, ${bubbleY - 22}px) scale(${scale})`;
 
-      words.forEach((word) => {
-        const rect = word.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = mouseX - cx;
-        const dy = mouseY - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const radius = 160;
+      /* proximity check every 3rd frame to reduce cost */
+      frame++;
+      if (frame % 3 === 0) {
+        let nearInteractive = false;
 
-        if (dist < radius) {
-          targetScale = 1.8;
-          const force = (1 - dist / radius) * 14;
-          const tx = (dx / dist) * -force;
-          const ty = (dy / dist) * -force;
-          gsap.to(word, {
-            x: tx,
-            y: ty,
-            duration: 0.4,
-            ease: "power2.out",
-            overwrite: "auto",
-          });
+        words.forEach((word) => {
+          const rect = word.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const dx = mouseX - cx;
+          const dy = mouseY - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const radius = 160;
 
-          if (dist < 80) {
-            disassemble(word);
+          if (dist < radius) {
+            const force = (1 - dist / radius) * 12;
+            const tx = (dx / dist) * -force;
+            const ty = (dy / dist) * -force;
+            gsap.to(word, {
+              x: tx,
+              y: ty,
+              duration: 0.4,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+            if (dist < 75) {
+              disassemble(word);
+            }
+          } else {
+            gsap.to(word, {
+              x: 0,
+              y: 0,
+              duration: 0.5,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
           }
-        } else {
-          targetScale = 1;
-          gsap.to(word, {
-            x: 0,
-            y: 0,
-            duration: 0.5,
-            ease: "power2.out",
-            overwrite: "auto",
-          });
-        }
-      });
+        });
 
-      /* scale up cursor over interactive elements */
-      const el = document.elementFromPoint(mouseX, mouseY);
-      if (el && el.closest("a, button")) {
-        targetScale = 2.2;
+        /* check interactive elements for cursor scale */
+        const el = document.elementFromPoint(mouseX, mouseY);
+        nearInteractive = !!(el && el.closest("a, button"));
+        targetScale = nearInteractive ? 2.2 : 1;
       }
 
       raf = requestAnimationFrame(loop);
@@ -317,19 +342,18 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- cases scroll animation ---------- */
+  /* ---------- cases scroll ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
     const ctx = gsap.context(() => {
       const track = document.querySelector(".ea-cases__track");
       const names = document.querySelectorAll(".ea-cases__name");
-      const bgLayers = document.querySelectorAll<HTMLElement>(".ea-cases__bg");
-      const slides = document.querySelectorAll(".ea-cases__slide");
+      const slides = gsap.utils.toArray<HTMLElement>(".ea-cases__slide");
 
       if (!track || !slides.length) return;
 
-      const slideH = (slides[0] as HTMLElement).offsetHeight;
+      const slideH = slides[0].offsetHeight;
       const totalDist = (slides.length - 1) * slideH;
 
       gsap.to(track, {
@@ -360,16 +384,26 @@ export function EditorialVarA() {
         },
       });
 
-      bgLayers.forEach((layer) => {
-        const speed = parseFloat(layer.dataset.speed || "1");
-        gsap.to(layer, {
-          y: () => -180 * speed,
+      /* center-scale morph: each slide grows near viewport center */
+      slides.forEach((slide) => {
+        gsap.to(slide.querySelector(".plate"), {
+          scale: 1.18,
           ease: "none",
           scrollTrigger: {
-            trigger: ".ea-cases",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.2,
+            trigger: slide,
+            start: "top 70%",
+            end: "center center",
+            scrub: 0.5,
+          },
+        });
+        gsap.to(slide.querySelector(".plate"), {
+          scale: 0.85,
+          ease: "none",
+          scrollTrigger: {
+            trigger: slide,
+            start: "center center",
+            end: "bottom 30%",
+            scrub: 0.5,
           },
         });
       });
@@ -419,7 +453,7 @@ export function EditorialVarA() {
             onClick={closeMenu}
             aria-label="Close menu"
           >
-            <X size={22} strokeWidth={1.5} />
+            <X size={24} strokeWidth={1.5} />
           </button>
           <nav className="ea-menu-panel__nav" aria-label="Site navigation">
             {MENU_LINKS.map((link) => (
@@ -513,28 +547,15 @@ export function EditorialVarA() {
 
         {/* ===================== CASES ===================== */}
         <section className="ea-cases" id="ea-work">
-          <div
-            className="ea-cases__fade ea-cases__fade--top"
-            aria-hidden="true"
-          />
-          <div
-            className="ea-cases__fade ea-cases__fade--bottom"
-            aria-hidden="true"
-          />
-
-          <div className="ea-cases__bg-wrap" aria-hidden="true">
-            <div className="ea-cases__bg ea-cases__bg--1" data-speed="0.4">
-              <Plate from="#23203a" to="#5d4b8a" />
-            </div>
-            <div className="ea-cases__bg ea-cases__bg--2" data-speed="0.8">
-              <Plate from="#1e2b28" to="#6f8a7d" />
-            </div>
-            <div className="ea-cases__bg ea-cases__bg--3" data-speed="0.2">
-              <Plate from="#2c2430" to="#9b7bb6" />
-            </div>
-          </div>
-
           <div className="ea-cases__window">
+            <div
+              className="ea-cases__fade ea-cases__fade--top"
+              aria-hidden="true"
+            />
+            <div
+              className="ea-cases__fade ea-cases__fade--bottom"
+              aria-hidden="true"
+            />
             <div className="ea-cases__track">
               {projects.map((p, i) => (
                 <div
@@ -665,10 +686,10 @@ export function EditorialVarA() {
         </p>
 
         <div className="ea-foot__base">
-          <a className="ea-foot__top" href="#ea-top">
+          <button className="ea-foot__top" type="button" onClick={scrollToTop}>
             Back to top
             <ArrowUp size={16} strokeWidth={1.5} />
-          </a>
+          </button>
           <span className="ea-foot__copy">© 2026 {person.name}</span>
         </div>
       </footer>
