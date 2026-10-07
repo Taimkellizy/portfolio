@@ -468,7 +468,7 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- cases scroll (joffreyspitzer.com layout) ---------- */
+  /* ---------- cases: spectrum on scroll (like menu hover) ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -478,7 +478,6 @@ export function EditorialVarA() {
 
       if (!items.length) return;
 
-      /* active name based on which item is closest to viewport center */
       ScrollTrigger.create({
         trigger: ".ea-cases",
         start: "top 80%",
@@ -487,34 +486,31 @@ export function EditorialVarA() {
           const mid = window.innerHeight * 0.5;
           let bestIdx = 0;
           let bestDist = Infinity;
+
           items.forEach((item, i) => {
             const rect = item.getBoundingClientRect();
-            const d = Math.abs(rect.top + rect.height / 2 - mid);
-            if (d < bestDist) {
-              bestDist = d;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.abs(cy - mid);
+
+            if (dist < bestDist) {
+              bestDist = dist;
               bestIdx = i;
             }
+
+            /* spectrum: peak at center, falloff with distance */
+            const radius = window.innerHeight * 0.4;
+            const t = Math.max(0, 1 - dist / radius);
+            const peak = t * t;
+            const s = 1 + peak * 0.35;
+            const opacity = 0.3 + peak * 0.7;
+            item.style.transform = `scale(${s.toFixed(4)})`;
+            item.style.opacity = String(opacity.toFixed(3));
           });
+
           names.forEach((n, i) => {
             n.classList.toggle("is-active", i === bestIdx);
           });
         },
-      });
-
-      /* subtle parallax on each image */
-      items.forEach((item) => {
-        const img = item.querySelector(".ea-case__plate") as HTMLElement;
-        if (!img) return;
-        gsap.to(img, {
-          yPercent: -8,
-          ease: "none",
-          scrollTrigger: {
-            trigger: item,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1,
-          },
-        });
       });
     }, root);
     return () => ctx.revert();
@@ -667,6 +663,7 @@ export function EditorialVarA() {
 
         {/* ===================== CASES (joffreyspitzer.com layout) ===================== */}
         <section className="ea-cases" id="ea-work">
+          <div className="ea-cases__line" aria-hidden="true" />
           <div className="ea-cases__grid">
             {/* left: sticky "Cases" label */}
             <div className="ea-cases__left">
