@@ -476,12 +476,12 @@
   align-items: baseline;
   padding: 24px 6px;
   border-bottom: 1px solid rgba(242, 240, 236, 0.13);
-  transition: background 300ms var(--ease-out), padding-left 300ms var(--ease-out);
+  transition: background 300ms var(--ease-out), transform 300ms var(--ease-out);
 }
 
 .eb-row a:hover {
   background: rgba(242, 240, 236, 0.045);
-  padding-left: 16px;
+  transform: translateX(16px);
 }
 
 .eb-row__org {
