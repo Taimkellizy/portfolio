@@ -751,10 +751,7 @@ export function EditorialVarA() {
         {/* ===================== BIO ===================== */}
         <section className="ea-bio" id="ea-bio">
           <div className="ea-bio__inner">
-            <p className="ea-bio__label u-label">
-              About
-              <StarGlyph className="ea-bio__star" />
-            </p>
+            <p className="ea-bio__label u-label">About</p>
             <p className="ea-bio__text" data-reveal>
               HTML and CSS first, then Harvard&apos;s CS50x, then real work:
               React components, Flask routes, SQLite when the data is honest.
@@ -768,7 +765,6 @@ export function EditorialVarA() {
 
         {/* ===================== CASES (joffreyspitzer.com layout) ===================== */}
         <section className="ea-cases" id="ea-work">
-          <div className="ea-cases__line" aria-hidden="true" />
           <div className="ea-cases__grid">
             {/* left: sticky "Cases" label */}
             <div className="ea-cases__left">
