@@ -347,16 +347,19 @@
 
 .ea-cases__grid {
   position: relative;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, auto) 1fr;
+  align-items: start;
 }
 
 .ea-cases__left {
   position: sticky;
+  align-self: start;
   top: 55vh;
   height: 45vh;
   display: flex;
   align-items: flex-end;
   padding-bottom: 20px;
-  width: 50%;
   padding-right: 40px;
   box-sizing: border-box;
 }
@@ -378,12 +381,25 @@
 }
 
 .ea-case {
+  position: relative;
   transform-origin: left center;
 }
 
 .ea-case__plate {
   overflow: hidden;
   border-radius: 3px;
+}
+
+.ea-case__caption {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 10px;
+  font-family: var(--font-outfit);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  color: var(--ea-ink-mute);
 }
 
 .ea-case__plate .plate {
@@ -407,10 +423,17 @@
 }
 
 .ea-cases__names {
-  position: absolute;
-  right: 0;
-  bottom: 20px;
+  position: sticky;
+  align-self: start;
+  top: 55vh;
+  height: 45vh;
   z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.ea-cases__names-inner {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -424,19 +447,13 @@
   letter-spacing: -0.01em;
   color: var(--ea-ink);
   opacity: 0.2;
-  transition:
-    opacity 350ms ease,
-    font-weight 350ms ease;
+  /* opacity/weight are driven by the scrubbed timeline — a CSS
+     transition here would lag behind every scrub frame */
   text-decoration: none;
 }
 
 .ea-case-name:hover {
   opacity: 0.5 !important;
-}
-
-.ea-case-name.is-active {
-  opacity: 1;
-  font-weight: 700;
 }
 
 /* ---------- sections ---------- */
@@ -692,14 +709,25 @@
     padding-bottom: 0;
   }
   .ea-cases__names {
-    position: relative;
-    right: auto;
-    bottom: auto;
+    position: static;
+    top: auto;
+    height: auto;
+    z-index: auto;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    padding-top: 32px;
+  }
+  .ea-cases__names-inner {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px 16px;
     text-align: left;
-    padding-top: 32px;
+  }
+  .ea-case-name {
+    opacity: 0.65;
   }
   .ea-menu-panel {
     width: 100%;
@@ -750,5 +778,9 @@
 @media (prefers-reduced-motion: reduce) {
   .ea-cursor {
     display: none;
+  }
+  .ea-case-name {
+    opacity: 0.65;
+    font-weight: 600;
   }
 }

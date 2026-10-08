@@ -24,7 +24,7 @@ const BIO_WORDS =
 const CASES = [
   { from: "#23203a", to: "#5d4b8a", ratio: "wide" },
   { from: "#1e2b28", to: "#6f8a7d", ratio: "landscape" },
-  { from: "#2c2430", to: "#9b7bb6", ratio: "portrait" },
+  { from: "#2c2430", to: "#9b7bb6", ratio: "landscape" },
   { from: "#242428", to: "#6e6e78", ratio: "landscape" },
 ];
 
@@ -139,6 +139,18 @@ export function EditorialVarA() {
         )
         .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
         .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
+
+      /* fade-up for layout blocks (grids/flex) — SplitText must not
+         touch these or it shatters their layout into fake "lines" */
+      gsap.utils.toArray<HTMLElement>("[data-reveal-fade]").forEach((el) => {
+        gsap.from(el, {
+          y: 26,
+          opacity: 0,
+          duration: 0.9,
+          ease: "expo.out",
+          scrollTrigger: { trigger: el, start: "top 88%" },
+        });
+      });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         const isTitle = el.hasAttribute("data-reveal-title");
@@ -499,79 +511,152 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- cases: ScrollTrigger scrub timeline (Codrops technique) ---------- */
+  /* ---------- cases: joffreyspitzer vertical slider ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
-    const ctx = gsap.context(() => {
-      const items = gsap.utils.toArray<HTMLElement>(".ea-case");
-      const names = document.querySelectorAll(".ea-case-name");
+    let ctx: ReturnType<typeof gsap.context> | null = null;
+    let winW = window.innerWidth;
+    let winH = window.innerHeight;
 
-      if (!items.length) return;
+    const setup = () => {
+      ctx?.revert();
+      ctx = null;
+      if (window.innerWidth <= 900) return;
 
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".ea-cases",
-          start: "top-=6.5% center",
-          end: "bottom center-=0.5%",
-          scrub: true,
-        },
-      });
+      ctx = gsap.context(() => {
+        const items = gsap.utils.toArray<HTMLElement>(".ea-case");
+        const titles = gsap.utils.toArray<HTMLElement>(".ea-case-name");
+        if (!items.length || !titles.length) return;
 
-      items.forEach((item, index) => {
-        const plate = item.querySelector(".plate") as HTMLElement;
-        if (!plate) return;
+        const BASE = 17.55;
+        const EXP = 36;
+        const scaleExpanded = EXP / BASE;
+        const widthCss = `${BASE}vw`;
 
-        /* scale up as it enters center */
-        timeline.to(
-          plate,
-          {
-            scale: 1.25,
+        const firstOf = new Map<number, HTMLElement>();
+        const lastOf = new Map<number, HTMLElement>();
+        items.forEach((item) => {
+          const idx = Number(item.dataset.projectIndex ?? 0);
+          if (!firstOf.has(idx)) firstOf.set(idx, item);
+          lastOf.set(idx, item);
+        });
+
+        const baseHeights: number[] = [];
+        const expHeights: number[] = [];
+
+        items.forEach((item, d) => {
+          const media = item.querySelector<HTMLElement>(".ea-case__plate");
+          if (!media) return;
+          const initScale = d === 0 ? scaleExpanded : 1;
+          gsap.set(media, {
+            width: widthCss,
+            transformOrigin: "left top",
+            scaleX: initScale,
+            scaleY: initScale,
             force3D: true,
-            duration: 0.8,
-            ease: "none",
-          },
-          index,
-        );
-
-        /* scale back to 1 as it leaves */
-        timeline.to(
-          plate,
-          {
-            scale: 1,
-            force3D: true,
-            duration: 1.5,
-            ease: "none",
-            delay: 0.3,
-          },
-          ">",
-        );
-      });
-
-      /* active name sync */
-      ScrollTrigger.create({
-        trigger: ".ea-cases",
-        start: "top 80%",
-        end: "bottom 20%",
-        onUpdate: () => {
-          const mid = window.innerHeight * 0.5;
-          let bestIdx = 0;
-          let bestDist = Infinity;
-          items.forEach((item, i) => {
-            const rect = item.getBoundingClientRect();
-            const d = Math.abs(rect.top + rect.height / 2 - mid);
-            if (d < bestDist) {
-              bestDist = d;
-              bestIdx = i;
-            }
           });
-          names.forEach((n, i) => {
-            n.classList.toggle("is-active", i === bestIdx);
+          const scaledHeight = media.getBoundingClientRect().height;
+          const baseHeight = scaledHeight / initScale;
+          const expHeight = baseHeight * scaleExpanded;
+          baseHeights[d] = baseHeight;
+          expHeights[d] = expHeight;
+          gsap.set(item, { height: initScale === 1 ? baseHeight : expHeight });
+        });
+
+        const activeIdx = Number(items[0]?.dataset.projectIndex ?? 0);
+        titles.forEach((t, d) => {
+          gsap.set(t, {
+            opacity: d === activeIdx ? 1 : 0.2,
+            fontWeight: d === activeIdx ? 700 : 500,
           });
-        },
-      });
-    }, root);
-    return () => ctx.revert();
+        });
+
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: ".ea-cases",
+            start: "top-=6.5% center",
+            end: "bottom center-=0.5%",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        items.forEach((item, d) => {
+          const media = item.querySelector<HTMLElement>(".ea-case__plate");
+          const projectIdx = Number(item.dataset.projectIndex ?? d);
+          const title = titles[projectIdx];
+          const baseHeight = baseHeights[d] ?? 0;
+          const expHeight = expHeights[d] ?? baseHeight * scaleExpanded;
+          if (!media || !title) return;
+
+          const isFirst = firstOf.get(projectIdx) === item;
+          const isLast = lastOf.get(projectIdx) === item;
+
+          timeline.to(
+            media,
+            {
+              scaleX: scaleExpanded,
+              scaleY: scaleExpanded,
+              force3D: true,
+              duration: 0.8,
+              ease: "none",
+            },
+            d,
+          );
+          if (isFirst)
+            timeline.to(
+              title,
+              { opacity: 1, fontWeight: 700, duration: 0.4, ease: "none" },
+              "<",
+            );
+          timeline.to(item, { height: expHeight, duration: 0.8, ease: "none" }, "<");
+
+          timeline.to(
+            media,
+            {
+              scaleX: 1,
+              scaleY: 1,
+              force3D: true,
+              duration: 1.5,
+              ease: "none",
+              delay: 0.3,
+            },
+            ">",
+          );
+          if (isLast)
+            timeline.to(
+              title,
+              { opacity: 0.2, fontWeight: 500, duration: 0.4, ease: "none" },
+              "<",
+            );
+          timeline.to(item, { height: baseHeight, duration: 1.5, ease: "none" }, "<");
+        });
+      }, root);
+    };
+
+    setup();
+
+    let resizeTimer = 0;
+    const onResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        const dw = Math.abs(window.innerWidth - winW);
+        const dh = Math.abs(window.innerHeight - winH);
+        if (dw < 10 && dh < 120) return;
+        winW = window.innerWidth;
+        winH = window.innerHeight;
+        setup();
+        ScrollTrigger.refresh();
+      }, 200);
+    };
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.clearTimeout(resizeTimer);
+      ctx?.revert();
+    };
   }, [reduced]);
 
   return (
@@ -703,12 +788,12 @@ export function EditorialVarA() {
 
         {/* ===================== BIO ===================== */}
         <section className="ea-bio" id="ea-bio">
-          <div className="ea-bio__inner" data-reveal>
+          <div className="ea-bio__inner">
             <p className="ea-bio__label u-label">
               About
               <StarGlyph className="ea-bio__star" />
             </p>
-            <p className="ea-bio__text">
+            <p className="ea-bio__text" data-reveal>
               HTML and CSS first, then Harvard&apos;s CS50x, then real work:
               React components, Flask routes, SQLite when the data is honest.
               Alongside the code I&apos;ve translated 850+ minutes of TED and
@@ -725,7 +810,9 @@ export function EditorialVarA() {
           <div className="ea-cases__grid">
             {/* left: sticky "Cases" label */}
             <div className="ea-cases__left">
-              <h2 className="ea-cases__title">Cases</h2>
+              <h2 className="ea-cases__title" data-reveal data-reveal-title>
+                Cases
+              </h2>
             </div>
 
             {/* center: scrolling images */}
@@ -733,6 +820,7 @@ export function EditorialVarA() {
               {projects.map((p, i) => (
                 <div
                   className={`ea-case ea-case--${CASES[i].ratio}`}
+                  data-project-index={i}
                   key={p.id}
                 >
                   <div className="ea-case__plate">
@@ -742,34 +830,40 @@ export function EditorialVarA() {
                       label={p.kind}
                     />
                   </div>
+                  <p className="ea-case__caption">{p.title}</p>
                 </div>
               ))}
             </div>
 
             {/* right: sticky project names */}
             <div className="ea-cases__names">
-              {projects.map((p, i) => (
-                <a
-                  key={p.id}
-                  className={`ea-case-name${i === 0 ? " is-active" : ""}`}
-                  href="#ea-work"
-                >
-                  {p.title}
-                </a>
-              ))}
+              <div className="ea-cases__names-inner">
+                {projects.map((p, i) => (
+                  <a
+                    key={p.id}
+                    className="ea-case-name"
+                    data-project-index={i}
+                    href="#ea-work"
+                  >
+                    {p.title}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         {/* ===================== CREDENTIALS ===================== */}
         <section className="ea-block" id="ea-credentials">
-          <header className="ea-sec" data-reveal>
-            <h2 className="ea-sec__title">credentials</h2>
+          <header className="ea-sec">
+            <h2 className="ea-sec__title" data-reveal data-reveal-title>
+              credentials
+            </h2>
             <span className="ea-sec__count u-label">Verified</span>
           </header>
           <ul className="ea-rows">
             {credentials.map((c) => (
-              <li key={c.id} className="ea-row" data-reveal>
+              <li key={c.id} className="ea-row" data-reveal-fade>
                 <a href={c.href} target="_blank" rel="noreferrer">
                   <span className="ea-row__org u-label">{c.org}</span>
                   <span className="ea-row__title">{c.title}</span>
@@ -786,13 +880,15 @@ export function EditorialVarA() {
 
         {/* ===================== WRITING ===================== */}
         <section className="ea-block" id="ea-writing">
-          <header className="ea-sec" data-reveal>
-            <h2 className="ea-sec__title">writing</h2>
+          <header className="ea-sec">
+            <h2 className="ea-sec__title" data-reveal data-reveal-title>
+              writing
+            </h2>
             <span className="ea-sec__count u-label">Journal</span>
           </header>
           <ul className="ea-rows">
             {posts.map((post) => (
-              <li key={post.slug} className="ea-row" data-reveal>
+              <li key={post.slug} className="ea-row" data-reveal-fade>
                 <a href="#ea-writing">
                   <span className="ea-row__org u-label">{post.tag}</span>
                   <span className="ea-row__title">{post.title}</span>
@@ -812,7 +908,7 @@ export function EditorialVarA() {
 
       {/* ===================== FOOTER ===================== */}
       <footer className="ea-foot" id="ea-contact">
-        <div className="ea-foot__cols" data-reveal>
+        <div className="ea-foot__cols" data-reveal-fade>
           <div className="ea-foot__col">
             <h3 className="ea-foot__col-title">Sitemap</h3>
             <ul>
