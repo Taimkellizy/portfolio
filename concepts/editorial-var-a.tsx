@@ -10,6 +10,7 @@ import {
 import { SplitText } from "gsap/SplitText";
 import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
+import PrismaticBurst from "@/components/prismatic-burst";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
 import { person, projects, credentials, posts } from "@/lib/content";
 import "./editorial-var-a.css";
@@ -41,7 +42,6 @@ export function EditorialVarA() {
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const giantRef = useRef<HTMLHeadingElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
-  const particleCanvasRef = useRef<HTMLCanvasElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
 
@@ -205,74 +205,6 @@ export function EditorialVarA() {
       });
     }, root);
     return () => ctx.revert();
-  }, [reduced]);
-
-  /* ---------- hero particles ---------- */
-
-  useEffect(() => {
-    const canvas = particleCanvasRef.current;
-    if (!canvas || reduced) return;
-    const ctx2d = canvas.getContext("2d");
-    if (!ctx2d) return;
-
-    let raf = 0;
-    let w = 0;
-    let h = 0;
-    const particles: {
-      x: number;
-      y: number;
-      r: number;
-      vx: number;
-      vy: number;
-      a: number;
-    }[] = [];
-
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
-      w = rect.width;
-      h = rect.height;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const count = 35;
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.2 + 0.3,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.12,
-        a: Math.random() * 0.18 + 0.04,
-      });
-    }
-
-    const draw = () => {
-      ctx2d.clearRect(0, 0, w, h);
-      particles.forEach((p) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
-        ctx2d.beginPath();
-        ctx2d.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx2d.fillStyle = `rgba(232, 230, 225, ${p.a})`;
-        ctx2d.fill();
-      });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-    };
   }, [reduced]);
 
   /* ---------- cursor + letter disassembly ---------- */
@@ -769,11 +701,18 @@ export function EditorialVarA() {
       <main>
         {/* ===================== HERO ===================== */}
         <section className="ea-hero" id="ea-top">
-          <canvas
-            className="ea-hero__particles"
-            ref={particleCanvasRef}
-            aria-hidden="true"
-          />
+          {!reduced && (
+            <div className="ea-hero__prism" aria-hidden="true">
+              <PrismaticBurst
+                intensity={3.2}
+                speed={0.32}
+                animationType="rotate3d"
+                distort={0.45}
+                mixBlendMode="lighten"
+                paused={false}
+              />
+            </div>
+          )}
 
           <p className="ea-hero__bio">
             {BIO_WORDS.map((w, i) => (

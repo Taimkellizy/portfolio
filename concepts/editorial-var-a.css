@@ -220,13 +220,21 @@
   overflow: clip;
 }
 
-.ea-hero__particles {
+.ea-hero__prism {
   position: absolute;
   inset: 0;
   z-index: 1;
+  opacity: 0.95;
   pointer-events: none;
-  width: 100%;
-  height: 100%;
+  /* burst center sits at the hero center (shader offset 0) but the burst
+     is wiped out there; only the top-left quadrant leaks through and it
+     fades to zero well before the mask boundary — no hard edges */
+  -webkit-mask-image: radial-gradient(
+    80% 90% at 0% 0%,
+    #000 25%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(80% 90% at 0% 0%, #000 25%, transparent 70%);
 }
 
 .ea-hero__bio {
@@ -687,6 +695,9 @@
     left: var(--ea-pad);
     width: min(88vw, 560px);
     font-size: clamp(19px, 3.4vw, 26px);
+  }
+  .ea-hero__prism {
+    display: none;
   }
   .ea-giant {
     font-size: clamp(110px, 34vw, 420px);
