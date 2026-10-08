@@ -66,18 +66,23 @@ export function EditorialVarA() {
   useEffect(() => {
     if (!menuPanelRef.current || !menuOverlayRef.current) return;
     if (reduced) {
-      menuPanelRef.current.style.transform = menuOpen
-        ? "translateX(0)"
-        : "translateX(100%)";
+      if (menuPanelRef.current) {
+        menuPanelRef.current.style.visibility = menuOpen ? "visible" : "hidden";
+        menuPanelRef.current.style.transform = menuOpen
+          ? "translateX(0)"
+          : "translateX(100%)";
+      }
       menuOverlayRef.current.style.opacity = menuOpen ? "1" : "0";
       menuOverlayRef.current.style.pointerEvents = menuOpen ? "auto" : "none";
       return;
     }
     if (menuOpen) {
+      if (menuPanelRef.current) menuPanelRef.current.style.visibility = "visible";
       gsap.to(menuOverlayRef.current, {
         opacity: 1,
         duration: 0.4,
         ease: "power2.out",
+        overwrite: "auto",
         onStart: () => {
           if (menuOverlayRef.current)
             menuOverlayRef.current.style.pointerEvents = "auto";
@@ -87,12 +92,14 @@ export function EditorialVarA() {
         x: 0,
         duration: 0.65,
         ease: "expo.out",
+        overwrite: "auto",
       });
     } else {
       gsap.to(menuOverlayRef.current, {
         opacity: 0,
         duration: 0.35,
         ease: "power2.in",
+        overwrite: "auto",
         onComplete: () => {
           if (menuOverlayRef.current)
             menuOverlayRef.current.style.pointerEvents = "none";
@@ -102,6 +109,11 @@ export function EditorialVarA() {
         x: "100%",
         duration: 0.55,
         ease: "expo.in",
+        overwrite: "auto",
+        onComplete: () => {
+          if (menuPanelRef.current)
+            menuPanelRef.current.style.visibility = "hidden";
+        },
       });
     }
   }, [menuOpen, reduced]);
@@ -110,7 +122,7 @@ export function EditorialVarA() {
     if (reduced) return;
     if (menuOverlayRef.current && menuPanelRef.current) {
       gsap.set(menuOverlayRef.current, { opacity: 0, pointerEvents: "none" });
-      gsap.set(menuPanelRef.current, { x: "100%" });
+      gsap.set(menuPanelRef.current, { x: "100%", visibility: "hidden" });
     }
   }, [reduced]);
 
@@ -448,66 +460,77 @@ export function EditorialVarA() {
     };
   }, [reduced]);
 
-  /* ---------- spectrum hover for menu + cases ---------- */
+  /* ---------- menu words: hovered word zone jumps to full size ---------- */
 
   useEffect(() => {
     if (!root.current || reduced) return;
     const isTouch = matchMedia("(hover: none)").matches;
     if (isTouch) return;
 
-    const containers =
-      root.current.querySelectorAll<HTMLElement>("[data-spectrum]");
-    const rafMap = new Map<HTMLElement, number>();
+    const container = root.current.querySelector<HTMLElement>("[data-spectrum]");
+    if (!container) return;
 
-    containers.forEach((container) => {
-      const items = container.querySelectorAll<HTMLElement>(
-        "[data-spectrum-item]",
-      );
-      if (!items.length) return;
+    const items = Array.from(
+      container.querySelectorAll<HTMLElement>("[data-spectrum-item]"),
+    );
+    if (!items.length) return;
 
-      const onMove = (e: MouseEvent) => {
-        cancelAnimationFrame(rafMap.get(container) || 0);
-        rafMap.set(
-          container,
-          requestAnimationFrame(() => {
-            items.forEach((item) => {
-              const rect = item.getBoundingClientRect();
-              const cx = rect.left + rect.width / 2;
-              const cy = rect.top + rect.height / 2;
-              const dx = e.clientX - cx;
-              const dy = e.clientY - cy;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-              const radius = 280;
-              if (dist < radius) {
-                const t = 1 - dist / radius;
-                const peak = t * t * t; /* steep cubic falloff */
-                const s = 1 + peak * 3;
-                item.style.transform = `scale(${s.toFixed(4)})`;
-                item.style.opacity = String(0.2 + peak * 0.8);
-              } else {
-                item.style.transform = "scale(1)";
-                item.style.opacity = "0.2";
-              }
-            });
-          }),
-        );
-      };
+    /* zone = the word's box plus ZONE_PAD on each side, in the vertical
+       stack. Words snap to full size within their zone, everything else
+       rests — no per-frame ramp. */
+    const ZONE_PAD = 22;
+    const ACTIVE_SCALE = 3;
 
-      const onLeave = () => {
-        items.forEach((item) => {
-          item.style.transform = "scale(1)";
+    /* must be the untransformed state: a scaled rect would feed the hover
+       state back into itself and make everything wiggle */
+    let rest: { el: HTMLElement; cy: number; half: number }[] = [];
+
+    const setActive = (el: HTMLElement | null) => {
+      const idx = el ? items.indexOf(el) : -1;
+      items.forEach((item, j) => {
+        if (j === idx) {
+          item.style.transform = `scale(${ACTIVE_SCALE})`;
+          item.style.opacity = "1";
+        } else {
+          /* push neighbours away by half the active word's growth so
+             nothing collides: up when above the active word, down when below */
+          const push = idx === -1 ? 0 : (ACTIVE_SCALE - 1) * (rest[j]?.half ?? 0);
+          const dir = j < idx ? -1 : j > idx ? 1 : 0;
+          item.style.transform = `translateY(${(push * dir).toFixed(1)}px) scale(1)`;
           item.style.opacity = "0.2";
-        });
-      };
+        }
+      });
+    };
 
-      container.addEventListener("mousemove", onMove);
-      container.addEventListener("mouseleave", onLeave);
-    });
+    const onEnter = () => {
+      rest = items.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { el, cy: r.top + r.height / 2, half: r.height / 2 };
+      });
+    };
+
+    const onMove = (e: MouseEvent) => {
+      let nearest: { el: HTMLElement; half: number; d: number } | null = null;
+      for (const entry of rest) {
+        const d = Math.abs(e.clientY - entry.cy);
+        if (d < (nearest ? nearest.d : Infinity)) {
+          nearest = { el: entry.el, half: entry.half, d };
+        }
+      }
+      setActive(nearest && nearest.d <= nearest.half + ZONE_PAD ? nearest.el : null);
+    };
+
+    const onLeave = () => setActive(null);
+
+    container.addEventListener("mouseenter", onEnter);
+    container.addEventListener("mousemove", onMove);
+    container.addEventListener("mouseleave", onLeave);
 
     return () => {
-      containers.forEach((container) => {
-        cancelAnimationFrame(rafMap.get(container) || 0);
-      });
+      container.removeEventListener("mouseenter", onEnter);
+      container.removeEventListener("mousemove", onMove);
+      container.removeEventListener("mouseleave", onLeave);
+      setActive(null);
     };
   }, [reduced]);
 
@@ -692,7 +715,7 @@ export function EditorialVarA() {
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
-        hidden={!menuOpen}
+        aria-hidden={!menuOpen}
       >
         <div className="ea-menu-panel__inner">
           <button
@@ -830,7 +853,6 @@ export function EditorialVarA() {
                       label={p.kind}
                     />
                   </div>
-                  <p className="ea-case__caption">{p.title}</p>
                 </div>
               ))}
             </div>
