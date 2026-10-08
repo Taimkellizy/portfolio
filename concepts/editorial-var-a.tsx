@@ -869,6 +869,18 @@ export function EditorialVarA() {
 
       {/* ===================== FOOTER ===================== */}
       <footer className="ea-foot" id="ea-contact">
+        {!reduced && (
+          <div className="ea-foot__burst" aria-hidden="true">
+            <PrismaticBurst
+              intensity={2.2}
+              speed={0.25}
+              animationType="rotate3d"
+              distort={0.6}
+              mixBlendMode="lighten"
+              paused={false}
+            />
+          </div>
+        )}
         <div className="ea-foot__cols" data-reveal-fade>
           <div className="ea-foot__col">
             <h3 className="ea-foot__col-title">Sitemap</h3>
