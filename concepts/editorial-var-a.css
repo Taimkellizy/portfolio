@@ -398,8 +398,17 @@
 }
 
 .ea-case__plate {
+  position: relative;
   overflow: hidden;
   border-radius: 3px;
+}
+
+.ea-case__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .ea-case__plate .plate {

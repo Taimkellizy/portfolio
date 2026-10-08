@@ -12,13 +12,19 @@ import { Plate } from "@/components/plate";
 import { StarGlyph } from "@/components/star-glyph";
 import PrismaticBurst from "@/components/prismatic-burst";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
-import { person, projects, credentials, posts } from "@/lib/content";
+import {
+  person,
+  projects,
+  credentials,
+  experience,
+  posts,
+} from "@/lib/content";
 import "./editorial-var-a.css";
 
 const HERO_WORD = "taim";
 
 const BIO_WORDS =
-  "I'm Taim Kellizy — a developer and CS student based in Egypt, originally from Syria. I build interfaces with React and Flask, and translate TED talks that reach millions.".split(
+  "I'm Taim Kellizy — a software developer and CS student based in Syria. I build web apps and browser extensions with React, TypeScript, and Node, and translate TED talks that reach millions.".split(
     " ",
   );
 
@@ -31,6 +37,7 @@ const CASES = [
 
 const MENU_LINKS = [
   { label: "Work", href: "#ea-work" },
+  { label: "Experience", href: "#ea-experience" },
   { label: "Credentials", href: "#ea-credentials" },
   { label: "Writing", href: "#ea-writing" },
   { label: "Contact", href: "#ea-contact" },
@@ -761,11 +768,14 @@ export function EditorialVarA() {
             <p className="ea-menu-panel__status">Available for work</p>
             <a href={`mailto:${person.email}`}>{person.email}</a>
             <div className="ea-menu-panel__social">
-              <a href={person.instagram} target="_blank" rel="noreferrer">
-                Instagram
+              <a href={person.github} target="_blank" rel="noreferrer">
+                GitHub
               </a>
               <a href={person.linkedin} target="_blank" rel="noreferrer">
                 LinkedIn
+              </a>
+              <a href={person.instagram} target="_blank" rel="noreferrer">
+                Instagram
               </a>
             </div>
           </div>
@@ -827,12 +837,12 @@ export function EditorialVarA() {
           <div className="ea-bio__inner">
             <p className="ea-bio__label u-label">About</p>
             <p className="ea-bio__text" data-reveal>
-              HTML and CSS first, then Harvard&apos;s CS50x, then real work:
-              React components, Flask routes, SQLite when the data is honest.
-              Alongside the code I&apos;ve translated 850+ minutes of TED and
-              TEDx talks into Arabic — 17 million views and counting — and
-              reviewed the work of new translators as a language supervisor. EF
-              SET C2. Proof over claims: everything below is checkable.
+              CS and AI at MTI University — GPA 3.75 — building in React,
+              TypeScript, Node, and Python: hackathon-winning tooling like
+              Arabify, and Unblock Syria&apos;s Shaghal browser extension with
+              Vitest, Playwright, and CI. Alongside the code, 140+ TED and
+              TEDx projects translated and reviewed into Arabic — 350+ hours.
+              EF SET C2. Proof over claims: everything below is checkable.
             </p>
           </div>
         </section>
@@ -854,21 +864,28 @@ export function EditorialVarA() {
 
             {/* center: scrolling images */}
             <div className="ea-cases__images">
-              {projects.map((p, i) => (
-                <div
-                  className={`ea-case ea-case--${CASES[i].ratio}`}
-                  data-project-index={i}
-                  key={p.id}
-                >
-                  <div className="ea-case__plate">
-                    <Plate
-                      from={CASES[i].from}
-                      to={CASES[i].to}
-                      label={p.kind}
-                    />
+              {projects.map((p, i) => {
+                const c = CASES[i % CASES.length];
+                return (
+                  <div
+                    className={`ea-case ea-case--${c.ratio}`}
+                    data-project-index={i}
+                    key={p.id}
+                  >
+                    <div className="ea-case__plate">
+                      <Plate from={c.from} to={c.to} label={p.kind} />
+                      {p.image ? (
+                        <img
+                          className="ea-case__img"
+                          src={p.image}
+                          alt={p.title}
+                          loading="lazy"
+                        />
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* right: sticky project names */}
@@ -887,6 +904,36 @@ export function EditorialVarA() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ===================== EXPERIENCE ===================== */}
+        <section className="ea-block" id="ea-experience">
+          <header className="ea-sec">
+            <h2
+              className="ea-sec__title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight
+            >
+              experience
+            </h2>
+            <span className="ea-sec__count u-label">Roles</span>
+          </header>
+          <ul className="ea-rows">
+            {experience.map((e) => (
+              <li key={e.id} className="ea-row" data-reveal-fade>
+                <a href={e.href} target="_blank" rel="noreferrer">
+                  <span className="ea-row__org u-label">{e.org}</span>
+                  <span className="ea-row__title">{e.title}</span>
+                  <span className="ea-row__metric">{e.metric}</span>
+                  <span className="ea-row__year u-label">{e.year}</span>
+                  <span className="ea-row__arrow" aria-hidden="true">
+                    <ArrowUpRight size={16} strokeWidth={1.5} />
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ===================== CREDENTIALS ===================== */}
@@ -983,6 +1030,9 @@ export function EditorialVarA() {
                 <a href="#ea-work">Work</a>
               </li>
               <li>
+                <a href="#ea-experience">Experience</a>
+              </li>
+              <li>
                 <a href="#ea-credentials">Credentials</a>
               </li>
               <li>
@@ -998,13 +1048,18 @@ export function EditorialVarA() {
               data-variable-weight>Social</h3>
             <ul>
               <li>
-                <a href={person.instagram} target="_blank" rel="noreferrer">
-                  Instagram
+                <a href={person.github} target="_blank" rel="noreferrer">
+                  GitHub
                 </a>
               </li>
               <li>
                 <a href={person.linkedin} target="_blank" rel="noreferrer">
                   LinkedIn
+                </a>
+              </li>
+              <li>
+                <a href={person.instagram} target="_blank" rel="noreferrer">
+                  Instagram
                 </a>
               </li>
             </ul>
