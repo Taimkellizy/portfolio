@@ -264,6 +264,9 @@ export function EditorialVarA() {
           duration: 0.3,
           ease: "power2.out",
           delay: i * 0.012,
+          /* composited layers drop out of the cursor's difference-blend
+             backdrop on the GPU path — keep these unpromoted */
+          force3D: false,
         });
       });
       gsap.delayedCall(0.5, () => {
@@ -276,6 +279,7 @@ export function EditorialVarA() {
             duration: 0.4,
             ease: "power2.inOut",
             delay: i * 0.015,
+            force3D: false,
             onComplete:
               i === n - 1
                 ? () => {
@@ -314,6 +318,7 @@ export function EditorialVarA() {
               duration: 0.4,
               ease: "power2.out",
               overwrite: "auto",
+              force3D: false,
             });
             if (dist < 75) {
               disassemble(word);
@@ -325,6 +330,7 @@ export function EditorialVarA() {
               duration: 0.5,
               ease: "power2.out",
               overwrite: "auto",
+              force3D: false,
             });
           }
         });
@@ -463,6 +469,74 @@ export function EditorialVarA() {
       container.removeEventListener("mousemove", onMove);
       container.removeEventListener("mouseleave", onLeave);
       setActive(null);
+    };
+  }, [reduced]);
+
+  /* ---------- variable-weight: boldness follows the cursor ---------- */
+
+  useEffect(() => {
+    if (!root.current || reduced) return;
+    const isTouch = matchMedia("(hover: none)").matches;
+    if (isTouch) return;
+
+    const targets = Array.from(
+      root.current.querySelectorAll<HTMLElement>("[data-variable-weight]"),
+    );
+    if (!targets.length) return;
+
+    /* the variable weight rides the SplitText ".char" spans the reveal
+       effect already builds, so chars are queried lazily per frame —
+       autoSplit rebuilds them on resize */
+    const baseOf = new Map<HTMLElement, number>();
+    targets.forEach((t) => {
+      baseOf.set(t, parseFloat(getComputedStyle(t).fontWeight) || 600);
+    });
+
+    const RANGE = 120;
+    const PEAK = 860;
+
+    let raf = 0;
+    const update = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        targets.forEach((t) => {
+          const base = baseOf.get(t) ?? 600;
+          t.querySelectorAll<HTMLElement>(".char").forEach((ch) => {
+            const r = ch.getBoundingClientRect();
+            if (r.width === 0) return;
+            const dx = e.clientX - (r.left + r.width / 2);
+            const dy = e.clientY - (r.top + r.height / 2);
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            let w = base;
+            if (dist < RANGE) {
+              const lerp = 1 - dist / RANGE;
+              w = base + (PEAK - base) * lerp * lerp;
+            }
+            const wi = Math.round(w);
+            if (ch.dataset.w !== String(wi)) {
+              ch.dataset.w = String(wi);
+              ch.style.fontWeight = String(wi);
+            }
+          });
+        });
+      });
+    };
+
+    const reset = () => {
+      targets.forEach((t) => {
+        t.querySelectorAll<HTMLElement>(".char").forEach((ch) => {
+          ch.dataset.w = "";
+          ch.style.fontWeight = "";
+        });
+      });
+    };
+
+    window.addEventListener("mousemove", update);
+    document.documentElement.addEventListener("mouseleave", reset);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", update);
+      document.documentElement.removeEventListener("mouseleave", reset);
     };
   }, [reduced]);
 
@@ -768,7 +842,12 @@ export function EditorialVarA() {
           <div className="ea-cases__grid">
             {/* left: sticky "Cases" label */}
             <div className="ea-cases__left">
-              <h2 className="ea-cases__title" data-reveal data-reveal-title>
+              <h2
+                className="ea-cases__title"
+                data-reveal
+                data-reveal-title
+                data-variable-weight
+              >
                 Cases
               </h2>
             </div>
@@ -813,7 +892,12 @@ export function EditorialVarA() {
         {/* ===================== CREDENTIALS ===================== */}
         <section className="ea-block" id="ea-credentials">
           <header className="ea-sec">
-            <h2 className="ea-sec__title" data-reveal data-reveal-title>
+            <h2
+              className="ea-sec__title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight
+            >
               credentials
             </h2>
             <span className="ea-sec__count u-label">Verified</span>
@@ -838,7 +922,12 @@ export function EditorialVarA() {
         {/* ===================== WRITING ===================== */}
         <section className="ea-block" id="ea-writing">
           <header className="ea-sec">
-            <h2 className="ea-sec__title" data-reveal data-reveal-title>
+            <h2
+              className="ea-sec__title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight
+            >
               writing
             </h2>
             <span className="ea-sec__count u-label">Journal</span>
@@ -879,7 +968,11 @@ export function EditorialVarA() {
         )}
         <div className="ea-foot__cols" data-reveal-fade>
           <div className="ea-foot__col">
-            <h3 className="ea-foot__col-title">Sitemap</h3>
+            <h3
+              className="ea-foot__col-title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight>Sitemap</h3>
             <ul>
               <li>
                 <a className="is-active" href="#ea-top">
@@ -898,7 +991,11 @@ export function EditorialVarA() {
             </ul>
           </div>
           <div className="ea-foot__col">
-            <h3 className="ea-foot__col-title">Social</h3>
+            <h3
+              className="ea-foot__col-title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight>Social</h3>
             <ul>
               <li>
                 <a href={person.instagram} target="_blank" rel="noreferrer">
@@ -913,7 +1010,11 @@ export function EditorialVarA() {
             </ul>
           </div>
           <div className="ea-foot__col">
-            <h3 className="ea-foot__col-title">Contact</h3>
+            <h3
+              className="ea-foot__col-title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight>Contact</h3>
             <ul>
               <li>
                 <a href={`mailto:${person.email}`}>{person.email}</a>
