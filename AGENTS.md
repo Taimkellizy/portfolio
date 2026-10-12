@@ -4,7 +4,7 @@ Entry point for AI agents working on this repo. Read this first.
 
 ## What this is
 
-Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one live page built as a design "concept" (`editorial-var-a`, class prefix `ea-`) with GSAP motion. Deployed on Vercel; working branch `design/exploration` (pushed to origin).
+Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one live page built as a design "concept" (`editorial-var-a`, class prefix `ea-`) with GSAP motion. Deployed on Vercel; production on `main`, design phase archived on `design/exploration`.
 
 ## Commands
 
