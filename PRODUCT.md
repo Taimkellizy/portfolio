@@ -46,7 +46,7 @@ Fonts (user-provided, self-hosted in `fonts/`): Array, CabinetGrotesk, ChunkFive
 
 - `assets/`: certificate PDFs (CS50x, EF SET, Unblock Syria contribution, others). The resume PDF (`Taimullah Resume (Unblock Syria 2026).pdf`) is present but intentionally not linked or served.
 - Real facts (as of 2026-10, from the resume): MTI University B.Sc. CS & AI, GPA 3.75/4.0, expected Sep 2029; Unblock Syria — Software Developer (Shaghal browser extension with Omar Albeik: React/TypeScript, Vitest/Testing Library/Playwright, CI); Qimma Hackathon 1st place ($500) for Arabify (Arabic-readiness analyzer, open source MIT); TED Translators — Arabic Language Supervisor & Linguistic Reviewer (140+ projects, 350+ hours, Review Cup 2026 Quarterfinalist); Harvard CS50x; EF SET C2 (77/100); Microsoft Career Essentials in Generative AI; McKinsey.org Forward; 1 Million Prompters (dub.ai). Skills: Python, C++, JavaScript, TypeScript, HTML, CSS, SQL; React, Next.js, Node.js, Flask, GSAP, i18next; Vitest, Playwright, Git, Figma; Arabic native, English C2. Contact: taimkellizy@gmail.com, linkedin.com/in/taimkellizy, github.com/Taimkellizy, instagram.com/taimkellizy.
-- Absence that must not be fabricated: **case-study screenshots** (user will supply; `Plate` gradients are the interim). All other content is real and shipped.
+- Case-study screenshots supplied 2026-10-11 in `public/cases/` (Arabify, Shaghal, Meridian incl. logo SVG); `Plate` gradients remain the load-error fallback. All content is real and shipped.
 
 ## Product Principles
 

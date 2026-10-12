@@ -52,7 +52,7 @@ LICENSE         GPL-3.0
 - All data in `lib/content.ts` (person, skills, credentials, experience, projects, posts) — all **real**
 - `credentials` = verifiable certificates/education; `experience` = roles; never mix them
 - Copy is English only (no Arabic script) for now
-- Case-study images go in `public/cases/` and are referenced via `image` on a project (Plate gradient is fallback only)
+- Case-study images go in `public/cases/` and are referenced via `images` on a project (entries carry `src`/`ratio`/`fit`/`alt`; two plates per project; Plate gradient is fallback only)
 - Never fabricate facts; only use verified credentials
 
 ## Workflow

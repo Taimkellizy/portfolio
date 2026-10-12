@@ -29,8 +29,9 @@ Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one 
 
 ## Current state / pending
 
-- Page order: hero → bio → cases → experience → credentials → writing → footer
-- Cases slider uses gradient `Plate` placeholders until real screenshots land in `public/cases/`; set `image` on a project in `lib/content.ts` and the gradient is covered
+- Page order: hero → bio → skills → cases → experience → credentials → writing → footer
+- Experience is a featured role dossier (`ea-xp`), one entry per role; skills are hairline groups (`ea-skill-row`); rows (`ea-row`) carry credentials/writing only
+- Cases slider renders one plate per entry in `projects[].images` (two per project: hero + detail/brand). Screenshots are shipped in `public/cases/` (Arabify, Shaghal, Meridian + logo SVG); the `Plate` gradient + kind label remains the load-error fallback. Image entries carry `src`/`ratio`/`fit`/`alt`
 - Mobile (≤900px) is explicitly out of scope: static stacked layout, no slider, no hero backdrop
 - Content hierarchy is software-dev-first; keep it that way (experience ≠ certificates)
 
