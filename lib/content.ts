@@ -34,7 +34,8 @@ export const credentials = [
     metric: "GPA 3.75 / 4.0",
     detail:
       "Expected September 2029. Data Structures, Algorithms, Databases, Computer Systems.",
-    href: "#",
+    /* no verifiable link — renders as a static row */
+    href: "",
     mark: "verified",
   },
   {
@@ -118,16 +119,24 @@ export const experience = [
     id: "unblock-dev",
     title: "Software Developer",
     org: "Unblock Syria",
-    year: "2026–",
-    metric: "Extension · Tests · CI",
-    detail:
-      "Contribute to Unblock Syria's web and browser-based tools, working directly with the project team on product features, reliability, and tester workflows. Develop and maintain the Shaghal browser extension using React and TypeScript — service testing, reporting, corrections, screenshots, API integration, and Arabic/RTL localization. Build component and end-to-end test coverage with Vitest, Testing Library, and Playwright, and integrate testing into CI. Investigate bugs and API integration issues, design implementation approaches, and collaborate on technical decisions and product improvements. Contribute to release readiness and prepare the project for public open-source development. Built with Omar Albeik.",
+    period: "2026 — now",
+    bullets: [
+      "Shaghal browser extension in React and TypeScript — service testing, reporting, corrections, screenshots, API integration, and Arabic/RTL localization.",
+      "Component and end-to-end test coverage with Vitest, Testing Library, and Playwright, integrated into CI.",
+      "Bug and API-integration investigation, implementation design, and collaboration on technical decisions.",
+      "Release readiness and preparation for the project's public open-source development.",
+    ],
+    stack: ["React", "TypeScript", "Vitest", "Playwright", "CI"],
+    credit: "Built with Omar Albeik",
     href: "https://github.com/unblocksyria/shaghal-extension",
   },
 ];
 
-/* Real projects — `image` paths resolve under public/cases/ and render
-   on top of the Plate fallback until screenshots are dropped in. */
+/* Real projects — `images` resolve under public/cases/ and render on top
+   of the Plate fallback (gradient + kind label shows until a file lands,
+   and on any load error). Each entry carries its plate ratio (banner 2/1,
+   wide 16/9, landscape 520/370) and fit — screenshots cover the plate,
+   transparent art (logos) is contained on the gradient card. */
 export const projects = [
   {
     id: "arabify",
@@ -136,7 +145,21 @@ export const projects = [
     year: "2026",
     stack: ["React", "TypeScript", "PostCSS"],
     note: "Arabic-readiness analyzer for web apps — 1st place, Qimma Hackathon.",
-    image: "",
+    href: "https://github.com/Taimkellizy",
+    images: [
+      {
+        src: "/cases/arabify-logo-4.svg",
+        ratio: "landscape",
+        fit: "cover",
+        alt: "Arabify logo",
+      },
+      {
+        src: "/cases/arabify-report.jpg",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Arabify landing page — RTL and Arabic SEO, simplified",
+      },
+    ],
   },
   {
     id: "shaghal",
@@ -145,16 +168,44 @@ export const projects = [
     year: "2026",
     stack: ["React", "TypeScript", "Playwright"],
     note: "Unblock Syria browser extension, built with Omar Albeik.",
-    image: "",
+    href: "https://github.com/unblocksyria/shaghal-extension",
+    images: [
+      {
+        src: "/cases/Shaghal logo.svg",
+        ratio: "landscape",
+        fit: "contain",
+        alt: "Shaghal logo",
+      },
+      {
+        src: "/cases/shaghal-hero.png",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Shaghal landing page — does this site work from Syria?",
+      },
+    ],
   },
   {
-    id: "portfolio",
-    title: "This Portfolio",
-    kind: "Site",
+    id: "meridian",
+    title: "Meridian",
+    kind: "i18n Automation",
     year: "2026",
-    stack: ["Next.js", "GSAP", "WebGL"],
-    note: "Editorial concept with variable-font motion and shader backdrops.",
-    image: "",
+    stack: ["Node.js", "Babel", "PostCSS"],
+    note: "Open-source i18n automation suite for React — extracts hardcoded strings, translates them via local or cloud APIs (LibreTranslate, Google, DeepL), configures i18next, and enforces RTL-ready logical CSS.",
+    href: "https://github.com/Taimkellizy/meridian-suite",
+    images: [
+      {
+        src: "/cases/Meridian_Full_Logo_no_bg_full_color.svg",
+        ratio: "banner",
+        fit: "contain",
+        alt: "Meridian logo",
+      },
+      {
+        src: "/cases/meridian-report.png",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Meridian CLI setting up i18next and translating an app into Arabic",
+      },
+    ],
   },
 ];
 

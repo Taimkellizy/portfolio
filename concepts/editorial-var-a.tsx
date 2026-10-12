@@ -18,21 +18,22 @@ import {
   credentials,
   experience,
   posts,
+  skills,
 } from "@/lib/content";
 import "./editorial-var-a.css";
 
 const HERO_WORD = "taim";
 
 const BIO_WORDS =
-  "I'm Taim Kellizy — a software developer and CS student based in Syria. I build web apps and browser extensions with React, TypeScript, and Node, and translate TED talks that reach millions.".split(
+  "I'm Taim Kellizy — a software developer and CS student based in Syria, building web apps and browser extensions with React and TypeScript.".split(
     " ",
   );
 
 const CASES = [
-  { from: "#23203a", to: "#5d4b8a", ratio: "wide" },
-  { from: "#1e2b28", to: "#6f8a7d", ratio: "landscape" },
-  { from: "#2c2430", to: "#9b7bb6", ratio: "landscape" },
-  { from: "#242428", to: "#6e6e78", ratio: "landscape" },
+  { from: "#23203a", to: "#5d4b8a" },
+  { from: "#1e2b28", to: "#6f8a7d" },
+  { from: "#2c2430", to: "#4f3d6b" },
+  { from: "#242428", to: "#6e6e78" },
 ];
 
 const MENU_LINKS = [
@@ -837,14 +838,43 @@ export function EditorialVarA() {
           <div className="ea-bio__inner">
             <p className="ea-bio__label u-label">About</p>
             <p className="ea-bio__text" data-reveal>
-              CS and AI at MTI University — GPA 3.75 — building in React,
-              TypeScript, Node, and Python: hackathon-winning tooling like
-              Arabify, and Unblock Syria&apos;s Shaghal browser extension with
-              Vitest, Playwright, and CI. Alongside the code, 140+ TED and
-              TEDx projects translated and reviewed into Arabic — 350+ hours.
-              EF SET C2. Proof over claims: everything below is checkable.
+              CS and AI at MTI University — GPA 3.75. I build Shaghal, Unblock
+              Syria&apos;s browser extension, with Vitest, Playwright, and CI;
+              and Arabify, the Arabic-readiness analyzer that took 1st place at
+              Qimma Hackathon. Off the keyboard, 140+ TED and TEDx projects
+              translated and reviewed into Arabic — 350+ hours. EF SET C2.
+              Proof over claims: everything below is checkable.
             </p>
           </div>
+        </section>
+
+        {/* ===================== SKILLS ===================== */}
+        <section className="ea-block" id="ea-skills">
+          <header className="ea-sec">
+            <h2
+              className="ea-sec__title"
+              data-reveal
+              data-reveal-title
+              data-variable-weight
+            >
+              skills
+            </h2>
+            <span className="ea-sec__count u-label">Stack</span>
+          </header>
+          <ul className="ea-rows">
+            {skills.map((g) => (
+              <li key={g.group} className="ea-skill-row" data-reveal-fade>
+                <span className="ea-skill-row__group u-label">{g.group}</span>
+                <div className="ea-skill-row__items">
+                  {g.items.map((item) => (
+                    <span className="ea-skill-row__item" key={item}>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* ===================== CASES (joffreyspitzer.com layout) ===================== */}
@@ -862,30 +892,46 @@ export function EditorialVarA() {
               </h2>
             </div>
 
-            {/* center: scrolling images */}
+            {/* center: scrolling images — one plate per entry in
+                `project.images`, name sync keyed on the project index */}
             <div className="ea-cases__images">
-              {projects.map((p, i) => {
-                const c = CASES[i % CASES.length];
-                return (
-                  <div
-                    className={`ea-case ea-case--${c.ratio}`}
-                    data-project-index={i}
-                    key={p.id}
-                  >
-                    <div className="ea-case__plate">
-                      <Plate from={c.from} to={c.to} label={p.kind} />
-                      {p.image ? (
-                        <img
-                          className="ea-case__img"
-                          src={p.image}
-                          alt={p.title}
-                          loading="lazy"
-                        />
-                      ) : null}
+              {projects
+                .flatMap((p, pi) =>
+                  (p.images.length
+                    ? p.images
+                    : [{ src: "", ratio: "landscape", fit: "cover", alt: "" }]
+                  ).map((img) => ({ p, pi, img })),
+                )
+                .map(({ p, pi, img }, i) => {
+                  const c = CASES[i % CASES.length];
+                  return (
+                    <div
+                      className={`ea-case ea-case--${img.ratio}`}
+                      data-project-index={pi}
+                      key={`${p.id}-${i}`}
+                    >
+                      <div className="ea-case__plate">
+                        <Plate from={c.from} to={c.to} label={p.kind} />
+                        {img.src ? (
+                          <img
+                            className={`ea-case__img${
+                              img.fit === "contain"
+                                ? " ea-case__img--contain"
+                                : ""
+                            }`}
+                            src={img.src}
+                            alt={img.alt}
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                            }}
+                          />
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
 
             {/* right: sticky project names */}
@@ -896,7 +942,10 @@ export function EditorialVarA() {
                     key={p.id}
                     className="ea-case-name"
                     data-project-index={i}
-                    href="#ea-work"
+                    href={p.href}
+                    {...(p.href.startsWith("http")
+                      ? { target: "_blank", rel: "noreferrer" }
+                      : {})}
                   >
                     {p.title}
                   </a>
@@ -917,23 +966,39 @@ export function EditorialVarA() {
             >
               experience
             </h2>
-            <span className="ea-sec__count u-label">Roles</span>
+            <span className="ea-sec__count u-label">Roles · 01</span>
           </header>
-          <ul className="ea-rows">
-            {experience.map((e) => (
-              <li key={e.id} className="ea-row" data-reveal-fade>
-                <a href={e.href} target="_blank" rel="noreferrer">
-                  <span className="ea-row__org u-label">{e.org}</span>
-                  <span className="ea-row__title">{e.title}</span>
-                  <span className="ea-row__metric">{e.metric}</span>
-                  <span className="ea-row__year u-label">{e.year}</span>
-                  <span className="ea-row__arrow" aria-hidden="true">
-                    <ArrowUpRight size={16} strokeWidth={1.5} />
-                  </span>
+          {experience.map((e) => (
+            <article key={e.id} className="ea-xp" data-reveal-fade>
+              <div className="ea-xp__meta">
+                <p className="ea-xp__period u-label">{e.period}</p>
+                <p className="ea-xp__org">{e.org}</p>
+                <a
+                  className="ea-xp__link"
+                  href={e.href}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  github
+                  <ArrowUpRight size={16} strokeWidth={1.5} />
                 </a>
-              </li>
-            ))}
-          </ul>
+              </div>
+              <div className="ea-xp__body">
+                <h3 className="ea-xp__title" data-reveal data-reveal-title>
+                  {e.title}
+                </h3>
+                <ul className="ea-xp__list">
+                  {e.bullets.map((b) => (
+                    <li key={b} className="ea-xp__bullet">
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <p className="ea-xp__credit">{e.credit}</p>
+                <p className="ea-xp__stack u-label">{e.stack.join("  ·  ")}</p>
+              </div>
+            </article>
+          ))}
         </section>
 
         {/* ===================== CREDENTIALS ===================== */}
@@ -950,19 +1015,32 @@ export function EditorialVarA() {
             <span className="ea-sec__count u-label">Verified</span>
           </header>
           <ul className="ea-rows">
-            {credentials.map((c) => (
-              <li key={c.id} className="ea-row" data-reveal-fade>
-                <a href={c.href} target="_blank" rel="noreferrer">
+            {credentials.map((c) => {
+              const body = (
+                <>
                   <span className="ea-row__org u-label">{c.org}</span>
                   <span className="ea-row__title">{c.title}</span>
                   <span className="ea-row__metric">{c.metric}</span>
                   <span className="ea-row__year u-label">{c.year}</span>
-                  <span className="ea-row__arrow" aria-hidden="true">
-                    <ArrowUpRight size={16} strokeWidth={1.5} />
-                  </span>
-                </a>
-              </li>
-            ))}
+                  {c.href ? (
+                    <span className="ea-row__arrow" aria-hidden="true">
+                      <ArrowUpRight size={16} strokeWidth={1.5} />
+                    </span>
+                  ) : null}
+                </>
+              );
+              return (
+                <li key={c.id} className="ea-row" data-reveal-fade>
+                  {c.href ? (
+                    <a href={c.href} target="_blank" rel="noreferrer">
+                      {body}
+                    </a>
+                  ) : (
+                    <div className="ea-row__plain">{body}</div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
 
