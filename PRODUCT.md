@@ -8,7 +8,7 @@ web
 
 ## Stack
 
-Next.js (App Router) + TypeScript, deployed on Vercel. Blog posts authored as `.md`/`.mdx` files in the repo (user-confirmed choice over Astro, 2026-10-06). Animation stack to be confirmed at design lock (GSAP + Lenis is the leading candidate from research).
+Next.js (App Router) + TypeScript, deployed on Vercel. Blog posts authored as `.md`/`.mdx` files in the repo (user-confirmed choice over Astro, 2026-10-06). Animation stack locked: GSAP + ScrollTrigger + SplitText, Lenis smooth scroll, ogl for WebGL backdrops (PrismaticBurst).
 
 ## Users
 
@@ -20,7 +20,7 @@ The personal portfolio of Taim Kellizy — a developer and CS student. Its job i
 
 ## Positioning
 
-A young developer with verifiable credentials (Harvard CS50x, TED Translators language supervisor, EF SET C2, Microsoft Gen-AI certificate) and an authored blog — presented through award-caliber, motion-rich design that itself demonstrates front-end skill.
+A software developer and CS student (based in Syria) with verifiable credentials (Unblock Syria developer role, 1st place Qimma Hackathon for Arabify, Harvard CS50x, TED Translators language supervisor, EF SET C2, Microsoft Gen-AI certificate) and an authored blog — presented through award-caliber, motion-rich design that itself demonstrates front-end skill. Software development leads; translation and language work are secondary proof, not the headline.
 
 ## Operating Context
 
@@ -44,10 +44,9 @@ Fonts (user-provided, self-hosted in `fonts/`): Array, CabinetGrotesk, ChunkFive
 
 ## Evidence on Hand
 
-- Old portfolio (cloned at `old-portfolio/`): factual baseline for bio, skills, certificate links, contact links. All visual assets replaced.
-- `assets/`: new headshot 2026 (white BG PNG), Profile.pdf (CV), CS50x.pdf, EF SET Certificate.pdf, McKinsey Forward Program.png, Certificate of Contribution — Unblock Syria, taimullah-kellizy-certificate (1).pdf.
-- Real facts available: Harvard CS50x; TED Translators Language Supervisor (850+ min translated, 17M+ views); EF SET C2 (77/100); Microsoft Career Essentials in Generative AI; McKinsey Forward Program; Unblock Syria contribution. Skills: C, JavaScript, Python, React, Flask, Bootstrap, SQLite, HTML/CSS. Contact: taimkellizy@gmail.com, linkedin.com/in/taimkellizy, instagram.com/taimkellizy.
-- Absences that must not be fabricated: project list/write-ups/screenshots (user reports ready but not yet supplied), new bio copy (facts exist, wording is to be authored), blog post drafts, domain name, favicon/logo. Synthetic concept content is labeled and listed for replacement.
+- `assets/`: certificate PDFs (CS50x, EF SET, Unblock Syria contribution, others). The resume PDF (`Taimullah Resume (Unblock Syria 2026).pdf`) is present but intentionally not linked or served.
+- Real facts (as of 2026-10, from the resume): MTI University B.Sc. CS & AI, GPA 3.75/4.0, expected Sep 2029; Unblock Syria — Software Developer (Shaghal browser extension with Omar Albeik: React/TypeScript, Vitest/Testing Library/Playwright, CI); Qimma Hackathon 1st place ($500) for Arabify (Arabic-readiness analyzer, open source MIT); TED Translators — Arabic Language Supervisor & Linguistic Reviewer (140+ projects, 350+ hours, Review Cup 2026 Quarterfinalist); Harvard CS50x; EF SET C2 (77/100); Microsoft Career Essentials in Generative AI; McKinsey.org Forward; 1 Million Prompters (dub.ai). Skills: Python, C++, JavaScript, TypeScript, HTML, CSS, SQL; React, Next.js, Node.js, Flask, GSAP, i18next; Vitest, Playwright, Git, Figma; Arabic native, English C2. Contact: taimkellizy@gmail.com, linkedin.com/in/taimkellizy, github.com/Taimkellizy, instagram.com/taimkellizy.
+- Case-study screenshots supplied 2026-10-11 in `public/cases/` (Arabify, Shaghal, Meridian incl. logo SVG); `Plate` gradients remain the load-error fallback. All content is real and shipped.
 
 ## Product Principles
 

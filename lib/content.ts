@@ -2,22 +2,53 @@ export const person = {
   name: "Taim Kellizy",
   firstName: "Taim",
   lastName: "Kellizy",
-  role: "Developer & CS Student",
-  location: "Based in Egypt",
-  origin: "Originally from Syria",
+  role: "Software Developer & CS Student",
+  location: "Based in Syria",
   email: "taimkellizy@gmail.com",
   linkedin: "https://www.linkedin.com/in/taimkellizy",
+  github: "https://github.com/Taimkellizy",
   instagram: "https://www.instagram.com/taimkellizy/",
-  resume: "/assets/Profile.pdf",
 };
 
 export const skills = [
-  { group: "Languages", items: ["C", "JavaScript", "Python", "HTML", "CSS"] },
-  { group: "Frameworks", items: ["React", "Flask", "Bootstrap"] },
-  { group: "Data", items: ["SQLite"] },
+  {
+    group: "Languages",
+    items: ["Python", "C++", "JavaScript", "TypeScript", "HTML", "CSS", "SQL"],
+  },
+  {
+    group: "Frameworks",
+    items: ["React", "Next.js", "Node.js", "Flask", "GSAP", "i18next"],
+  },
+  {
+    group: "Tooling",
+    items: ["Vitest", "Playwright", "Testing Library", "Git", "Figma"],
+  },
 ];
 
 export const credentials = [
+  {
+    id: "education",
+    title: "B.Sc. Computer Science & AI",
+    org: "MTI University",
+    year: "2029",
+    metric: "GPA 3.75 / 4.0",
+    detail:
+      "Expected September 2029. Data Structures, Algorithms, Databases, Computer Systems.",
+    /* no verifiable link — renders as a static row */
+    href: "",
+    mark: "verified",
+  },
+  {
+    id: "arabify",
+    title: "Arabify — 1st Place",
+    org: "Qimma Hackathon",
+    year: "2026",
+    metric: "$500 · 1st of 120+",
+    detail:
+      "Arabic-readiness analyzer for web apps — React, PostCSS AST parsing, RTL/ARIA/performance audits, open source under MIT.",
+    href: "https://github.com/Taimkellizy",
+    mark: "verified",
+  },
   {
     id: "cs50x",
     title: "Harvard CS50x",
@@ -30,24 +61,13 @@ export const credentials = [
     mark: "verified",
   },
   {
-    id: "ted",
-    title: "TED Translators",
-    org: "Language Supervisor",
-    year: "2024–25",
-    metric: "17M+ views",
-    detail:
-      "850+ minutes of TED/TEDx talks translated to Arabic. Reviewer and language supervisor guiding new volunteers.",
-    href: "https://www.credential.net/0286fbbb-391f-4a5e-a6cd-9a9576ac481b#acc.JC3R4Vf9",
-    mark: "verified",
-  },
-  {
-    id: "efset",
-    title: "EF SET English",
-    org: "C2 Proficient",
-    year: "2025",
-    metric: "77 / 100",
-    detail: "Near-native English proficiency, certified C2.",
-    href: "https://cert.efset.org/e8uY2e",
+    id: "prompters",
+    title: "1 Million Prompters",
+    org: "dub.ai",
+    year: "2026",
+    metric: "Program",
+    detail: "Applied AI prompt engineering program.",
+    href: "https://omp.dub.ai/certificate/m9emGCV1fE9E?locale=en",
     mark: "verified",
   },
   {
@@ -67,54 +87,125 @@ export const credentials = [
     year: "2025",
     metric: "Program",
     detail: "Problem solving, structured thinking, and professional effectiveness.",
-    href: "#",
+    href: "https://www.credly.com/badges/d271ec72-79c6-48fb-bd08-fc515524f44a/public_url",
     mark: "verified",
   },
   {
-    id: "unblock",
-    title: "Unblock Syria",
-    org: "Certificate of Contribution",
+    id: "efset",
+    title: "EF SET English",
+    org: "C2 Proficient",
     year: "2025",
-    metric: "Contribution",
-    detail: "Technical contribution to a civic access initiative.",
-    href: "#",
+    metric: "77 / 100",
+    detail: "Near-native English proficiency, certified C2.",
+    href: "https://cert.efset.org/e8uY2e",
+    mark: "verified",
+  },
+  {
+    id: "ted",
+    title: "TED Translators",
+    org: "Language Supervisor",
+    year: "2024–26",
+    metric: "140+ projects",
+    detail:
+      "140+ projects and 350+ hours of TED/TEDx translated to Arabic. Reviewer and language supervisor; Quarterfinalist, Review Cup 2026 (top 30 of 106).",
+    href: "https://www.credential.net/0286fbbb-391f-4a5e-a6cd-9a9576ac481b",
     mark: "verified",
   },
 ];
 
-/* Placeholder project entries — synthetic, to be replaced with real work. */
+/* Roles — kept apart from certificates, since a job is not a credential. */
+export const experience = [
+  {
+    id: "unblock-dev",
+    title: "Software Developer",
+    org: "Unblock Syria",
+    period: "2026 — now",
+    bullets: [
+      "Shaghal browser extension in React and TypeScript — service testing, reporting, corrections, screenshots, API integration, and Arabic/RTL localization.",
+      "Component and end-to-end test coverage with Vitest, Testing Library, and Playwright, integrated into CI.",
+      "Bug and API-integration investigation, implementation design, and collaboration on technical decisions.",
+      "Release readiness and preparation for the project's public open-source development.",
+    ],
+    stack: ["React", "TypeScript", "Vitest", "Playwright", "CI"],
+    credit: "Built with Omar Albeik",
+    href: "https://github.com/unblocksyria/shaghal-extension",
+  },
+];
+
+/* Real projects — `images` resolve under public/cases/ and render on top
+   of the Plate fallback (gradient + kind label shows until a file lands,
+   and on any load error). Each entry carries its plate ratio (banner 2/1,
+   wide 16/9, landscape 520/370) and fit — screenshots cover the plate,
+   transparent art (logos) is contained on the gradient card. */
 export const projects = [
   {
-    id: "p1",
-    title: "Signal Garden",
-    kind: "Web App",
-    year: "2025",
-    stack: ["React", "Flask", "SQLite"],
-    note: "Synthetic placeholder — replace with real project.",
-  },
-  {
-    id: "p2",
-    title: "Ledger Nine",
+    id: "arabify",
+    title: "Arabify",
     kind: "Tooling",
-    year: "2025",
-    stack: ["Python", "SQLite"],
-    note: "Synthetic placeholder — replace with real project.",
+    year: "2026",
+    stack: ["React", "TypeScript", "PostCSS"],
+    note: "Arabic-readiness analyzer for web apps — 1st place, Qimma Hackathon.",
+    href: "https://github.com/Taimkellizy",
+    images: [
+      {
+        src: "/cases/arabify-logo-4.svg",
+        ratio: "landscape",
+        fit: "cover",
+        alt: "Arabify logo",
+      },
+      {
+        src: "/cases/arabify-report.jpg",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Arabify landing page — RTL and Arabic SEO, simplified",
+      },
+    ],
   },
   {
-    id: "p3",
-    title: "Minaret Index",
-    kind: "Frontend",
-    year: "2024",
-    stack: ["JavaScript", "HTML", "CSS"],
-    note: "Synthetic placeholder — replace with real project.",
+    id: "shaghal",
+    title: "Shaghal",
+    kind: "Browser Extension",
+    year: "2026",
+    stack: ["React", "TypeScript", "Playwright"],
+    note: "Unblock Syria browser extension, built with Omar Albeik.",
+    href: "https://github.com/unblocksyria/shaghal-extension",
+    images: [
+      {
+        src: "/cases/Shaghal logo.svg",
+        ratio: "landscape",
+        fit: "contain",
+        alt: "Shaghal logo",
+      },
+      {
+        src: "/cases/shaghal-hero.png",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Shaghal landing page — does this site work from Syria?",
+      },
+    ],
   },
   {
-    id: "p4",
-    title: "Coldstart",
-    kind: "Experiment",
-    year: "2024",
-    stack: ["C"],
-    note: "Synthetic placeholder — replace with real project.",
+    id: "meridian",
+    title: "Meridian",
+    kind: "i18n Automation",
+    year: "2026",
+    stack: ["Node.js", "Babel", "PostCSS"],
+    note: "Open-source i18n automation suite for React — extracts hardcoded strings, translates them via local or cloud APIs (LibreTranslate, Google, DeepL), configures i18next, and enforces RTL-ready logical CSS.",
+    href: "https://github.com/Taimkellizy/meridian-suite",
+    images: [
+      {
+        src: "/cases/Meridian_Full_Logo_no_bg_full_color.svg",
+        ratio: "banner",
+        fit: "contain",
+        alt: "Meridian logo",
+      },
+      {
+        src: "/cases/meridian-report.png",
+        ratio: "banner",
+        fit: "cover",
+        alt: "Meridian CLI setting up i18next and translating an app into Arabic",
+      },
+    ],
   },
 ];
 
