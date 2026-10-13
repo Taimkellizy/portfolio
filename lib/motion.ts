@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -105,28 +105,6 @@ export function useSmoothScroll(enabled = true) {
 
     return () => cleanup();
   }, [enabled, reduced]);
-}
-
-/**
- * Scoped GSAP context so every timeline a concept creates is reverted
- * when the concept unmounts (the lab swaps concepts on the same page).
- */
-export function useGsapScope<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const ctx = gsap.context(() => {}, el);
-    return () => {
-      ctx.revert();
-      ScrollTrigger.getAll().forEach((st) => {
-        if (st.trigger && el.contains(st.trigger as Node)) st.kill();
-      });
-    };
-  }, []);
-
-  return ref;
 }
 
 export { gsap, ScrollTrigger };

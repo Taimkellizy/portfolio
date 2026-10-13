@@ -10,13 +10,20 @@ Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one 
 
 - `npm run dev` — dev server on localhost:3000
 - `npm run build` — production build, must pass
-- `npx tsc --noEmit` — typecheck, must pass
+- `npm run lint` — ESLint (flat config, `eslint-config-next`), must stay error-free
+- `npm run typecheck` — `tsc --noEmit`, must pass
 
 ## Map
 
 - `app/` — Next router; `page.tsx` renders ConceptLab only
 - `components/concept-lab.tsx` — mounts loading screen + the live concept
-- `concepts/editorial-var-a.tsx` / `.css` — the entire site
+- `concepts/editorial-var-a.tsx` — composition root: hook wiring + page order
+- `concepts/editorial-var-a/` — one hook file per motion system
+  (`use-menu-dialog`, `use-entrance-reveals`, `use-hero-cursor`,
+  `use-magnetic-wordmark`, `use-menu-spectrum`, `use-variable-weight`,
+  `use-cases-slider`), `sections.tsx` (all section markup), `shared.ts`
+  (constants, `newTabProps`, `isTouchLayout`); CSS stays one file at
+  `concepts/editorial-var-a.css`
 - `components/prismatic-burst.*` — WebGL chromatic backdrop (ogl shader, React Bits origin)
 - `components/lattice-loader*` — loading screen (React Bits origin)
 - `components/plate.tsx`, `star-glyph.tsx` — gradient placeholder plate, star glyph

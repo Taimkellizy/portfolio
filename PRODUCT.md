@@ -40,7 +40,7 @@ A software developer and CS student (based in Syria) with verifiable credentials
 Taste keywords: dither, grainy gradient, modern, clean, minimalistic, professional.
 Taste references analyzed 2026-10-06 — authoritative breakdown in `taste-notes.md` (Per Appelgren editorial, OXALEY dark agency, bold grainy folk/riso, Blok monocolor Swiss, Y2K grainy starburst).
 Hard pins (2026-10-06): DARK theme only (no white backgrounds); 5 concept previews before production; motion signature = floating rotated photo drift + grainy gradient scrub combined; unique experience on PC and mobile; `prefers-reduced-motion` respected.
-Fonts (user-provided, self-hosted in `fonts/`): Array, CabinetGrotesk, ChunkFive, YoungSerif, NimbusSans, Office Code Pro (data/labels only), Outfit, Work Sans.
+Fonts (self-hosted): Outfit (variable, `public/fonts/`) with static instances for the OG card, Work Sans (variable), Office Code Pro (data/labels only).
 
 ## Evidence on Hand
 

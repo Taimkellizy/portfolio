@@ -457,12 +457,11 @@ const PrismaticBurst = ({
       meshRef.current = null;
       triRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only init: renderScale/props are read once at mount (quality-tier policy)
   }, []);
 
   useEffect(() => {
-    const canvas = rendererRef.current?.gl?.canvas as
-      | HTMLCanvasElement
-      | undefined;
+    const canvas = containerRef.current?.querySelector("canvas");
     if (canvas) {
       canvas.style.mixBlendMode = lightMode
         ? "normal"

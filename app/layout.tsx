@@ -1,12 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import {
-  workSans,
-  array,
-  arrayWide,
-  chunkFive,
-  nimbus,
-  officeCode,
-} from "./fonts";
+import { workSans, officeCode } from "./fonts";
 import { person } from "@/lib/content";
 import "./globals.css";
 
@@ -55,14 +48,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={[
-        workSans.variable,
-        array.variable,
-        arrayWide.variable,
-        chunkFive.variable,
-        nimbus.variable,
-        officeCode.variable,
-      ].join(" ")}
+      className={[workSans.variable, officeCode.variable].join(" ")}
     >
       <body>{children}</body>
     </html>

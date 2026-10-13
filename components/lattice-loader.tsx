@@ -201,9 +201,15 @@ const LatticeLoader: React.FC<LatticeLoaderProps> = ({
 
   const timerRef = useRef<HTMLSpanElement>(null);
   const dsRef = useRef(0);
-  const markRef = useRef<"done" | "error">("done");
-  const mark = status === "working" ? markRef.current : status;
-  markRef.current = mark;
+  /* the settled status (last non-working value — keeps the check-mark of
+     a "done"/"error" flash visible while status returns to working) */
+  const [settledStatus, setSettledStatus] = useState<"done" | "error">("done");
+  const [prevStatus, setPrevStatus] = useState(status);
+  if (status !== prevStatus) {
+    setPrevStatus(status);
+    if (status !== "working") setSettledStatus(status);
+  }
+  const mark = status === "working" ? settledStatus : status;
   const [announce, setAnnounce] = useState(`${label}, in progress`);
 
   const paint = (ds: number) => {
@@ -226,12 +232,19 @@ const LatticeLoader: React.FC<LatticeLoaderProps> = ({
     return () => clearInterval(id);
   }, [status, elapsed]);
 
+  /* status → announcement text; the timer value must be read from the
+     interval tick (not render state), so this stays effect-driven */
   useEffect(() => {
-    if (status === "working") setAnnounce(`${label}, in progress`);
-    else
+    /* eslint-disable react-hooks/set-state-in-effect -- a11y announcement sync */
+    if (status === "working") {
+      setAnnounce(`${label}, in progress`);
+    } else {
       setAnnounce(
         `${status === "done" ? doneLabel : errorLabel}${showTimer ? ` ${spoken(dsRef.current)}` : ""}`,
       );
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-announce on status change only; label/flag props are constant per mount
   }, [status]);
 
   return (

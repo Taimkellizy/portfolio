@@ -17,7 +17,7 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
 | 1.5 | Mobile polish (user review round) | **DONE** (this session) |
 | 2 | Accessibility | **DONE** (this session) |
 | 3 | SEO + share preview | **DONE** (this session) |
-| 4 | Code quality + perf | NOT STARTED |
+| 4 | Code quality + perf | **DONE** (this session) |
 | 5 | Verify + docs sweep | NOT STARTED |
 
 ## Decisions made (do not re-litigate)
@@ -155,7 +155,7 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
   OG/twitter/apple serve real PNGs (magic bytes checked); card renders the
   heavy Outfit 800 correctly.
 
-## Phase 4 — code quality + perf
+## Phase 4 — code quality + perf (done this session)
 
 1. Split `concepts/editorial-var-a.tsx` (~1.2k lines) into hooks
    (`useMenu`, `useHeroCursor`, `useMagnetic`, `useSpectrum`,
@@ -173,6 +173,49 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
    on case `<img>` (CLS); optional WebP for the ~300KB PNGs
    (`shaghal-hero.png`, `meridian-report.png`).
 4. Consider `loading="lazy"` only below the fold (first case image is LCP-ish).
+
+### Phase 4 notes (shipped this session)
+
+- **Split `concepts/editorial-var-a.tsx`** (1262 lines → a ~100-line
+  composition root): one hook per motion system in `concepts/editorial-var-a/`
+  (`use-menu-dialog`, `use-entrance-reveals`, `use-hero-cursor`,
+  `use-magnetic-wordmark`, `use-menu-spectrum`, `use-variable-weight`,
+  `use-cases-slider`), `sections.tsx` for all markup, `shared.ts` for
+  constants/helpers (`PLATE_PALETTES`, `newTabProps`, `isTouchLayout`).
+  Hook order in the composition root doubles as effect order (menu
+  visibility → dialog; entrance → cursor). Behavior verified identical:
+  same page heights (desktop 6707, mobile 7534), hero entrance lands,
+  slider initializes, no horizontal overflow at 1440/390, menu dialog
+  pass unchanged.
+- **Removed**: `app/fonts/` Array×3 + ArrayWide×3 + ChunkFive + Nimbus
+  (~4.5MB), their `fonts.ts` exports + `next/font` preloads + `--font-*`
+  vars in `globals.css`; tracked junk folders root `fonts/` + `Colors/`
+  (Fontsource-era copies); `useGsapScope` from `lib/motion.ts`;
+  `public/fonts/YoungSerifVF.ttf`; dead CSS (`.lab-switch*`, `.u-grain` +
+  keyframes + reduced-motion reference, `.u-dither`, `.u-caps`,
+  `--lab-pad`/`--lab-h`); unused case shots `arabify-audit.png` +
+  `shaghal-hero2.png` (the swap's leftover). `star-glyph.tsx` + `.u-star`
+  **kept** — the phase-1 decision stands.
+- **ESLint**: `eslint-config-next@16` flat config (`eslint.config.mjs`,
+  `core-web-vitals` array — no eslintrc compat), `lint` + `typecheck`
+  scripts, lint is error-free. Two flags from the React-hooks-compiler
+  rules were fixed for real: `lattice-loader`'s ref-during-render check-mark
+  became the documented render-phase adjustment pattern (settled status
+  state); `prismatic-burst`'s second effect reads the canvas from the
+  container DOM instead of back through `rendererRef`. Two waivers carry
+  inline reasons: the burst's mount-only dep array and the loader's
+  announcement effect.
+- **Images**: `shaghal-hero`/`meridian-report` converted to WebP
+  (407KB→78KB, 293KB→79KB, sharp via `scripts/convert-cases-webp.cjs`),
+  content entries now carry intrinsic `width`/`height` on raster images
+  (aspect hint for crawlers; the absolute-plate layout has no CLS).
+- **Deferred, on purpose**: `next/image` migration (would change serving +
+  the plate's onError fallback interplay; lint rule off with a comment
+  pointing here); case-file PNG→WebP for the arabify JPG is already small.
+- **Known dev-tooling flaw** (accepted): `@next/eslint-plugin-next` pulls
+  a vulnerable `braces` advisory through `fast-glob` — dev-only, and
+  `npm audit fix --force` would downgrade eslint-config-next to v14.
+  Re-visit when Next ships a newer plugin.
 
 ## Phase 5 — verify + docs
 
