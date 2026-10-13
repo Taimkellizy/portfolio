@@ -33,7 +33,6 @@ Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one 
 - `GUIDELINES.md` — conventions and traps
 - `PRODUCT.md` — positioning and product principles
 - `assets/` — certificate PDFs (tracked). The resume PDF is intentionally not linked or served.
-- `PROD-PLAN.md` — temp handoff doc: prod-readiness phases, status, decisions, verification recipe. Read it first for multi-phase work; delete when all phases ship.
 
 ## Current state / pending
 

@@ -11,7 +11,7 @@ Design authority for Taim Kellizy's portfolio. Derived from taste references and
 | `--ea-bg` | `#0c0c0e` | Page background (near-black) |
 | `--ea-ink` | `#e8e6e1` | Primary text (warm off-white) |
 | `--ea-ink-soft` | `rgba(232, 230, 225, 0.78)` | Secondary text |
-| `--ea-ink-mute` | `rgba(232, 230, 225, 0.5)` | Tertiary text, labels |
+| `--ea-ink-mute` | `rgba(232, 230, 225, 0.58)` | Tertiary text, labels (WCAG AA on `--ea-bg`) |
 | `--ea-line` | `rgba(232, 230, 225, 0.14)` | Hairline borders |
 | `--ea-menu-bg` | `#f0eeeb` | Slide-in menu panel (light) |
 | `--ea-menu-ink` | `#111` | Menu panel text (dark) |
@@ -53,7 +53,7 @@ Signature animations:
 1. **Magnetic wordmark** — letters displace up to 6px near cursor (380px radius)
 2. **Letter disassembly** — hero words burst outward in circular pattern on cursor proximity
 3. **Cursor bubble** — 44px white circle, `mix-blend-mode: difference`, scales 2.2× over links/buttons; native cursor is `cursor: none` site-wide (hover-capable devices only). `.ea` root carries `isolation: isolate` so the blend resolves against one group.
-4. **Cases vertical slider** (joffreyspitzer technique) — ScrollTrigger scrub timeline; each plate scales 17.55vw→36vw (`scaleX/scaleY`, left-top origin) at viewport centre, then collapses; active name syncs opacity 1/0.2 + weight 700/500
+4. **Cases vertical slider** (joffreyspitzer technique) — ScrollTrigger scrub timeline; each plate scales 17.55vw→36vw (`scaleX/scaleY`, left-top origin) at viewport centre, then collapses; active name syncs opacity 1/0.55 + weight 700/500
 5. **Menu word zones** — hovered word snaps to scale 3 + full opacity inside its ±22px band; neighbours push away by half the growth (measured untransformed on mouseenter)
 6. **Spectral row sweep** — 1px underline over rows on hover, cycling the burst shader's hue ramp (sampled stops paled toward ground) with a travelling white hotspot; animation paused at rest
 7. **Variable-weight headers** — sub-headers (section titles, Cases, footer col titles): per-char `font-weight` lerps toward 860 within 120px of the cursor (quadratic falloff), driven on SplitText `.char` spans
@@ -66,7 +66,7 @@ All animations respect `prefers-reduced-motion` (WebGL pieces and the loading wa
 
 ### Right-side menu
 - Trigger: fixed circular button (right-center), solid `#0c0c0e` fill, `Menu` icon
-- Panel: 50vw, slides from right (`expo.out`, 650ms), closes smoothly on X / overlay click / Escape
+- Panel: 50vw, slides from right (`expo.out`, 650ms), closes smoothly on X / overlay click / Escape; dialog hardened — `visibility: hidden` + `inert` when closed (no tabbable ghosts pre-hydration), focus trap, initial focus on the close button, focus returns to the opener, Lenis-aware scroll lock
 - Light bg `#f0eeeb`, dark text `#111`
 - Nav links: zone-based scale hover (see Motion #5)
 - CTA pill, contact info, social links (GitHub, LinkedIn, Instagram)
@@ -75,9 +75,9 @@ All animations respect `prefers-reduced-motion` (WebGL pieces and the loading wa
 - 3-column grid: `1fr minmax(0, auto) 1fr` — image column centred, sticky title left, sticky names right
 - "Cases" title + names both sticky at `top: 55vh / height: 45vh`, `align-self: start`, 20px bottom padding (same level)
 - Plates: width `17.55vw`, gap `12px`, scrub-scaled to `36vw` at centre (see Motion #4)
-- Names: opacity 0.2 / active 1, weight 500 / active 700 (timeline-driven, no CSS transition); names link to the project's `href` (external repos open in a new tab)
+- Names: opacity 0.55 / active 1, weight 500 / active 700 (timeline-driven, no CSS transition); names link to the project's `href` (external repos open in a new tab)
 - Plates: one per entry in `projects[].images` (two per project). The timeline keys name sync on `data-project-index`, so several plates share one active name (`firstOf`/`lastOf`)
-- Project images: entries carry `src` / `ratio` / `fit` / `alt` in `lib/content.ts`. `fit: cover` fills the plate (screenshots); `fit: contain` frames art on the gradient card (logos). The gradient + kind label is the fallback (also on `img` error)
+- Project images: entries carry `src` / `ratio` / `fit` / `alt` (rasters also carry intrinsic `width`/`height`; large shots ship as tuned WebP — see `scripts/convert-cases-webp.cjs`) in `lib/content.ts`. `fit: cover` fills the plate (screenshots); `fit: contain` frames art on the gradient card (logos). The gradient + kind label is the fallback (also on `img` error)
 - Plate ratios per image: `banner` `2/1`, `wide` `16/9`, `landscape` `520/370` — assigned to match each source crop
 - Titles are lowercase ("cases") like all section titles
 
