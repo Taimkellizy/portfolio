@@ -16,7 +16,7 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
 | 1 | Phone support | **DONE** |
 | 1.5 | Mobile polish (user review round) | **DONE** (this session) |
 | 2 | Accessibility | **DONE** (this session) |
-| 3 | SEO + share preview | NOT STARTED |
+| 3 | SEO + share preview | **DONE** (this session) |
 | 4 | Code quality + perf | NOT STARTED |
 | 5 | Verify + docs sweep | NOT STARTED |
 
@@ -116,7 +116,7 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
   `inert` flips both ways, scroll lock clears; HTTP 200 + expected strings
   in prerendered HTML; no horizontal overflow at 390 and 1440.
 
-## Phase 3 — SEO + share preview
+## Phase 3 — SEO + share preview (done this session)
 
 1. `app/opengraph-image.tsx` + `app/twitter-image.tsx` (next/og ImageResponse,
    1200×630, load Outfit-Variable.ttf via fs in the route).
@@ -127,6 +127,33 @@ preview (OG), code quality, phone support**. Live concept is `editorial-var-a`
 4. JSON-LD `Person` schema from `lib/content.ts`.
 5. Verify crawler-visible HTML keeps all sections (page is statically
    prerendered — keep it that way).
+
+### Phase 3 notes (shipped this session)
+
+- `app/opengraph-image.tsx` + `app/twitter-image.tsx` (re-export): 1200×630
+  PNG built with next/og from `lib/content.ts` — dark card, caps name row,
+  800-weight "taim" wordmark, hairline bottom row with role/location.
+- **`next/og`'s bundled opentype parser cannot read variable-font `fvar`
+  tables** — Outfit-Variable.ttf and WorkSans-Variable.ttf both fail with
+  `parseFvarAxis` TypeError at prerender. Static instances live in
+  `public/fonts/static/` (Outfit-Medium/SemiBold/ExtraBold.ttf, from Google
+  Fonts; request the css2 API with a plain `Mozilla/5.0` UA to get real TTFs
+  — MSIE UA returns EOT, modern UA returns woff2, both useless to satori).
+- `app/layout.tsx`: full OG/twitter metadata (url/siteName/title/
+  description), `alternates.canonical`, authors + creator. og/twitter image
+  entries come from the file conventions (never set `images` explicitly —
+  it overrides them).
+- Icons: `app/icon.svg` (star glyph on the dark token) +
+  `app/apple-icon.tsx` (generated 180×180 "t" in Outfit ExtraBold).
+- `app/robots.ts` (allow all + sitemap) and `app/sitemap.ts` (single entry,
+  monthly).
+- JSON-LD `Person` in `app/page.tsx` (name/jobTitle/url/email/homeLocation/
+  sameAs/knowsAbout) — prerendered into the static HTML.
+- Verified: all 7 routes prerender statically (/ , apple-icon, icon.svg,
+  opengraph-image, twitter-image, robots.txt, sitemap.xml); head carries
+  canonical, full og/twitter set, icon links; JSON-LD present in body;
+  OG/twitter/apple serve real PNGs (magic bytes checked); card renders the
+  heavy Outfit 800 correctly.
 
 ## Phase 4 — code quality + perf
 
@@ -191,3 +218,7 @@ keyboard pass, reduced-motion pass. Update `AGENTS.md`/`DESIGN.md`/
    dialog kills its transitions under reduced motion
    (`.ea-menu-panel, .ea-menu-panel * { transition: none !important }`) and
    its initial focus retries after a double rAF. Don't remove either.
+10. `next/og` (the bundled satori/opentype) cannot parse variable fonts —
+   OG/apple-icon routes must use the static TTFs in `public/fonts/static/`.
+   Don't swap them back to `Outfit-Variable.ttf`; if a new weight is needed,
+   download another static instance (plain `Mozilla/5.0` UA on the css2 API).

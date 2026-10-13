@@ -48,6 +48,7 @@ Taim Kellizy's personal portfolio — Next.js 16 (App Router) + TypeScript, one 
 8. `credentials` = verifiable certificates/education; `experience` = roles. Never mix.
 9. All visible copy is English only (no Arabic script) for now.
 10. The global reduced-motion `transition-duration: 0.01ms !important` makes any element with the initial `transition-property: all` transition `visibility` — computed visibility goes stale on descendants and `focus()` silently fails. The menu dialog relies on `.ea-menu-panel, .ea-menu-panel * { transition: none !important }` under reduced motion + a double-rAF focus retry; don't remove either.
+11. `next/og` (OG/apple-icon image routes) cannot parse variable-font `fvar` tables — it must use the static Outfit TTFs in `public/fonts/static/` (Medium/SemiBold/ExtraBold); don't swap `Outfit-Variable.ttf` back in.
 
 ## Verify before committing
 

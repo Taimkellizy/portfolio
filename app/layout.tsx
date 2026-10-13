@@ -7,23 +7,36 @@ import {
   nimbus,
   officeCode,
 } from "./fonts";
+import { person } from "@/lib/content";
 import "./globals.css";
 
+const SITE = "https://taimkellizy-portfolio.vercel.app";
+const TITLE = "Taim Kellizy — Developer & CS Student";
+const DESCRIPTION =
+  "Portfolio of Taim Kellizy, a developer and computer science student. Selected work, credentials, and writing.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://taimkellizy.dev"),
+  metadataBase: new URL(SITE),
   title: {
-    default: "Taim Kellizy — Developer & CS Student",
+    default: TITLE,
     template: "%s — Taim Kellizy",
   },
-  description:
-    "Portfolio of Taim Kellizy, a developer and computer science student. Selected work, credentials, and writing.",
+  description: DESCRIPTION,
+  authors: [{ name: person.name, url: SITE }],
+  creator: person.name,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    title: "Taim Kellizy — Developer & CS Student",
-    description:
-      "Portfolio of Taim Kellizy, a developer and computer science student.",
+    url: SITE,
+    siteName: person.name,
+    title: TITLE,
+    description: DESCRIPTION,
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
   robots: { index: true, follow: true },
 };
 
