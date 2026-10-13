@@ -10,10 +10,11 @@
   --font-outfit: "Outfit", "Work Sans", "Helvetica Neue", Arial, sans-serif;
   --ea-bg: #0c0c0e;
   --ea-ink: #e8e6e1;
-  --ea-ink-mute: rgba(232, 230, 225, 0.5);
+  --ea-ink-mute: rgba(232, 230, 225, 0.58);
   --ea-ink-soft: rgba(232, 230, 225, 0.78);
   --ea-line: rgba(232, 230, 225, 0.14);
   --ea-pad: 32px;
+  --ea-pad: max(32px, env(safe-area-inset-left), env(safe-area-inset-right));
   --ea-menu-bg: #f0eeeb;
   --ea-menu-ink: #111;
 
@@ -27,6 +28,57 @@
      GSAP transforms/will-change) the backdrop can otherwise fail to
      include them, leaving the bubble solid white over light glyphs */
   isolation: isolate;
+}
+
+/* ---------- keyboard: skip link + focus ring ---------- */
+
+/* The global reduced-motion `transition-duration: 0.01ms !important`
+   meets the initial `transition-property: all` on every untransitioned
+   element — a visibility flip then resolves stale on descendants for
+   seconds and `focus()` on the dialog's buttons silently fails. The
+   dialog needs synchronous visibility: kill its transitions outright
+   under reduced motion (its slides are JS-driven anyway). */
+@media (prefers-reduced-motion: reduce) {
+  .ea-menu-panel,
+  .ea-menu-panel * {
+    transition: none !important;
+  }
+}
+
+.ea-skip {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 400;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--ea-ink);
+  color: var(--ea-bg);
+  font-family: var(--font-outfit);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(calc(-100% - 20px));
+  transition: transform 200ms var(--ease-out);
+}
+
+.ea-skip:focus {
+  transform: translateY(0);
+}
+
+.ea :focus-visible {
+  outline: 2px solid var(--ea-ink);
+  outline-offset: 3px;
+}
+
+/* the light menu panel needs the dark ink for its ring */
+.ea-menu-panel :focus-visible {
+  outline-color: var(--ea-menu-ink);
+}
+
+/* skip-link target: focus lands here without needing a ring */
+.ea main:focus {
+  outline: none;
 }
 
 /* ---------- cursor bubble ---------- */
@@ -102,6 +154,13 @@
   background: var(--ea-menu-bg);
   color: var(--ea-menu-ink);
   overflow-y: auto;
+  /* pre-hydration the offscreen links must not be tab-reachable; the JS
+     visibility toggles inline on open/close (gsap owns the slide) */
+  visibility: hidden;
+  /* never transition: the global reduced-motion `transition-duration:
+     0.01ms !important` would turn a visibility flip into a transition,
+     leaving computed visibility (and focusability) stale for ~2 frames */
+  transition: none;
   transform: translateX(100%);
   will-change: transform;
 }
@@ -282,20 +341,6 @@
   transition: transform 0.15s ease-out;
 }
 
-.ea-giant__star-wrap {
-  position: absolute;
-  left: calc(100% + 0.035em);
-  top: 0.045em;
-  display: block;
-  width: 0.115em;
-  height: 0.115em;
-}
-
-.ea-giant__star-wrap .ea-giant__star {
-  width: 100%;
-  height: 100%;
-}
-
 .ea-hero__giant {
   position: absolute;
   left: -0.09em;
@@ -412,6 +457,24 @@
   object-fit: cover;
 }
 
+/* project header shown under the plates on phones — the sticky name
+   list is the desktop/slider treatment */
+.ea-case__caption {
+  display: none;
+}
+
+.ea-case__caption-title {
+  font-family: var(--font-outfit);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  color: var(--ea-ink);
+}
+
+.ea-case__caption-kind {
+  opacity: 0.55;
+}
+
 /* transparent art (logos) is framed on the gradient card instead of
    covering it — padding % resolves against the plate width */
 .ea-case__img--contain {
@@ -467,14 +530,14 @@
   font-weight: 500;
   letter-spacing: -0.01em;
   color: var(--ea-ink);
-  opacity: 0.2;
+  opacity: 0.55;
   /* opacity/weight are driven by the scrubbed timeline — a CSS
      transition here would lag behind every scrub frame */
   text-decoration: none;
 }
 
 .ea-case-name:hover {
-  opacity: 0.5 !important;
+  opacity: 0.85 !important;
 }
 
 /* ---------- sections ---------- */
@@ -503,7 +566,7 @@
 }
 
 .ea-sec__count {
-  opacity: 0.5;
+  opacity: 0.62;
 }
 
 .ea-rows {
@@ -835,7 +898,7 @@
 .ea-foot__base {
   position: absolute;
   right: var(--ea-pad);
-  bottom: clamp(28px, 5vh, 58px);
+  bottom: max(clamp(28px, 5vh, 58px), env(safe-area-inset-bottom));
   z-index: 3;
   display: flex;
   align-items: center;
@@ -908,19 +971,48 @@
 @media (max-width: 900px) {
   .ea {
     --ea-pad: 20px;
+    --ea-pad: max(20px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+
+  /* hero: stacked flow — bio top, giant anchored to the bottom. No
+     absolute positioning, so short viewports can't overlap the parts */
+  .ea-hero {
+    display: flex;
+    flex-direction: column;
+    padding: 0 var(--ea-pad) clamp(20px, 3vh, 40px);
+    box-sizing: border-box;
   }
   .ea-hero__bio {
-    top: 108px;
-    left: var(--ea-pad);
-    width: min(88vw, 560px);
+    position: static;
+    width: 100%;
+    max-width: 560px;
+    padding-top: 108px;
+    margin-bottom: auto;
     font-size: clamp(19px, 3.4vw, 26px);
   }
-  .ea-hero__prism {
-    display: none;
+  /* hero wordmark runs vertically up the right edge — fills the dead
+     space the horizontal word left behind. Band hugs the right edge:
+     the rotated box is 0.78em wide, so its anchor sits 0.78em in */
+  .ea-hero__giant {
+    position: absolute;
+    top: 100%;
+    left: calc(100% - 0.78em);
+    right: auto;
+    bottom: auto;
+    margin: 0;
+    font-size: min(72vw, 32svh);
+    transform-origin: top left;
+    /* rotate first (local frame), then nudge down for the "t" bleed */
+    transform: translateY(0.05em) rotate(-90deg);
   }
-  .ea-giant {
-    font-size: clamp(110px, 34vw, 420px);
+  .ea-hero__scroll {
+    position: static;
+    align-self: flex-start;
+    margin-top: 18px;
+    font-size: 13px;
   }
+
+  /* cases: full-width cards, project header attached to its plates */
   .ea-cases__grid {
     grid-template-columns: 1fr;
   }
@@ -928,43 +1020,82 @@
     position: relative;
     top: auto;
     height: auto;
+    padding-right: 0;
     padding-bottom: 32px;
   }
   .ea-cases__images {
-    width: clamp(200px, 45vw, 320px);
+    width: min(100%, 560px);
     margin: 0 auto;
     padding-bottom: 0;
+    gap: 8px;
+  }
+  .ea-case {
+    display: flex;
+    flex-direction: column;
+  }
+  .ea-case__caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 22px 0 10px;
+  }
+  .ea-case:first-child .ea-case__caption {
+    margin-top: 0;
+  }
+  .ea-case--banner .ea-case__plate,
+  .ea-case--wide .ea-case__plate,
+  .ea-case--landscape .ea-case__plate {
+    width: 100%;
   }
   .ea-cases__names {
-    position: static;
-    top: auto;
-    height: auto;
-    z-index: auto;
-    flex-direction: row;
-    align-items: baseline;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    gap: 6px 16px;
-    padding-top: 32px;
+    display: none;
   }
-  .ea-cases__names-inner {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 6px 16px;
-    text-align: left;
-  }
-  .ea-case-name {
-    opacity: 0.65;
-  }
+
   .ea-menu-panel {
     width: 100%;
     min-width: unset;
   }
   .ea-menu-panel__inner {
     padding: 32px 28px 40px;
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+  }
+
+  /* bottom-right FAB: thumb-reachable, clear of page content */
+  .ea-menu-btn {
+    top: auto;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    transform: none;
+    width: 48px;
+    height: 48px;
+  }
+  .ea-menu-btn:hover {
+    transform: scale(1.08);
+    border-color: rgba(232, 230, 225, 0.5);
+  }
+
+  /* phones only: the word goes full-bleed and the base row moves above
+     it — desktop keeps the original bottom-left word + absolute base row */
+  .ea-foot {
+    padding-bottom: calc(41vw + 24px + env(safe-area-inset-bottom));
+  }
+  .ea-foot__word {
+    font-size: 52vw;
   }
   .ea-foot__cols {
+    flex-direction: column;
     gap: 40px;
+  }
+  .ea-foot__base {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin-top: 32px;
+    justify-content: flex-start;
+    gap: 24px;
+    font-size: 15px;
   }
   .ea-foot__col-title,
   .ea-foot__col a {
@@ -976,23 +1107,32 @@
 }
 
 @media (max-width: 620px) {
-  .ea-menu-btn {
-    right: 16px;
-    width: 42px;
-    height: 42px;
-  }
-  .ea-hero__scroll {
-    font-size: 13px;
-    bottom: 26px;
+  /* tighter bio so the vertical wordmark never collides on short screens */
+  .ea-hero__bio {
+    font-size: clamp(17px, 3.6vw, 26px);
+    line-height: 1.35;
   }
   .ea-row :is(a, .ea-row__plain) {
     grid-template-columns: minmax(0, 1fr) 26px;
-    gap: 12px;
+    gap: 8px 12px;
     padding: 20px 12px 20px 8px;
   }
+  /* stacked rows keep every field — nothing is dropped on phones */
   .ea-row__org,
+  .ea-row__title,
+  .ea-row__metric,
+  .ea-row__excerpt,
   .ea-row__year {
-    display: none;
+    display: block;
+    grid-column: 1;
+  }
+  .ea-row__year {
+    text-align: left;
+  }
+  .ea-row__arrow {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
   }
   .ea-skill-row {
     grid-template-columns: minmax(0, 1fr);
@@ -1004,11 +1144,63 @@
     gap: 14px;
   }
   .ea-foot__base {
-    left: var(--ea-pad);
-    right: var(--ea-pad);
     justify-content: space-between;
     gap: 16px;
     font-size: 15px;
+  }
+}
+
+/* ---------- touch: tap feedback instead of hover, no stuck hover states ---------- */
+
+@media (hover: none) {
+  .ea-row a:active,
+  .ea-row__plain:active {
+    background: rgba(232, 230, 225, 0.06);
+    transform: none;
+  }
+  .ea-case__caption:active,
+  .ea-case-name:active,
+  .ea-hero__scroll:active,
+  .ea-foot__col a:active,
+  .ea-foot__top:active,
+  .ea-xp__link:active {
+    opacity: 0.6;
+  }
+  .ea-menu-panel__link:active {
+    opacity: 0.5;
+  }
+  .ea-menu-panel__cta:active {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  .ea-menu-btn:active {
+    transform: scale(0.94);
+    border-color: rgba(232, 230, 225, 0.5);
+  }
+
+  /* touch browsers stick :hover after a tap — keep these at rest */
+  .ea-row a:hover,
+  .ea-row__plain:hover,
+  .ea-skill-row:hover {
+    background: transparent;
+    transform: none;
+  }
+  .ea-row a:hover::after,
+  .ea-row__plain:hover::after,
+  .ea-skill-row:hover::after {
+    opacity: 0;
+  }
+  .ea-row a:hover .ea-row__arrow {
+    opacity: 0.45;
+    transform: none;
+  }
+  .ea-menu-btn:hover {
+    transform: none;
+    border-color: rgba(232, 230, 225, 0.25);
+  }
+  .ea-menu-panel__cta:hover {
+    transform: none;
+    opacity: 1;
   }
 }
 

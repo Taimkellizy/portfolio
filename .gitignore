@@ -6,3 +6,4 @@ node_modules/
 old-portfolio/
 next-env.d.ts
 assets/*Resume*.pdf
+*.log

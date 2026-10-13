@@ -19,6 +19,10 @@ export type PrismaticBurstProps = {
   rayCount?: number;
   mixBlendMode?: React.CSSProperties["mixBlendMode"] | "none";
   lightMode?: boolean;
+  /* absolute drawing-buffer scale vs CSS px. Default keeps the tuned
+     desktop path (min(1, dpr * 0.65)); phones pass ~0.55 for a ~3x
+     pixel cut. Read at mount — gate mounting on your media query */
+  renderScale?: number;
 };
 
 const vertexShader = `#version 300 es
@@ -252,6 +256,7 @@ const PrismaticBurst = ({
   rayCount,
   mixBlendMode = "lighten",
   lightMode = false,
+  renderScale,
 }: PrismaticBurstProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const programRef = useRef<Program | null>(null);
@@ -277,8 +282,10 @@ const PrismaticBurst = ({
     if (!container) return;
 
     /* 0.65 of native (capped at 1): still cheap on weak GPUs but keeps
-       filament edges crisper than 0.5; the adaptive cadence gives headroom */
-    const dpr = Math.min(1, (window.devicePixelRatio || 1) * 0.65);
+       filament edges crisper than 0.5; the adaptive cadence gives headroom.
+       renderScale overrides the whole formula (mobile lite tier) */
+    const dpr =
+      renderScale ?? Math.min(1, (window.devicePixelRatio || 1) * 0.65);
     const renderer = new Renderer({ dpr, alpha: false, antialias: false });
     rendererRef.current = renderer;
 

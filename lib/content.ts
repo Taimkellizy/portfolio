@@ -21,7 +21,15 @@ export const skills = [
   },
   {
     group: "Tooling",
-    items: ["Vitest", "Playwright", "Testing Library", "Git", "Figma"],
+    items: [
+      "Vitest",
+      "Playwright",
+      "Testing Library",
+      "Git",
+      "Figma",
+      "OpenCode",
+      "Antigravity",
+    ],
   },
 ];
 
@@ -178,7 +186,7 @@ export const projects = [
       },
       {
         src: "/cases/shaghal-hero.png",
-        ratio: "banner",
+        ratio: "landscape",
         fit: "cover",
         alt: "Shaghal landing page — does this site work from Syria?",
       },

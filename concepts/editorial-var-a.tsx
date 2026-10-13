@@ -5,11 +5,13 @@ import {
   gsap,
   ScrollTrigger,
   usePrefersReducedMotion,
+  useMediaQuery,
   scrollToTop,
+  stopSmoothScroll,
+  startSmoothScroll,
 } from "@/lib/motion";
 import { SplitText } from "gsap/SplitText";
 import { Plate } from "@/components/plate";
-import { StarGlyph } from "@/components/star-glyph";
 import PrismaticBurst from "@/components/prismatic-burst";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
 import {
@@ -46,31 +48,25 @@ const MENU_LINKS = [
 
 export function EditorialVarA() {
   const root = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
   const giantRef = useRef<HTMLHeadingElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const reduced = usePrefersReducedMotion();
+  /* phones/tablets get the lite render tier (≈3x fewer pixels); null
+     until measured so the bursts mount with the right scale */
+  const narrow = useMediaQuery("(max-width: 900px)");
 
   /* ---------- menu ---------- */
 
   const openMenu = useCallback(() => setMenuOpen(true), []);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeMenu();
-    };
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [menuOpen, closeMenu]);
-
+  /* panel visibility + slide. Declared before the dialog effect below:
+     effects run in order, and initial focus must land on an already
+     visible panel */
   useEffect(() => {
     if (!menuPanelRef.current || !menuOverlayRef.current) return;
     if (reduced) {
@@ -134,6 +130,58 @@ export function EditorialVarA() {
     }
   }, [reduced]);
 
+  /* dialog behaviour: Lenis-aware scroll lock, Escape to close, focus
+     trap, initial focus on the close button, focus return to opener */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const panel = menuPanelRef.current;
+    const opener = menuBtnRef.current;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeMenu();
+        return;
+      }
+      if (e.key !== "Tab" || !panel) return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    stopSmoothScroll();
+    document.body.style.overflow = "hidden";
+    const closeBtn =
+      panel?.querySelector<HTMLElement>(".ea-menu-panel__close") ?? null;
+    closeBtn?.focus();
+    if (closeBtn && document.activeElement !== closeBtn) {
+      /* computed visibility can lag the inline flip by a frame (see the
+         .ea-menu-panel transition note) — retry after the style flush */
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => closeBtn.focus()),
+      );
+    }
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      startSmoothScroll();
+      document.body.style.overflow = "";
+      opener?.focus();
+    };
+  }, [menuOpen, closeMenu]);
+
   /* ---------- hero entrance ---------- */
 
   useEffect(() => {
@@ -141,35 +189,40 @@ export function EditorialVarA() {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
-      tl.from("[data-hero-nav]", {
-        y: -16,
-        opacity: 0,
-        duration: 0.95,
-        stagger: 0.09,
-      })
-        .from(
-          "[data-hero-letter]",
-          {
-            yPercent: 55,
-            opacity: 0,
-            duration: 1.35,
-            stagger: 0.055,
-          },
-          0.18,
-        )
-        .from("[data-hero-star]", { scale: 0, opacity: 0, duration: 0.9 }, 0.55)
-        .from("[data-hero-scroll]", { y: 18, opacity: 0, duration: 0.9 }, 0.75);
+      /* fromTo (never from) for entrance tweens: `from` captures its end
+         state at first render, which under React can be the from-state
+         itself — letters then freeze mid-entrance */
+      tl.fromTo(
+        "[data-hero-letter]",
+        { yPercent: 55, opacity: 0 },
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 1.35,
+          stagger: 0.055,
+        },
+        0.18,
+      ).fromTo(
+        "[data-hero-scroll]",
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.9 },
+        0.75,
+      );
 
       /* fade-up for layout blocks (grids/flex) — SplitText must not
          touch these or it shatters their layout into fake "lines" */
       gsap.utils.toArray<HTMLElement>("[data-reveal-fade]").forEach((el) => {
-        gsap.from(el, {
-          y: 26,
-          opacity: 0,
-          duration: 0.9,
-          ease: "expo.out",
-          scrollTrigger: { trigger: el, start: "top 88%" },
-        });
+        gsap.fromTo(
+          el,
+          { y: 26, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "expo.out",
+            scrollTrigger: { trigger: el, start: "top 88%" },
+          },
+        );
       });
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
@@ -181,14 +234,18 @@ export function EditorialVarA() {
             mask: "chars",
             charsClass: "char",
             onSplit: (self) => {
-              return gsap.from(self.chars, {
-                duration: 1,
-                yPercent: -120,
-                scale: 1.2,
-                stagger: 0.01,
-                ease: "expo.out",
-                scrollTrigger: { trigger: el, start: "top 88%" },
-              });
+              return gsap.fromTo(
+                self.chars,
+                { yPercent: -120, scale: 1.2 },
+                {
+                  yPercent: 0,
+                  scale: 1,
+                  duration: 1,
+                  stagger: 0.01,
+                  ease: "expo.out",
+                  scrollTrigger: { trigger: el, start: "top 88%" },
+                },
+              );
             },
           });
           el.setAttribute("data-split", "1");
@@ -199,13 +256,17 @@ export function EditorialVarA() {
             mask: "lines",
             linesClass: "line",
             onSplit: (self) => {
-              return gsap.from(self.lines, {
-                duration: 0.9,
-                yPercent: 105,
-                stagger: 0.04,
-                ease: "expo.out",
-                scrollTrigger: { trigger: el, start: "top 88%" },
-              });
+              return gsap.fromTo(
+                self.lines,
+                { yPercent: 105 },
+                {
+                  yPercent: 0,
+                  duration: 0.9,
+                  stagger: 0.04,
+                  ease: "expo.out",
+                  scrollTrigger: { trigger: el, start: "top 88%" },
+                },
+              );
             },
           });
           el.setAttribute("data-split", "1");
@@ -443,7 +504,9 @@ export function EditorialVarA() {
           const push = idx === -1 ? 0 : (ACTIVE_SCALE - 1) * (rest[j]?.half ?? 0);
           const dir = j < idx ? -1 : j > idx ? 1 : 0;
           item.style.transform = `translateY(${(push * dir).toFixed(1)}px) scale(1)`;
-          item.style.opacity = "0.2";
+          /* dimmed only while the zone hover is live; on leave everything
+             rests at full opacity again (matches the pre-hover CSS state) */
+          item.style.opacity = idx === -1 ? "1" : "0.2";
         }
       });
     };
@@ -604,7 +667,7 @@ export function EditorialVarA() {
         const activeIdx = Number(items[0]?.dataset.projectIndex ?? 0);
         titles.forEach((t, d) => {
           gsap.set(t, {
-            opacity: d === activeIdx ? 1 : 0.2,
+            opacity: d === activeIdx ? 1 : 0.55,
             fontWeight: d === activeIdx ? 700 : 500,
           });
         });
@@ -664,7 +727,7 @@ export function EditorialVarA() {
           if (isLast)
             timeline.to(
               title,
-              { opacity: 0.2, fontWeight: 500, duration: 0.4, ease: "none" },
+              { opacity: 0.55, fontWeight: 500, duration: 0.4, ease: "none" },
               "<",
             );
           timeline.to(item, { height: baseHeight, duration: 1.5, ease: "none" }, "<");
@@ -698,6 +761,12 @@ export function EditorialVarA() {
 
   return (
     <div className="ea" ref={root}>
+      {/* keyboard: fixed chrome comes first in DOM order, so jump
+          straight past it to the content */}
+      <a className="ea-skip" href="#ea-main" inert={menuOpen}>
+        Skip to content
+      </a>
+
       {/* cursor bubble */}
       <div
         className="ea-cursor"
@@ -709,9 +778,13 @@ export function EditorialVarA() {
       {/* menu button */}
       <button
         className="ea-menu-btn"
+        ref={menuBtnRef}
         type="button"
         onClick={openMenu}
         aria-label="Open menu"
+        aria-expanded={menuOpen}
+        aria-controls="ea-menu-panel"
+        inert={menuOpen}
       >
         <Menu size={20} strokeWidth={1.5} />
       </button>
@@ -725,11 +798,13 @@ export function EditorialVarA() {
       />
       <div
         className="ea-menu-panel"
+        id="ea-menu-panel"
         ref={menuPanelRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site menu"
         aria-hidden={!menuOpen}
+        inert={!menuOpen}
       >
         <div className="ea-menu-panel__inner">
           <button
@@ -769,13 +844,13 @@ export function EditorialVarA() {
             <p className="ea-menu-panel__status">Available for work</p>
             <a href={`mailto:${person.email}`}>{person.email}</a>
             <div className="ea-menu-panel__social">
-              <a href={person.github} target="_blank" rel="noreferrer">
+              <a href={person.github} target="_blank" rel="noopener noreferrer">
                 GitHub
               </a>
-              <a href={person.linkedin} target="_blank" rel="noreferrer">
+              <a href={person.linkedin} target="_blank" rel="noopener noreferrer">
                 LinkedIn
               </a>
-              <a href={person.instagram} target="_blank" rel="noreferrer">
+              <a href={person.instagram} target="_blank" rel="noopener noreferrer">
                 Instagram
               </a>
             </div>
@@ -783,10 +858,10 @@ export function EditorialVarA() {
         </div>
       </div>
 
-      <main>
+      <main id="ea-main" tabIndex={-1} inert={menuOpen}>
         {/* ===================== HERO ===================== */}
         <section className="ea-hero" id="ea-top">
-          {!reduced && (
+          {!reduced && narrow !== null && (
             <div className="ea-hero__prism" aria-hidden="true">
               <PrismaticBurst
                 intensity={3.2}
@@ -795,6 +870,7 @@ export function EditorialVarA() {
                 distort={0.45}
                 mixBlendMode="lighten"
                 paused={false}
+                renderScale={narrow ? 0.55 : undefined}
               />
             </div>
           )}
@@ -807,11 +883,8 @@ export function EditorialVarA() {
             ))}
           </p>
 
-          <h1
-            className="ea-giant ea-hero__giant"
-            aria-label={person.name}
-            ref={giantRef}
-          >
+          <h1 className="ea-giant ea-hero__giant" ref={giantRef}>
+            <span className="u-sr-only">{person.name}</span>
             <span aria-hidden="true">
               {HERO_WORD.split("").map((ch, i) => (
                 <span
@@ -822,9 +895,6 @@ export function EditorialVarA() {
                   {ch}
                 </span>
               ))}
-            </span>
-            <span className="ea-giant__star-wrap" data-hero-star>
-              <StarGlyph className="ea-giant__star" />
             </span>
           </h1>
 
@@ -900,9 +970,9 @@ export function EditorialVarA() {
                   (p.images.length
                     ? p.images
                     : [{ src: "", ratio: "landscape", fit: "cover", alt: "" }]
-                  ).map((img) => ({ p, pi, img })),
+                  ).map((img, ii) => ({ p, pi, img, isFirst: ii === 0 })),
                 )
-                .map(({ p, pi, img }, i) => {
+                .map(({ p, pi, img, isFirst }, i) => {
                   const c = CASES[i % CASES.length];
                   return (
                     <div
@@ -910,6 +980,24 @@ export function EditorialVarA() {
                       data-project-index={pi}
                       key={`${p.id}-${i}`}
                     >
+                      {/* mobile-only project header (the sticky name list is
+                          desktop/slider only) */}
+                      {isFirst ? (
+                        <a
+                          className="ea-case__caption"
+                          href={p.href}
+                          {...(p.href.startsWith("http")
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                        >
+                          <span className="ea-case__caption-title">
+                            {p.title}
+                          </span>
+                          <span className="ea-case__caption-kind u-label">
+                            {p.kind}
+                          </span>
+                        </a>
+                      ) : null}
                       <div className="ea-case__plate">
                         <Plate from={c.from} to={c.to} label={p.kind} />
                         {img.src ? (
@@ -944,7 +1032,7 @@ export function EditorialVarA() {
                     data-project-index={i}
                     href={p.href}
                     {...(p.href.startsWith("http")
-                      ? { target: "_blank", rel: "noreferrer" }
+                      ? { target: "_blank", rel: "noopener noreferrer" }
                       : {})}
                   >
                     {p.title}
@@ -977,7 +1065,7 @@ export function EditorialVarA() {
                   className="ea-xp__link"
                   href={e.href}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                 >
                   github
                   <ArrowUpRight size={16} strokeWidth={1.5} />
@@ -1032,7 +1120,7 @@ export function EditorialVarA() {
               return (
                 <li key={c.id} className="ea-row" data-reveal-fade>
                   {c.href ? (
-                    <a href={c.href} target="_blank" rel="noreferrer">
+                    <a href={c.href} target="_blank" rel="noopener noreferrer">
                       {body}
                     </a>
                   ) : (
@@ -1078,8 +1166,8 @@ export function EditorialVarA() {
       </main>
 
       {/* ===================== FOOTER ===================== */}
-      <footer className="ea-foot" id="ea-contact">
-        {!reduced && (
+      <footer className="ea-foot" id="ea-contact" inert={menuOpen}>
+        {!reduced && narrow !== null && (
           <div className="ea-foot__burst" aria-hidden="true">
             <PrismaticBurst
               intensity={2.2}
@@ -1088,6 +1176,7 @@ export function EditorialVarA() {
               distort={0.6}
               mixBlendMode="lighten"
               paused={false}
+              renderScale={narrow ? 0.55 : undefined}
             />
           </div>
         )}
@@ -1126,17 +1215,17 @@ export function EditorialVarA() {
               data-variable-weight>Social</h3>
             <ul>
               <li>
-                <a href={person.github} target="_blank" rel="noreferrer">
+                <a href={person.github} target="_blank" rel="noopener noreferrer">
                   GitHub
                 </a>
               </li>
               <li>
-                <a href={person.linkedin} target="_blank" rel="noreferrer">
+                <a href={person.linkedin} target="_blank" rel="noopener noreferrer">
                   LinkedIn
                 </a>
               </li>
               <li>
-                <a href={person.instagram} target="_blank" rel="noreferrer">
+                <a href={person.instagram} target="_blank" rel="noopener noreferrer">
                   Instagram
                 </a>
               </li>
@@ -1158,9 +1247,6 @@ export function EditorialVarA() {
 
         <p className="ea-giant ea-foot__word" aria-hidden="true">
           {HERO_WORD}
-          <span className="ea-giant__star-wrap">
-            <StarGlyph className="ea-giant__star" />
-          </span>
         </p>
 
         <div className="ea-foot__base">

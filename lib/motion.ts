@@ -23,6 +23,26 @@ export function usePrefersReducedMotion() {
 }
 
 /**
+ * SSR-safe media query state. Returns `null` until measured (never on the
+ * server), then the live match. Mount-dependent effects (WebGL quality
+ * tiers) must gate on `!== null` so they read the right value on first
+ * mount.
+ */
+export function useMediaQuery(query: string): boolean | null {
+  const [matches, setMatches] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const update = () => setMatches(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, [query]);
+
+  return matches;
+}
+
+/**
  * Lenis smooth scroll driven from the GSAP ticker so a single clock
  * governs scroll and animation. Disabled entirely under reduced motion.
  */
@@ -34,6 +54,19 @@ export function scrollToTop() {
   } else {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+}
+
+/**
+ * Pause/resume the shared Lenis clock for modal scroll locks (menu
+ * dialog). No-ops when Lenis is absent (reduced motion / not yet
+ * mounted) — pair with `document.body.style.overflow` for the lock.
+ */
+export function stopSmoothScroll() {
+  _lenis?.stop();
+}
+
+export function startSmoothScroll() {
+  _lenis?.start();
 }
 
 export function useSmoothScroll(enabled = true) {
