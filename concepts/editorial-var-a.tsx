@@ -21,6 +21,7 @@ import {
   SiteFooter,
 } from "./editorial-var-a/sections";
 import { content } from "@/lib/i18n";
+import type { WritingRow } from "@/lib/blog";
 import "./editorial-var-a.css";
 
 /**
@@ -30,7 +31,13 @@ import "./editorial-var-a.css";
  * the dictionary and flips the motion system for Arabic (word-level
  * reveals, whole-word wordmark, static weights).
  */
-export function EditorialVarA({ locale }: { locale: "en" | "ar" }) {
+export function EditorialVarA({
+  locale,
+  writingRows,
+}: {
+  locale: "en" | "ar";
+  writingRows: WritingRow[];
+}) {
   const root = useRef<HTMLDivElement>(null);
   const giantRef = useRef<HTMLHeadingElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -87,7 +94,7 @@ export function EditorialVarA({ locale }: { locale: "en" | "ar" }) {
         <CasesSection locale={locale} />
         <ExperienceSection locale={locale} />
         <CredentialsSection locale={locale} />
-        <WritingSection locale={locale} />
+        <WritingSection locale={locale} rows={writingRows} />
       </main>
 
       <SiteFooter

@@ -31,13 +31,20 @@ Mono: **Office Code Pro** — labels, metadata, code.
 | Hero bio | Outfit | 600 | `clamp(20px, 2.1vw, 34px)` |
 | Body text | Work Sans | 420 | `clamp(19px, 2vw, 28px)` |
 | Row title | Outfit | 600 | `21px` |
+| Post title | Outfit | 600 | `clamp(32px, 4.6vw, 58px)` |
+| Prose h2 | Outfit | 600 | `clamp(23px, 2.4vw, 30px)` |
+| Prose body | Work Sans | 420 | `17px`, `line-height: 1.75` |
 | Small label | Work Sans | 600 | `11px`, `letter-spacing: 0.14em`, uppercase |
 | Menu link | Outfit | 700 | `clamp(16px, 1.8vw, 24px)` |
 | Menu panel nav | Outfit | 700 | `clamp(28px, 3vw, 38px)` |
 
+Arabic blog builds (`[dir="rtl"]`): **Thmanyah Serif Text** (`--font-thmanyah-serif`, full weight ladder) carries headings — post title, prose h2/h3, prev/next titles; **Thmanyah Sans** stays the reading face for paragraphs. Latin glyphs ride the serif when it carries them, else fall through to Work Sans — the English build is untouched by design.
+
+Arabic prose faces (`--font-thmanyah` first in the stack so Arabic glyphs never fall through to Latin fallbacks — Arial's built-in Arabic would otherwise win). Code stays physical LTR inside Arabic prose (`direction: ltr; unicode-bidi: isolate`).
+
 ## Layout
 
-- Max content width: `680px` (bio text)
+- Max content width: `680px` (bio text); blog container `1120px` (prose + sticky `240px` ToC column)
 - Page padding: `32px` (desktop), `20px` (mobile)
 - Section margin-top: `clamp(110px, 16vh, 200px)`
 - Hairline rows: `1px` bottom border, `24px` vertical padding

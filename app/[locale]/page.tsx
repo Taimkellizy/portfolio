@@ -1,5 +1,6 @@
 import { ConceptLab } from "@/components/concept-lab";
-import { content, isLocale, locales } from "@/lib/i18n";
+import { writingRowsFor } from "@/lib/blog";
+import { content, isLocale, locales, type Locale } from "@/lib/i18n";
 
 const SITE = "https://taimkellizy-portfolio.vercel.app";
 
@@ -13,8 +14,9 @@ export default async function LocalePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: raw } = await params;
-  const locale = isLocale(raw) ? raw : "en";
+  const locale = isLocale(raw) ? (raw as Locale) : "en";
   const dict = content[locale];
+  const writingRows = await writingRowsFor(locale);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -37,7 +39,7 @@ export default async function LocalePage({
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <ConceptLab locale={locale} />
+      <ConceptLab locale={locale} writingRows={writingRows} />
     </>
   );
 }

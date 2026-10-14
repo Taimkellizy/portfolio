@@ -1,0 +1,504 @@
+/* Blog pages (listing + post) — wears the editorial-var-a language via
+   the `.ea` root (tokens, rows, type layer); this file adds only the
+   chrome, prose, and ToC layer. Physical LTR rules up top, the
+   [dir="rtl"] mirror at the bottom (same split as the concept css). */
+
+/* Blog pages have no cursor bubble — keep the native cursor visible
+   where the concept hides it (double class outranks `.ea *`). */
+@media (hover: hover) {
+  .ea.ea--blog,
+  .ea.ea--blog * {
+    cursor: auto !important;
+  }
+}
+
+/* ---------- top bar ---------- */
+
+.blog-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: clamp(28px, 4vw, 44px) var(--ea-pad) 0;
+}
+
+/* burst glow anchored at the top-start corner behind the wordmark —
+   larger than the bar strip: it leans over into the title zone, and
+   the mask fades it out across that reach */
+/* burst glow anchored at the top-start corner behind the wordmark —
+   larger than the bar strip: it leans over into the title zone. The
+   mask fades the canvas, but a mask also ISOLATES its group, which
+   would strand the canvas' opaque ground over the text — so the glow
+   sits BELOW the flow content (z-index -1 inside the .ea group): its
+   opaque black only hides the page background, never the text. */
+.blog-bar__prism {
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  z-index: -1;
+  width: min(144vw, 1400px);
+  height: clamp(640px, 88vh, 1000px);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    70% 100% at 0% 0%,
+    #000 28%,
+    transparent 76%
+  );
+  mask-image: radial-gradient(70% 100% at 0% 0%, #000 28%, transparent 76%);
+}
+
+.blog-bar__word {
+  font-family: var(--font-outfit);
+  font-weight: 700;
+  font-size: clamp(30px, 3.6vw, 46px);
+  letter-spacing: -0.03em;
+  text-transform: lowercase;
+}
+
+.blog-bar__links {
+  display: flex;
+  align-items: baseline;
+  gap: 22px;
+}
+
+.blog-bar__link {
+  color: var(--ea-ink-mute);
+  transition: color 240ms var(--ease-out);
+}
+
+.blog-bar__link:hover {
+  color: var(--ea-ink);
+}
+
+.blog-bar__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* عربي label, english side of the switch: Thmanyah Sans first (the full
+   list-var carries Work Sans for Latin), no tracking — Arabic script
+   must not run spaced */
+.blog-bar__lang--ar {
+  font-family: var(--font-thmanyah);
+  letter-spacing: 0;
+}
+
+/* ---------- page shell ---------- */
+
+.blog-main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(48px, 7vh, 88px) var(--ea-pad) clamp(96px, 14vh, 180px);
+}
+
+.blog-index .ea-sec {
+  padding-bottom: 26px;
+}
+
+.blog-empty {
+  font-family: var(--font-work-sans);
+  font-size: 15px;
+  color: var(--ea-ink-mute);
+  padding: 32px 0;
+}
+
+/* ---------- post header ---------- */
+
+.blog-post__head {
+  padding-bottom: 38px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid var(--ea-line);
+}
+
+.blog-post__flag {
+  color: var(--ea-ink-mute);
+  margin-bottom: 18px;
+}
+
+.blog-post__title {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: clamp(32px, 4.6vw, 58px);
+  letter-spacing: -0.028em;
+  line-height: 1.08;
+  margin-bottom: 20px;
+  max-width: 18ch;
+}
+
+.blog-post__standfirst {
+  font-family: var(--font-work-sans);
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.6;
+  color: var(--ea-ink-soft);
+  max-width: 60ch;
+  margin-bottom: 26px;
+}
+
+.blog-post__meta {
+  color: var(--ea-ink-mute);
+  opacity: 0.75;
+}
+
+/* ---------- post layout: ToC + prose ---------- */
+
+.blog-post__layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+.post-toc {
+  position: sticky;
+  top: 40px;
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--font-work-sans);
+}
+
+/* ride the design tokens, not the component's zinc defaults; menu
+   roles bind to the page's faces — branch heads read as headings
+   (Outfit / RTL serif), leaf labels inherit the body face */
+.post-toc .branched-menu {
+  --bm-ink: var(--ea-ink);
+  --bm-accent: var(--ea-ink);
+  --bm-line: var(--ea-line);
+}
+
+.post-toc .branched-menu__head {
+  font-family: var(--font-outfit);
+  letter-spacing: -0.02em;
+}
+
+.blog-post__layout > .ea-prose {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* ---------- prose ---------- */
+
+.ea-prose {
+  font-family: var(--font-work-sans);
+  font-size: 17px;
+  font-weight: 420;
+  line-height: 1.75;
+  color: var(--ea-ink-soft);
+}
+
+.ea-prose > :first-child {
+  margin-top: 0;
+}
+
+.ea-prose h2 {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: clamp(23px, 2.4vw, 30px);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ea-ink);
+  margin: 2.1em 0 0.7em;
+  scroll-margin-top: 32px;
+}
+
+.ea-prose h3 {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  color: var(--ea-ink);
+  margin: 1.8em 0 0.5em;
+  scroll-margin-top: 32px;
+}
+
+.ea-prose p {
+  margin: 0 0 1.25em;
+}
+
+.ea-prose ul,
+.ea-prose ol {
+  margin: 0 0 1.25em;
+  padding-inline-start: 1.5em;
+}
+
+.ea-prose li {
+  margin-bottom: 0.45em;
+}
+
+.ea-prose li::marker {
+  color: var(--ea-ink-mute);
+}
+
+.ea-prose strong {
+  font-weight: 700;
+  color: var(--ea-ink);
+}
+
+.ea-prose a {
+  color: var(--ea-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ea-line);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 240ms var(--ease-out);
+}
+
+.ea-prose a:hover {
+  text-decoration-color: var(--ea-ink);
+}
+
+.ea-prose blockquote {
+  border-inline-start: 1px solid var(--ea-line);
+  padding-inline-start: 20px;
+  color: var(--ea-ink-mute);
+  margin: 0 0 1.25em;
+}
+
+.ea-prose hr {
+  border: none;
+  border-top: 1px solid var(--ea-line);
+  margin: 2.4em 0;
+}
+
+/* Inline code and fenced blocks stay LTR even inside Arabic prose —
+   the classic mixed-direction trap. `isolate` pins the direction flip
+   to the code span itself so it can't re-flow the sentence around it. */
+.ea-prose :is(code, pre) {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: isolate;
+  font-family: var(--font-code);
+}
+
+.ea-prose code {
+  font-size: 0.86em;
+  background: rgba(232, 230, 225, 0.07);
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+
+.ea-prose pre {
+  background: rgba(232, 230, 225, 0.05);
+  border: 1px solid var(--ea-line);
+  border-radius: 8px;
+  padding: 18px 22px;
+  overflow-x: auto;
+  margin: 0 0 1.4em;
+}
+
+.ea-prose pre code {
+  display: block;
+  width: fit-content;
+  font-size: 13.5px;
+  line-height: 1.65;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* ---------- prev / next ---------- */
+
+.blog-xnav {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px;
+  align-items: end;
+  margin-top: 64px;
+  padding-top: 30px;
+  border-top: 1px solid var(--ea-line);
+}
+
+.blog-xnav__link {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--ea-ink-mute);
+  transition: color 240ms var(--ease-out);
+}
+
+.blog-xnav__link:hover {
+  color: var(--ea-ink);
+}
+
+.blog-xnav__dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.62;
+}
+
+.blog-xnav__title {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.015em;
+  max-width: 26ch;
+}
+
+.blog-xnav__link--next {
+  align-items: flex-end;
+  text-align: end;
+}
+
+.blog-xnav__link--index {
+  align-self: center;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .blog-post__layout {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    /* the desktop grid's align-items: start shrink-to-fits children in a
+       column flex — stretch so prose paragraphs and the folded ToC run
+       the full container width */
+    align-items: stretch;
+  }
+
+  .post-toc {
+    position: static;
+    width: 100%;
+  }
+
+  .blog-xnav {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .blog-xnav__link--index {
+    order: 3;
+  }
+}
+
+.post-toc--folded {
+  border: 1px solid var(--ea-line);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+
+.post-toc--folded summary {
+  list-style: none;
+  color: var(--ea-ink-mute);
+  padding: 6px 0;
+  transition: color 200ms ease;
+}
+
+.post-toc--folded summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-toc--folded summary::before {
+  content: "+";
+  display: inline-block;
+  margin-inline-end: 10px;
+}
+
+.post-toc--folded[open] summary::before {
+  content: "–";
+}
+
+.post-toc--folded summary:hover,
+.post-toc--folded[open] summary {
+  color: var(--ea-ink);
+}
+
+.post-toc--folded .branched-menu {
+  margin-top: 10px;
+}
+
+/* ---------- touch ---------- */
+
+@media (hover: none) {
+  .blog-bar__link:active,
+  .blog-xnav__link:active {
+    opacity: 0.6;
+  }
+}
+
+/* ============================================================
+   Arabic mirror ([dir="rtl"])
+
+   Grid/flex auto-flip with dir=rtl; mirrored here: the type layer
+   (Thmanyah Sans first so Arabic glyphs never fall through to Latin
+   fallbacks), tracking/case that Arabic must not inherit, and the
+   directional nav glyphs. Code stays LTR by the physical rules above.
+   ============================================================ */
+
+[dir="rtl"] .ea--blog :is(
+    .blog-post__title,
+    .ea-prose :is(h2, h3),
+    .blog-xnav__title
+  ) {
+  /* headings: Thmanyah Serif Text — Latin glyphs inside Arabic headings
+     (the "C" in CS50x) ride the serif if it carries them, else fall
+     through the chain below to the same Work Sans as before */
+  font-family: var(--font-thmanyah-serif), var(--font-thmanyah),
+    var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .ea--blog :is(.ea-prose, .blog-post__standfirst) {
+  /* body paragraphs: Thmanyah Sans carries the reading text */
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+}
+
+/* the ToC (and the BranchedMenu inside it) reads as body text — without
+   this the Arabic branches fall through to Arial's built-in glyphs */
+[dir="rtl"] .ea--blog .post-toc {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+}
+
+/* branch heads ride the Arabic heading face (Thmanyah Serif), items the
+   reading face — the same split the prose uses */
+[dir="rtl"] .ea--blog .post-toc .branched-menu__head {
+  font-family: var(--font-thmanyah-serif), var(--font-thmanyah),
+    var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+}
+
+/* the bar wordmark rides the Arabic wordmark/heading pair — the
+   display cut singles it out next to Work Sans fallback chrome */
+[dir="rtl"] .blog-bar__word {
+  font-family: var(--font-thmanyah-display), var(--font-thmanyah),
+    "Work Sans", sans-serif;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .ea--blog :is(
+    .ea-prose,
+    .blog-post__head,
+    .ea-prose li,
+    .ea-prose blockquote,
+    .blog-empty,
+    .blog-bar,
+    .blog-xnav
+  ) {
+  letter-spacing: 0;
+}
+
+/* strong emphasis in Arabic prose rides the Arabic face too */
+[dir="rtl"] .ea-prose strong {
+  font-family: inherit;
+}
+
+/* horizontal travel arrows mirror; the diagonal ArrowUpRight does not
+   (same rule as the concept's row arrows) */
+[dir="rtl"] .blog-xnav__dir svg {
+  transform: scaleX(-1);
+}
+
+/* bar burst mirrors: leak hugs the top-right corner in RTL (the hero
+   bookend's mirror); inset-inline-start already flips the anchor */
+[dir="rtl"] .blog-bar__prism {
+  -webkit-mask-image: radial-gradient(
+    70% 100% at 100% 0%,
+    #000 28%,
+    transparent 76%
+  );
+  mask-image: radial-gradient(70% 100% at 100% 0%, #000 28%, transparent 76%);
+}

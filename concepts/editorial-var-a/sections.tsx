@@ -3,6 +3,7 @@ import { Plate } from "@/components/plate";
 import PrismaticBurst from "@/components/prismatic-burst";
 import { scrollToTop } from "@/lib/motion";
 import { content, type Locale, type LocaleContent } from "@/lib/i18n";
+import type { WritingRow } from "@/lib/blog";
 import { PLATE_PALETTES, newTabProps } from "./shared";
 import type { MenuDialogState } from "./use-menu-dialog";
 
@@ -503,22 +504,29 @@ function CredentialRow({
 
 /* ===================== writing ===================== */
 
-/* Posts keep placeholder anchors until real post pages ship. */
-export function WritingSection({ locale }: { locale: Locale }) {
-  const { ui, posts } = content[locale];
+/* Rows come pre-built from the server page (lib/blog writingRowsFor):
+   bundled posts link to their blog page, untranslated posts show the
+   available locale's copy, bundle-less stubs keep the placeholder
+   anchor until written. */
+export function WritingSection({
+  locale,
+  rows,
+}: {
+  locale: Locale;
+  rows: WritingRow[];
+}) {
+  const { ui } = content[locale];
   return (
     <section className="ea-block" id="ea-writing">
       <SectionHeader title={ui.writingTitle} count={ui.writingCount} locale={locale} />
       <ul className="ea-rows">
-        {posts.map((post) => (
-          <li key={post.slug} className="ea-row" data-reveal-fade>
-            <a href="#ea-writing">
-              <span className="ea-row__org u-label">{post.tag}</span>
-              <span className="ea-row__title">{post.title}</span>
-              <span className="ea-row__excerpt">{post.excerpt}</span>
-              <span className="ea-row__year u-label">
-                {new Date(post.date).getFullYear()}
-              </span>
+        {rows.map((row) => (
+          <li key={row.title} className="ea-row" data-reveal-fade>
+            <a href={row.href} {...newTabProps(row.href)}>
+              <span className="ea-row__org u-label">{row.tag}</span>
+              <span className="ea-row__title">{row.title}</span>
+              <span className="ea-row__excerpt">{row.excerpt}</span>
+              <span className="ea-row__year u-label">{row.year}</span>
               <span className="ea-row__arrow" aria-hidden="true">
                 <ArrowUpRight size={16} strokeWidth={1.5} />
               </span>

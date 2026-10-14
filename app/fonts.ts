@@ -50,3 +50,19 @@ export const thmanyahSerifDisplay = localFont({
   variable: "--font-thmanyah-display",
   fallback: ["Work Sans", "Helvetica Neue", "Arial", "sans-serif"],
 });
+
+/* Arabic serif text face — the blog heading font (RTL builds). Full
+   weight ladder so h1/h2/h3 weights resolve inside the face instead of
+   synthesizing. */
+export const thmanyahSerif = localFont({
+  src: [
+    { path: "./fonts/thmanyahseriftext-Light.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/thmanyahseriftext-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/thmanyahseriftext-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/thmanyahseriftext-Bold.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/thmanyahseriftext-Black.woff2", weight: "900", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-thmanyah-serif",
+  fallback: ["Work Sans", "Helvetica Neue", "Arial", "sans-serif"],
+});

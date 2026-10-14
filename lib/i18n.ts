@@ -56,6 +56,13 @@ export interface Ui {
   credentialsCount: string;
   writingTitle: string;
   writingCount: string;
+  blogHome: string;
+  blogAllPosts: string;
+  blogContents: string;
+  blogPrev: string;
+  blogNext: string;
+  blogEmpty: string;
+  blogUpdated: string;
   footerColumns: typeof FOOTER_COLUMNS;
   backToTop: string;
   copyright: string;

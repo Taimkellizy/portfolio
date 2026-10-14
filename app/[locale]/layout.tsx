@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   thmanyahSans,
   thmanyahSerifDisplay,
+  thmanyahSerif,
   workSans,
   officeCode,
 } from "../fonts";
@@ -84,6 +85,7 @@ export default async function LocaleLayout({
         officeCode.variable,
         thmanyahSans.variable,
         thmanyahSerifDisplay.variable,
+        thmanyahSerif.variable,
       ].join(" ")}
     >
       <body>{children}</body>
