@@ -257,6 +257,38 @@
   margin-bottom: 4px;
 }
 
+/* sibling-locale switch: a real button beside the CTA — the dim
+   underlined link inside the foot was invisible in practice */
+.ea-menu-panel__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  margin-top: 20px;
+  padding: 13px 26px;
+  border: 1px solid rgba(17, 17, 17, 0.35);
+  border-radius: 999px;
+  /* thmanyah FIRST: outfit-with-fallbacks would satisfy Arabic via
+     Arial before ever reaching a real Arabic face */
+  font-family: var(--font-thmanyah), var(--font-outfit), sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ea-menu-ink);
+  transition:
+    background 240ms var(--ease-out),
+    color 240ms var(--ease-out),
+    border-color 240ms var(--ease-out);
+}
+
+.ea-menu-panel__lang:hover {
+  background: var(--ea-menu-ink);
+  color: var(--ea-menu-bg);
+  border-color: var(--ea-menu-ink);
+}
+
+/* `.ea-menu-panel__foot a`'s dim hover opacity must not leak in here —
+   the lang pill owns its colour states */
+
 .ea-menu-panel__foot a {
   color: var(--ea-menu-ink);
   opacity: 0.6;
@@ -932,6 +964,16 @@
 
 /* ---------- responsive ---------- */
 
+/* SplitText mask wrappers inherit the element's line-height (1) and clip
+   at its bottom edge — descenders (g/y in Latin, ة/ب/ي tails in Arabic)
+   get flat-cut. Extend the visible zone downward; the negative margin
+   keeps the layout identical, and entrance chars drop from ABOVE so the
+   extra window never exposes the travel. */
+:is(.char-mask, .word-mask) {
+  padding-bottom: 0.22em;
+  margin-bottom: -0.22em;
+}
+
 @media (max-width: 1080px) {
   .ea-row :is(a, .ea-row__plain) {
     grid-template-columns: 150px minmax(0, 1fr) 80px 26px;
@@ -1173,6 +1215,10 @@
     transform: scale(0.97);
     opacity: 1;
   }
+  .ea-menu-panel__lang:active {
+    background: var(--ea-menu-ink);
+    color: var(--ea-menu-bg);
+  }
   .ea-menu-btn:active {
     transform: scale(0.94);
     border-color: rgba(232, 230, 225, 0.5);
@@ -1220,5 +1266,224 @@
   .ea-case-name {
     opacity: 0.65;
     font-weight: 600;
+  }
+}
+
+/* ============================================================
+   Arabic mirror ([dir="rtl"])
+
+   Grid/flex auto-flip with dir=rtl; only what CSS can't infer is
+   mirrored here: hard left/right offsets, translate directions,
+   paddings that read asymmetric, and the type layer — Thmanyah Sans
+   carries the Arabic glyphs while Latin falls through to Work Sans.
+   ============================================================ */
+
+[dir="rtl"] .ea {
+  --font-outfit: var(--font-thmanyah), "Work Sans", "Helvetica Neue", Arial,
+    sans-serif;
+}
+
+/* text faces that hardcode Work Sans need the Arabic face first */
+[dir="rtl"] :is(.u-label, .ea-bio__text, .ea-row__metric, .ea-row__excerpt,
+.ea-xp__bullet, .ea-xp__credit, .ea-xp__link) {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+}
+
+/* Arabic script has no uppercase and must not run tracked — negative
+   letter-spacing on display text and 0.14em on labels both reset */
+[dir="rtl"] .ea :is(
+    .u-label,
+    .ea-giant,
+    .ea-sec__title,
+    .ea-cases__title,
+    .ea-hero__bio,
+    .ea-hero__scroll,
+    .ea-bio__text,
+    .ea-row__title,
+    .ea-case__caption-title,
+    .ea-skill-row__item,
+    .ea-xp__org,
+    .ea-xp__title,
+    .ea-foot__col-title,
+    .ea-foot__col a,
+    .ea-foot__base,
+    .ea-case-name,
+    .ea-skip
+  ),
+[dir="rtl"] .ea-menu-panel :is(
+    .ea-menu-panel__link,
+    .ea-menu-panel__cta,
+    .ea-menu-panel__inner
+  ) {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* skip link, menu button, panel slide from the reading edge */[dir="rtl"] .ea-skip {
+  left: auto;
+  right: 12px;
+}
+
+[dir="rtl"] .ea-menu-btn {
+  right: auto;
+  left: 24px;
+}
+
+[dir="rtl"] .ea-menu-panel {
+  right: auto;
+  left: 0;
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .ea-menu-panel__link {
+  transform-origin: right center;
+}
+
+/* hero: bio column and the giant wordmark swap sides; the wordmark
+   rides the Arabic display cut of the family */
+[dir="rtl"] .ea-giant {
+  font-family: var(--font-thmanyah-display), var(--font-thmanyah),
+    "Work Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* the Arabic ink spans ~1.03em (vs Latin ~0.75em) — cap the desktop
+   FOOTER wordmark by viewport height so its full ink always clears the
+   columns on short viewports (the hero giant keeps the full 31vw size) */
+@media (min-width: 901px) {
+  [dir="rtl"] .ea-foot__word {
+    font-size: min(clamp(120px, 31vw, 640px), 44svh);
+  }
+}
+[dir="rtl"] .ea-hero__bio {
+  left: auto;
+  right: 50.5%;
+}
+
+[dir="rtl"] .ea-hero__giant {
+  left: auto;
+  /* no right bleed: the -0.09em left-bleed is a Latin "taim" gesture;
+     slicing the ت it mirrors onto reads broken */
+  right: 0;
+  /* Latin bleeds 0.1em below the edge by design; the display cut's
+     tails dive ~0.17em past the line box (canvas-measured), so slice
+     geometry lands mid-curve. Anchor by ink instead: full line-box +
+     0.2em up — the تيم tail tip kisses ~0.025em above the fold. */
+  bottom: 0.2em;
+  line-height: 1;
+}
+
+[dir="rtl"] .ea-hero__scroll {
+  right: auto;
+  left: var(--ea-pad);
+}
+
+[dir="rtl"] .ea-hero__word {
+  margin-right: 0;
+  margin-left: 0.28em;
+}
+
+/* hero burst bookend mirrors: hero leak top-left → top-right in RTL */
+[dir="rtl"] .ea-hero__prism {
+  -webkit-mask-image: radial-gradient(80% 90% at 100% 0%, #000 25%, transparent 70%);
+  mask-image: radial-gradient(80% 90% at 100% 0%, #000 25%, transparent 70%);
+}
+
+[dir="rtl"] .ea-foot__burst {
+  -webkit-mask-image: radial-gradient(80% 80% at 0% 100%, #000 25%, transparent 70%);
+  mask-image: radial-gradient(80% 80% at 0% 100%, #000 25%, transparent 70%);
+}
+
+/* cases: title/names columns swap (grid auto-flips); the name list hugs
+   the tail edge and the plate expansion anchors at the new origin */
+[dir="rtl"] .ea-cases__left {
+  padding-right: 0;
+  padding-left: 40px;
+}
+
+[dir="rtl"] .ea-cases__names-inner {
+  text-align: left;
+}
+
+[dir="rtl"] .ea-case {
+  transform-origin: right center;
+}
+
+[dir="rtl"] .ea-row :is(a, .ea-row__plain) {
+  padding: 24px 14px 24px 20px;
+}
+
+[dir="rtl"] .ea-skill-row {
+  padding: 24px 14px 24px 20px;
+}
+
+[dir="rtl"] .ea-row__year {
+  text-align: left;
+}
+
+[dir="rtl"] .ea-row a:hover,
+[dir="rtl"] .ea-row__plain:hover {
+  transform: translateX(-10px);
+}
+
+[dir="rtl"] .ea-row a:hover .ea-row__arrow,
+[dir="rtl"] .ea-xp__link:hover svg {
+  transform: translate(-3px, -3px);
+}
+
+/* footer: giant word + base row swap sides — same ink-anchoring as the
+   hero giant; no right bleed (the ت must not slice) */
+[dir="rtl"] .ea-foot__word {
+  left: auto;
+  right: 0;
+  bottom: 0.2em;
+  line-height: 1;
+}
+
+[dir="rtl"] .ea-foot__base {
+  right: auto;
+  left: var(--ea-pad);
+}
+
+@media (max-width: 900px) {
+  /* the rotated wordmark runs up the LEFT edge in Arabic: mirror of the
+     LTR bleed. Right-anchored so the post-rotation band lands [0, 1em];
+     the extra 0.2em keeps the ink fully on-screen — the tail kisses the
+     edge instead of a big chunk slicing off-screen */
+  [dir="rtl"] .ea-hero__giant {
+    right: calc(100% - 1.2em);
+    left: auto;
+    bottom: auto;
+    top: 100%;
+    transform-origin: top right;
+    transform: translateY(0.05em) rotate(90deg);
+  }
+  [dir="rtl"] .ea-menu-btn {
+    right: auto;
+    left: max(16px, env(safe-area-inset-right));
+  }
+  [dir="rtl"] .ea-cases__left {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* the full-bleed Arabic ink is ~1.03em of a 52vw face → widen the
+     reserved band below the base row so the word never climbs into it */
+  [dir="rtl"] .ea-foot {
+    padding-bottom: calc(58vw + 24px + env(safe-area-inset-bottom));
+  }
+  [dir="rtl"] .ea-foot__base {
+    left: auto;
+    right: auto;
+  }
+}
+
+@media (max-width: 620px) {
+  [dir="rtl"] .ea-row :is(a, .ea-row__plain) {
+    padding: 20px 8px 20px 12px;
+  }
+  [dir="rtl"] .ea-skill-row {
+    padding: 20px 8px 20px 12px;
+  }
+  [dir="rtl"] .ea-row__year {
+    text-align: right;
   }
 }

@@ -1,27 +1,27 @@
-import { Menu, X, ArrowUpRight, ArrowUp, Mail } from "lucide-react";
+import { Menu, X, ArrowUpRight, ArrowUp, Mail, Languages } from "lucide-react";
 import { Plate } from "@/components/plate";
 import PrismaticBurst from "@/components/prismatic-burst";
 import { scrollToTop } from "@/lib/motion";
-import {
-  person,
-  projects,
-  credentials,
-  experience,
-  posts,
-  skills,
-} from "@/lib/content";
-import {
-  BIO_WORDS,
-  HERO_WORD,
-  MENU_LINKS,
-  PLATE_PALETTES,
-  newTabProps,
-} from "./shared";
+import { content, type Locale, type LocaleContent } from "@/lib/i18n";
+import { PLATE_PALETTES, newTabProps } from "./shared";
 import type { MenuDialogState } from "./use-menu-dialog";
+
+/* Static per-weight face (no variable axis): the cursor-weight effect is
+   an LTR-glyph easter egg — Arabic titles don't ride .char spans. */
+function titleWeightAttr(locale: Locale) {
+  return locale === "ar" ? undefined : { "data-variable-weight": true };
+}
 
 /* ===================== chrome: menu ===================== */
 
-export function MenuDialog({ menu }: { menu: MenuDialogState }) {
+export function MenuDialog({
+  menu,
+  locale,
+}: {
+  menu: MenuDialogState;
+  locale: Locale;
+}) {
+  const { ui, person } = content[locale];
   const {
     menuOpen,
     openMenu,
@@ -30,6 +30,8 @@ export function MenuDialog({ menu }: { menu: MenuDialogState }) {
     menuPanelRef,
     menuOverlayRef,
   } = menu;
+  const other = locale === "ar" ? "en" : "ar";
+  const switchLabel = other === "ar" ? "عربي" : "English";
 
   return (
     <>
@@ -38,7 +40,7 @@ export function MenuDialog({ menu }: { menu: MenuDialogState }) {
         ref={menuBtnRef}
         type="button"
         onClick={openMenu}
-        aria-label="Open menu"
+        aria-label={ui.menuOpen}
         aria-expanded={menuOpen}
         aria-controls="ea-menu-panel"
         inert={menuOpen}
@@ -58,7 +60,7 @@ export function MenuDialog({ menu }: { menu: MenuDialogState }) {
         ref={menuPanelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Site menu"
+        aria-label={ui.menuLabel}
         aria-hidden={!menuOpen}
         inert={!menuOpen}
       >
@@ -67,16 +69,16 @@ export function MenuDialog({ menu }: { menu: MenuDialogState }) {
             className="ea-menu-panel__close"
             type="button"
             onClick={closeMenu}
-            aria-label="Close menu"
+            aria-label={ui.menuClose}
           >
             <X size={24} strokeWidth={1.5} />
           </button>
           <nav
             className="ea-menu-panel__nav"
-            aria-label="Site navigation"
+            aria-label={ui.menuNavLabel}
             data-spectrum
           >
-            {MENU_LINKS.map((link) => (
+            {ui.menuLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -94,20 +96,38 @@ export function MenuDialog({ menu }: { menu: MenuDialogState }) {
             onClick={closeMenu}
           >
             <Mail size={16} strokeWidth={1.5} />
-            Get in touch
+            {ui.getInTouch}
+          </a>
+          <a
+            className="ea-menu-panel__lang"
+            href={`/${other}`}
+            hrefLang={other}
+            aria-label={locale === "ar" ? "English" : "عربي"}
+            onClick={closeMenu}
+          >
+            <Languages size={18} strokeWidth={1.5} />
+            {switchLabel}
           </a>
           <div className="ea-menu-panel__foot">
-            <p className="ea-menu-panel__status">Available for work</p>
+            <p className="ea-menu-panel__status">{ui.availableForWork}</p>
             <a href={`mailto:${person.email}`}>{person.email}</a>
             <div className="ea-menu-panel__social">
               <a href={person.github} target="_blank" rel="noopener noreferrer">
-                GitHub
+                {ui.socialLabels.github}
               </a>
-              <a href={person.linkedin} target="_blank" rel="noopener noreferrer">
-                LinkedIn
+              <a
+                href={person.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {ui.socialLabels.linkedin}
               </a>
-              <a href={person.instagram} target="_blank" rel="noopener noreferrer">
-                Instagram
+              <a
+                href={person.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {ui.socialLabels.instagram}
               </a>
             </div>
           </div>
@@ -123,11 +143,14 @@ export function HeroSection({
   reduced,
   narrow,
   giantRef,
+  locale,
 }: {
   reduced: boolean;
   narrow: boolean | null;
   giantRef: React.Ref<HTMLHeadingElement>;
+  locale: Locale;
 }) {
+  const { person, ui } = content[locale];
   const renderBackdrop = !reduced && narrow !== null;
 
   return (
@@ -147,30 +170,38 @@ export function HeroSection({
       ) : null}
 
       <p className="ea-hero__bio">
-        {BIO_WORDS.map((word, i) => (
+        {ui.heroBio.split(" ").map((word, i) => (
           <span className="ea-hero__word" data-hero-word key={`${word}-${i}`}>
             {word}
           </span>
         ))}
       </p>
 
-      <h1 className="ea-giant ea-hero__giant" ref={giantRef}>
+      <h1 className="ea-giant ea-hero__giant" ref={giantRef} lang={locale === "ar" ? "ar" : undefined}>
         <span className="u-sr-only">{person.name}</span>
         <span aria-hidden="true">
-          {HERO_WORD.split("").map((ch, i) => (
-            <span
-              className="ea-giant__letter"
-              data-hero-letter
-              key={`${ch}-${i}`}
-            >
-              {ch}
-            </span>
-          ))}
+          {/* Arabic keeps contextual joining: one span — the entrance and
+              the magnet move the whole wordmark */}
+          {locale === "en"
+            ? ui.heroWord.split("").map((ch, i) => (
+                <span
+                  className="ea-giant__letter"
+                  data-hero-letter
+                  key={`${ch}-${i}`}
+                >
+                  {ch}
+                </span>
+              ))
+            : (
+                <span className="ea-giant__letter" data-hero-letter>
+                  {ui.heroWord}
+                </span>
+              )}
         </span>
       </h1>
 
       <a className="ea-hero__scroll" href="#ea-bio" data-hero-scroll>
-        Scroll to explore
+        {ui.scrollHint}
       </a>
     </section>
   );
@@ -178,18 +209,14 @@ export function HeroSection({
 
 /* ===================== bio ===================== */
 
-export function BioSection() {
+export function BioSection({ locale }: { locale: Locale }) {
+  const { ui } = content[locale];
   return (
     <section className="ea-bio" id="ea-bio">
       <div className="ea-bio__inner">
-        <p className="ea-bio__label u-label">About</p>
+        <p className="ea-bio__label u-label">{ui.aboutLabel}</p>
         <p className="ea-bio__text" data-reveal>
-          CS and AI at MTI University — GPA 3.75. I build Shaghal, Unblock
-          Syria&apos;s browser extension, with Vitest, Playwright, and CI;
-          and Arabify, the Arabic-readiness analyzer that took 1st place at
-          Qimma Hackathon. Off the keyboard, 140+ TED and TEDx projects
-          translated and reviewed into Arabic — 350+ hours. EF SET C2.
-          Proof over claims: everything below is checkable.
+          {ui.aboutText}
         </p>
       </div>
     </section>
@@ -201,9 +228,11 @@ export function BioSection() {
 export function SectionHeader({
   title,
   count,
+  locale,
 }: {
   title: string;
   count: string;
+  locale: Locale;
 }) {
   return (
     <header className="ea-sec">
@@ -211,7 +240,7 @@ export function SectionHeader({
         className="ea-sec__title"
         data-reveal
         data-reveal-title
-        data-variable-weight
+        {...titleWeightAttr(locale)}
       >
         {title}
       </h2>
@@ -222,10 +251,11 @@ export function SectionHeader({
 
 /* ===================== skills ===================== */
 
-export function SkillsSection() {
+export function SkillsSection({ locale }: { locale: Locale }) {
+  const { ui, skills } = content[locale];
   return (
     <section className="ea-block" id="ea-skills">
-      <SectionHeader title="skills" count="Stack" />
+      <SectionHeader title={ui.skillsTitle} count={ui.skillsCount} locale={locale} />
       <ul className="ea-rows">
         {skills.map((group) => (
           <li key={group.group} className="ea-skill-row" data-reveal-fade>
@@ -246,10 +276,11 @@ export function SkillsSection() {
 
 /* ===================== cases ===================== */
 
-type ProjectImage = (typeof projects)[number]["images"][number];
+type Project = LocaleContent["projects"][number];
+type ProjectImage = Project["images"][number];
 
 interface CasePlateEntry {
-  project: (typeof projects)[number];
+  project: Project;
   projectIndex: number;
   image: ProjectImage;
   isFirstImage: boolean;
@@ -265,7 +296,7 @@ const EMPTY_PLATE_IMAGE: ProjectImage = {
 /* One plate per image entry; a project without images still renders one
    empty plate so the palette slots stay aligned with the name list. Name
    sync is keyed on the project index. */
-function buildCasePlates(): CasePlateEntry[] {
+function buildCasePlates(projects: Project[]): CasePlateEntry[] {
   return projects.flatMap((project, projectIndex) =>
     (project.images.length
       ? project.images
@@ -279,9 +310,10 @@ function buildCasePlates(): CasePlateEntry[] {
   );
 }
 
-/* joffreyspitzer.com layout: sticky label left, scrolling plates centre,
-   sticky project names right (desktop only). */
-export function CasesSection() {
+/* joffreyspitzer.com layout: sticky label lead side, scrolling plates
+   centre, sticky project names tail side (desktop only). */
+export function CasesSection({ locale }: { locale: Locale }) {
+  const { ui, projects } = content[locale];
   return (
     <section className="ea-cases" id="ea-work">
       <div className="ea-cases__grid">
@@ -290,14 +322,14 @@ export function CasesSection() {
             className="ea-cases__title"
             data-reveal
             data-reveal-title
-            data-variable-weight
+            {...titleWeightAttr(locale)}
           >
-            Cases
+            {ui.casesTitle}
           </h2>
         </div>
 
         <div className="ea-cases__images">
-          {buildCasePlates().map((entry, index) => (
+          {buildCasePlates(projects).map((entry, index) => (
             <CasePlate
               key={`${entry.project.id}-${index}`}
               entry={entry}
@@ -380,10 +412,11 @@ function CasePlate({
 
 /* ===================== experience ===================== */
 
-export function ExperienceSection() {
+export function ExperienceSection({ locale }: { locale: Locale }) {
+  const { ui, experience } = content[locale];
   return (
     <section className="ea-block" id="ea-experience">
-      <SectionHeader title="experience" count="Roles · 01" />
+      <SectionHeader title={ui.xpTitle} count={ui.xpCount} locale={locale} />
       {experience.map((role) => (
         <article key={role.id} className="ea-xp" data-reveal-fade>
           <div className="ea-xp__meta">
@@ -395,7 +428,7 @@ export function ExperienceSection() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              github
+              {ui.githubLink}
               <ArrowUpRight size={16} strokeWidth={1.5} />
             </a>
           </div>
@@ -421,10 +454,15 @@ export function ExperienceSection() {
 
 /* ===================== credentials ===================== */
 
-export function CredentialsSection() {
+export function CredentialsSection({ locale }: { locale: Locale }) {
+  const { ui, credentials } = content[locale];
   return (
     <section className="ea-block" id="ea-credentials">
-      <SectionHeader title="credentials" count="Verified" />
+      <SectionHeader
+        title={ui.credentialsTitle}
+        count={ui.credentialsCount}
+        locale={locale}
+      />
       <ul className="ea-rows">
         {credentials.map((credential) => (
           <li key={credential.id} className="ea-row" data-reveal-fade>
@@ -439,7 +477,7 @@ export function CredentialsSection() {
 function CredentialRow({
   credential,
 }: {
-  credential: (typeof credentials)[number];
+  credential: LocaleContent["credentials"][number];
 }) {
   const body = (
     <>
@@ -466,10 +504,11 @@ function CredentialRow({
 /* ===================== writing ===================== */
 
 /* Posts keep placeholder anchors until real post pages ship. */
-export function WritingSection() {
+export function WritingSection({ locale }: { locale: Locale }) {
+  const { ui, posts } = content[locale];
   return (
     <section className="ea-block" id="ea-writing">
-      <SectionHeader title="writing" count="Journal" />
+      <SectionHeader title={ui.writingTitle} count={ui.writingCount} locale={locale} />
       <ul className="ea-rows">
         {posts.map((post) => (
           <li key={post.slug} className="ea-row" data-reveal-fade>
@@ -493,43 +532,18 @@ export function WritingSection() {
 
 /* ===================== footer ===================== */
 
-const FOOTER_COLUMNS: {
-  title: string;
-  links: { label: string; href: string; active?: boolean }[];
-}[] = [
-  {
-    title: "Sitemap",
-    links: [
-      { label: "Home", href: "#ea-top", active: true },
-      { label: "Work", href: "#ea-work" },
-      { label: "Experience", href: "#ea-experience" },
-      { label: "Credentials", href: "#ea-credentials" },
-      { label: "Writing", href: "#ea-writing" },
-    ],
-  },
-  {
-    title: "Social",
-    links: [
-      { label: "GitHub", href: person.github },
-      { label: "LinkedIn", href: person.linkedin },
-      { label: "Instagram", href: person.instagram },
-    ],
-  },
-  {
-    title: "Contact",
-    links: [{ label: person.email, href: `mailto:${person.email}` }],
-  },
-];
-
 export function SiteFooter({
   reduced,
   narrow,
   menuOpen,
+  locale,
 }: {
   reduced: boolean;
   narrow: boolean | null;
   menuOpen: boolean;
+  locale: Locale;
 }) {
+  const { ui } = content[locale];
   const renderBurst = !reduced && narrow !== null;
 
   return (
@@ -549,13 +563,13 @@ export function SiteFooter({
       ) : null}
 
       <div className="ea-foot__cols" data-reveal-fade>
-        {FOOTER_COLUMNS.map((column) => (
+        {ui.footerColumns.map((column) => (
           <div className="ea-foot__col" key={column.title}>
             <h3
               className="ea-foot__col-title"
               data-reveal
               data-reveal-title
-              data-variable-weight
+              {...titleWeightAttr(locale)}
             >
               {column.title}
             </h3>
@@ -577,15 +591,15 @@ export function SiteFooter({
       </div>
 
       <p className="ea-giant ea-foot__word" aria-hidden="true">
-        {HERO_WORD}
+        {ui.heroWord}
       </p>
 
       <div className="ea-foot__base">
         <button className="ea-foot__top" type="button" onClick={scrollToTop}>
-          Back to top
+          {ui.backToTop}
           <ArrowUp size={16} strokeWidth={1.5} />
         </button>
-        <span className="ea-foot__copy">© 2026 {person.name}</span>
+        <span className="ea-foot__copy">{ui.copyright}</span>
       </div>
     </footer>
   );

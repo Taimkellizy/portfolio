@@ -32,7 +32,7 @@ export interface MenuDialogState {
  * effects run in order, and initial focus must land on an already
  * visible panel.
  */
-export function useMenuDialog(): MenuDialogState {
+export function useMenuDialog(rtl: boolean = false): MenuDialogState {
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
   const menuOverlayRef = useRef<HTMLDivElement>(null);
@@ -45,12 +45,14 @@ export function useMenuDialog(): MenuDialogState {
   /* panel visibility + slide */
   useEffect(() => {
     if (!menuPanelRef.current || !menuOverlayRef.current) return;
+    /* the panel is parked off the lead edge; RTL mirrors the slide */
+    const off = rtl ? "-100%" : "100%";
     if (reduced) {
       if (menuPanelRef.current) {
         menuPanelRef.current.style.visibility = menuOpen ? "visible" : "hidden";
         menuPanelRef.current.style.transform = menuOpen
           ? "translateX(0)"
-          : "translateX(100%)";
+          : `translateX(${off})`;
       }
       menuOverlayRef.current.style.opacity = menuOpen ? "1" : "0";
       menuOverlayRef.current.style.pointerEvents = menuOpen ? "auto" : "none";
@@ -86,7 +88,7 @@ export function useMenuDialog(): MenuDialogState {
         },
       });
       gsap.to(menuPanelRef.current, {
-        x: "100%",
+        x: off,
         duration: 0.55,
         ease: "expo.in",
         overwrite: "auto",
@@ -96,15 +98,18 @@ export function useMenuDialog(): MenuDialogState {
         },
       });
     }
-  }, [menuOpen, reduced]);
+  }, [menuOpen, reduced, rtl]);
 
   useEffect(() => {
     if (reduced) return;
     if (menuOverlayRef.current && menuPanelRef.current) {
       gsap.set(menuOverlayRef.current, { opacity: 0, pointerEvents: "none" });
-      gsap.set(menuPanelRef.current, { x: "100%", visibility: "hidden" });
+      gsap.set(menuPanelRef.current, {
+        x: rtl ? "-100%" : "100%",
+        visibility: "hidden",
+      });
     }
-  }, [reduced]);
+  }, [reduced, rtl]);
 
   /* dialog behaviour: focus trap + focus/scroll bookkeeping */
   useEffect(() => {

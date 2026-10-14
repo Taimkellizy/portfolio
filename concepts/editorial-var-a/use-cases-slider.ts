@@ -20,6 +20,7 @@ const IDLE_NAME_OPACITY = 0.55;
 export function useCasesSlider(
   root: RefObject<HTMLDivElement | null>,
   reduced: boolean,
+  rtl: boolean = false,
 ) {
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -36,7 +37,7 @@ export function useCasesSlider(
         const items = gsap.utils.toArray<HTMLElement>(".ea-case");
         const titles = gsap.utils.toArray<HTMLElement>(".ea-case-name");
         if (!items.length || !titles.length) return;
-        buildSliderTimeline(items, titles);
+        buildSliderTimeline(items, titles, rtl);
       }, root);
     };
 
@@ -63,14 +64,17 @@ export function useCasesSlider(
       window.clearTimeout(resizeTimer);
       ctx?.revert();
     };
-  }, [root, reduced]);
+  }, [root, reduced, rtl]);
 }
 
 function buildSliderTimeline(
   items: HTMLElement[],
   titles: HTMLElement[],
+  rtl: boolean,
 ) {
   const scaleExpanded = EXPANDED_VW / BASE_VW;
+  /* mirrored anchor: plates grow outward from their reading-edge side */
+  const transformOrigin = rtl ? "right top" : "left top";
 
   const { firstOf, lastOf } = projectBoundaries(items);
 
@@ -83,7 +87,7 @@ function buildSliderTimeline(
     const initScale = d === 0 ? scaleExpanded : 1;
     gsap.set(media, {
       width: `${BASE_VW}vw`,
-      transformOrigin: "left top",
+      transformOrigin,
       scaleX: initScale,
       scaleY: initScale,
       force3D: true,

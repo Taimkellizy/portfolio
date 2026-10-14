@@ -17,9 +17,10 @@ const REVEAL_START = "top 88%";
  *   those, or it shatters their layout into fake "lines".
  * - Titles split with a chars mask; text blocks split with a lines mask.
  */
-export function useEntranceReveals(
+ export function useEntranceReveals(
   root: RefObject<HTMLDivElement | null>,
   reduced: boolean,
+  arabic: boolean = false,
 ) {
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -59,7 +60,10 @@ export function useEntranceReveals(
 
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
         if (el.hasAttribute("data-reveal-title")) {
-          applyCharMaskReveal(el);
+          /* word-level split for Arabic: char-splitting breaks contextual
+             letter joining, words split at spaces and keep the shaping */
+          if (arabic) applyWordMaskReveal(el);
+          else applyCharMaskReveal(el);
         } else {
           applyLineMaskReveal(el);
         }
@@ -67,7 +71,7 @@ export function useEntranceReveals(
       });
     }, root);
     return () => ctx.revert();
-  }, [root, reduced]);
+  }, [root, reduced, arabic]);
 }
 
 /* Titles: per-char mask flying down into place. */
@@ -86,6 +90,29 @@ function applyCharMaskReveal(el: HTMLElement) {
           scale: 1,
           duration: 1,
           stagger: 0.01,
+          ease: "expo.out",
+          scrollTrigger: { trigger: el, start: REVEAL_START },
+        },
+      ),
+  });
+}
+
+/* Titles (Arabic): per-word mask flying down into place. */
+function applyWordMaskReveal(el: HTMLElement) {
+  return new SplitText(el, {
+    type: "words",
+    autoSplit: true,
+    mask: "words",
+    wordsClass: "word",
+    onSplit: (self) =>
+      gsap.fromTo(
+        self.words,
+        { yPercent: -120, scale: 1.2 },
+        {
+          yPercent: 0,
+          scale: 1,
+          duration: 1,
+          stagger: 0.04,
           ease: "expo.out",
           scrollTrigger: { trigger: el, start: REVEAL_START },
         },

@@ -18,10 +18,12 @@ export function useHeroCursor({
   root,
   cursor,
   reduced,
+  arabic,
 }: {
   root: RefObject<HTMLDivElement | null>;
   cursor: RefObject<HTMLDivElement | null>;
   reduced: boolean;
+  arabic: boolean;
 }) {
   useEffect(() => {
     if (!root.current || reduced) return;
@@ -30,7 +32,10 @@ export function useHeroCursor({
 
     const words =
       root.current.querySelectorAll<HTMLElement>("[data-hero-word]");
-    words.forEach(splitIntoChars);
+    /* per-char split and letter disassembly are LTR-only: Arabic loses
+       contextual joining and bidi order under element-level splits, so
+       words stay whole and only repel */
+    if (!arabic) words.forEach(splitIntoChars);
 
     let mouseX = -100;
     let mouseY = -100;
@@ -114,7 +119,7 @@ export function useHeroCursor({
           overwrite: "auto",
           force3D: false,
         });
-        if (dist < 75) {
+        if (!arabic && dist < 75) {
           disassemble(word);
         }
       } else {
@@ -153,7 +158,7 @@ export function useHeroCursor({
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
     };
-  }, [root, cursor, reduced]);
+  }, [root, cursor, reduced, arabic]);
 }
 
 /* Wrap each hero-word character in a span so the tweens can move them

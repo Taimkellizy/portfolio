@@ -249,3 +249,80 @@ export const posts = [
     tag: "Design",
   },
 ];
+
+/* UI copy (chrome + section labels) — locale-mirrored in content-ar.ts.
+   Everything the concept renders outside lib/data lives here. */
+
+export const MENU_LINKS = [
+  { label: "Work", href: "#ea-work" },
+  { label: "Experience", href: "#ea-experience" },
+  { label: "Credentials", href: "#ea-credentials" },
+  { label: "Writing", href: "#ea-writing" },
+  { label: "Contact", href: "#ea-contact" },
+];
+
+export const FOOTER_COLUMNS: {
+  title: string;
+  links: { label: string; href: string; active?: boolean }[];
+}[] = [
+  {
+    title: "Sitemap",
+    links: [
+      { label: "Home", href: "#ea-top", active: true },
+      { label: "Work", href: "#ea-work" },
+      { label: "Experience", href: "#ea-experience" },
+      { label: "Credentials", href: "#ea-credentials" },
+      { label: "Writing", href: "#ea-writing" },
+    ],
+  },
+  {
+    title: "Social",
+    links: [
+      { label: "GitHub", href: person.github },
+      { label: "LinkedIn", href: person.linkedin },
+      { label: "Instagram", href: person.instagram },
+    ],
+  },
+  {
+    title: "Contact",
+    links: [{ label: person.email, href: `mailto:${person.email}` }],
+  },
+];
+
+export const ui = {
+  heroWord: "taim",
+  heroBio:
+    "I'm Taim Kellizy — a software developer and CS student based in Syria, building web apps and browser extensions with React and TypeScript.",
+  menuOpen: "Open menu",
+  menuClose: "Close menu",
+  menuLabel: "Site menu",
+  menuNavLabel: "Site navigation",
+  menuLinks: MENU_LINKS,
+  getInTouch: "Get in touch",
+  availableForWork: "Available for work",
+  socialLabels: { github: "GitHub", linkedin: "LinkedIn", instagram: "Instagram" },
+  skipToContent: "Skip to content",
+  scrollHint: "Scroll to explore",
+  aboutLabel: "About",
+  aboutText: `CS and AI at MTI University — GPA 3.75. I build Shaghal, Unblock
+Syria's browser extension, with Vitest, Playwright, and CI;
+and Arabify, the Arabic-readiness analyzer that took 1st place at
+Qimma Hackathon. Off the keyboard, 140+ TED and TEDx projects
+translated and reviewed into Arabic — 350+ hours. EF SET C2.
+Proof over claims: everything below is checkable.`,
+  skillsTitle: "skills",
+  skillsCount: "Stack",
+  casesTitle: "Cases",
+  xpTitle: "experience",
+  xpCount: "Roles · 01",
+  githubLink: "github",
+  credentialsTitle: "credentials",
+  credentialsCount: "Verified",
+  writingTitle: "writing",
+  writingCount: "Journal",
+  footerColumns: FOOTER_COLUMNS,
+  backToTop: "Back to top",
+  copyright: `© 2026 ${person.name}`,
+  metaDescription:
+    "Portfolio of Taim Kellizy, a developer and computer science student. Selected work, credentials, and writing.",
+};

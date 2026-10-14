@@ -15,9 +15,11 @@ const PEAK = 860;
 export function useVariableWeight(
   root: RefObject<HTMLDivElement | null>,
   reduced: boolean,
+  arabic: boolean = false,
 ) {
   useEffect(() => {
     if (!root.current || reduced) return;
+    if (arabic) return; /* static-weight face, no .char spans */
     if (isTouchLayout()) return;
 
     const targets = Array.from(
@@ -49,7 +51,7 @@ export function useVariableWeight(
       window.removeEventListener("mousemove", update);
       document.documentElement.removeEventListener("mouseleave", reset);
     };
-  }, [root, reduced]);
+  }, [root, reduced, arabic]);
 }
 
 function charsOf(title: HTMLElement) {
