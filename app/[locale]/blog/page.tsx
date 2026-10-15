@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogBar } from "./blog-bar";
@@ -6,9 +5,15 @@ import { BlogFooter } from "./blog-footer";
 import "../../../concepts/editorial-var-a.css";
 import "./blog.css";
 import { getAllPosts } from "@/lib/blog";
+import { BlogIndexList, type BlogRow } from "@/components/blog-index-list";
 import { content, isLocale, locales, type Locale } from "@/lib/i18n";
-
-const SITE = "https://taimkellizy-portfolio.vercel.app";
+import {
+  SITE,
+  breadcrumbNode,
+  graph,
+  jsonLdScript,
+} from "@/lib/seo";
+import { topicLabel } from "@/lib/topics";
 
 export const dynamicParams = false;
 
@@ -33,7 +38,14 @@ export async function generateMetadata({
     description: ui.metaDescription,
     alternates: {
       canonical: siteUrl,
-      languages: { en: `${SITE}/en/blog`, ar: `${SITE}/ar/blog` },
+      languages: {
+        en: `${SITE}/en/blog`,
+        ar: `${SITE}/ar/blog`,
+        "x-default": `${SITE}/`,
+      },
+      types: {
+        "application/rss+xml": `${SITE}/${locale}/rss.xml`,
+      },
     },
     openGraph: {
       type: "website",
@@ -61,12 +73,34 @@ export default async function BlogIndexPage({
   const { ui } = content[locale];
   const posts = await getAllPosts(locale);
   const other = locale === "en" ? "ar" : "en";
+  const rows: BlogRow[] = posts.map((post) => ({
+    id: post.id,
+    slug: post.slug,
+    title: post.title,
+    excerpt: post.excerpt,
+    year: new Date(post.date).getFullYear().toString(),
+    topics: post.topics.map((id) => ({ id, label: topicLabel(id, locale) })),
+  }));
 
   return (
-    <div className="ea ea--blog">
-      <a className="ea-skip" href="#blog-main">
-        {ui.skipToContent}
-      </a>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdScript(
+            graph(
+              breadcrumbNode(locale, [
+                { name: content[locale].person.name, path: "" },
+                { name: ui.writingTitle, path: "/blog" },
+              ]),
+            ),
+          ),
+        }}
+      />
+      <div className="ea ea--blog">
+        <a className="ea-skip" href="#blog-main">
+          {ui.skipToContent}
+        </a>
 
       <BlogBar locale={locale} langHref={`/${other}/blog`} showIndexLink={false} />
 
@@ -76,30 +110,17 @@ export default async function BlogIndexPage({
           <span className="ea-sec__count u-label">{ui.writingCount}</span>
         </header>
 
-        {posts.length > 0 ? (
-          <ul className="ea-rows">
-            {posts.map((post) => (
-              <li key={post.id} className="ea-row">
-                <a href={`/${locale}/blog/${post.slug}`}>
-                  <span className="ea-row__org u-label">{post.tags[0]}</span>
-                  <span className="ea-row__title">{post.title}</span>
-                  <span className="ea-row__excerpt">{post.excerpt}</span>
-                  <span className="ea-row__year u-label">
-                    {new Date(post.date).getFullYear()}
-                  </span>
-                  <span className="ea-row__arrow" aria-hidden="true">
-                    <ArrowUpRight size={16} strokeWidth={1.5} />
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="blog-empty">{ui.blogEmpty}</p>
-        )}
-      </main>
+        <BlogIndexList
+          rows={rows}
+          allLabel={ui.allTopics}
+          topicsLabel={ui.topicsLabel}
+          emptyLabel={ui.blogEmpty}
+          locale={locale}
+        />
+        </main>
 
-      <BlogFooter locale={locale} />
-    </div>
+        <BlogFooter locale={locale} />
+      </div>
+    </>
   );
 }

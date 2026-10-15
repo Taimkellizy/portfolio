@@ -63,6 +63,18 @@ export interface Ui {
   blogNext: string;
   blogEmpty: string;
   blogUpdated: string;
+  copyCode: string;
+  copied: string;
+  copyFailed: string;
+  allTopics: string;
+  topicsLabel: string;
+  minRead: string;
+  copyAsMarkdown: string;
+  viewAsMarkdown: string;
+  copyLink: string;
+  smallerText: string;
+  largerText: string;
+  readingSize: string;
   footerColumns: typeof FOOTER_COLUMNS;
   backToTop: string;
   copyright: string;

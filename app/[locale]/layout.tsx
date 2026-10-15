@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import {
   thmanyahSans,
   thmanyahSerifDisplay,
@@ -8,9 +10,15 @@ import {
   officeCode,
 } from "../fonts";
 import { content, dirOf, isLocale, locales } from "@/lib/i18n";
+import {
+  SITE,
+  absolute,
+  graph,
+  jsonLdScript,
+  personNode,
+  webSiteNode,
+} from "@/lib/seo";
 import "../globals.css";
-
-const SITE = "https://taimkellizy-portfolio.vercel.app";
 
 export const dynamicParams = false;
 
@@ -40,7 +48,15 @@ export async function generateMetadata({
     creator: person.name,
     alternates: {
       canonical: siteUrl,
-      languages: { en: `${SITE}/en`, ar: `${SITE}/ar` },
+      languages: {
+        en: `${SITE}/en`,
+        ar: `${SITE}/ar`,
+        /* root 308s to the visitor's locale — Google's preferred x-default */
+        "x-default": `${SITE}/`,
+      },
+      types: {
+        "application/rss+xml": absolute(`/${locale}/rss.xml`),
+      },
     },
     openGraph: {
       type: "website",
@@ -80,6 +96,11 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={dirOf(locale)}
+      /* the reading-size restore script (blog post pages) stamps a
+         data-reading-size on <html> before hydration — suppress the
+         attribute diff on this element so the DOM value wins (see
+         AGENTS.md gotcha 25) */
+      suppressHydrationWarning
       className={[
         workSans.variable,
         officeCode.variable,
@@ -88,7 +109,17 @@ export default async function LocaleLayout({
         thmanyahSerif.variable,
       ].join(" ")}
     >
-      <body>{children}</body>
+      <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLdScript(graph(personNode(locale), webSiteNode(locale))),
+          }}
+        />
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

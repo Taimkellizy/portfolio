@@ -2,6 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import { content, type Locale } from "./i18n";
+import { isTopicId, topicIds, topicLabel, type TopicId } from "./topics";
 
 /* Build-time blog loader — server-only fs reading, no runtime fetching.
    A "bundle" is one post: content/posts/<bundleId>/ holds meta.json plus
@@ -19,7 +20,8 @@ export interface PostMeta {
   excerpt: string;
   date: string;
   updated?: string;
-  tags: string[];
+  /* fixed vocabulary ids (lib/topics.ts) — shared by every locale bundle */
+  topics: TopicId[];
   cover?: string;
   /* ToC branch icon names, keyed by heading slug (lib/post-icons) */
   navIcons?: Record<string, string>;
@@ -41,7 +43,7 @@ interface RawFrontmatter {
   excerpt?: unknown;
   date?: unknown;
   updated?: unknown;
-  tags?: unknown;
+  topics?: unknown;
   cover?: unknown;
   slug?: unknown;
   navIcons?: unknown;
@@ -60,7 +62,7 @@ function assertFrontmatter(
   excerpt: string;
   date: string;
   updated?: string;
-  tags: string[];
+  topics: TopicId[];
   cover?: string;
   slug?: string;
   navIcons?: Record<string, string>;
@@ -78,10 +80,18 @@ function assertFrontmatter(
   if (data.updated !== undefined && typeof data.updated !== "string")
     fail("updated");
   if (
-    !Array.isArray(data.tags) ||
-    data.tags.some((tag) => typeof tag !== "string")
+    !Array.isArray(data.topics) ||
+    data.topics.length === 0 ||
+    data.topics.some((topic) => typeof topic !== "string")
   )
-    fail("tags");
+    fail("topics");
+  /* the vocabulary is closed — an unknown id is a build error, not a new topic */
+  const unknown = (data.topics as string[]).filter((topic) => !isTopicId(topic));
+  if (unknown.length > 0) {
+    throw new Error(
+      `content/posts/${bundleId}/${locale}.mdx: unknown topic id(s) ${unknown.join(", ")} — valid ids: ${topicIds.join(", ")}`,
+    );
+  }
   if (data.cover !== undefined && typeof data.cover !== "string") fail("cover");
   if (data.slug !== undefined && typeof data.slug !== "string") fail("slug");
   if (data.navIcons !== undefined) {
@@ -119,7 +129,7 @@ async function readPost(locale: string, bundleId: string): Promise<Post> {
     excerpt: data.excerpt,
     date: data.date,
     updated: data.updated,
-    tags: data.tags,
+    topics: data.topics as TopicId[],
     cover: data.cover,
     navIcons: data.navIcons,
     body: content,
@@ -181,6 +191,25 @@ export async function getAdjacent(
   };
 }
 
+/* ===================== reading time ===================== */
+
+/** Prose words — fenced/inline code and mdx punctuation don't count. */
+export function wordCount(body: string): number {
+  const prose = body
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`[^`\n]*`/g, " ")
+    .replace(/[#>*_[\]()!-]/g, " ");
+  return prose.split(/\s+/).filter(Boolean).length;
+}
+
+/**
+ * Minutes to read — 225 wpm English, 180 Arabic (connected script reads
+ * slower). Never renders as "0 min read".
+ */
+export function readingMinutes(body: string, locale: Locale): number {
+  return Math.max(1, Math.round(wordCount(body) / (locale === "ar" ? 180 : 225)));
+}
+
 /* ===================== one-pager "writing" rows ===================== */
 
 /* One link row in the one-pager's writing section. Posts with a bundle
@@ -197,8 +226,8 @@ export interface WritingRow {
 
 const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ar" : "en");
 
-const toRow = (post: PostMeta): Omit<WritingRow, "href"> => ({
-  tag: post.tags[0] ?? "",
+const toRow = (post: PostMeta, locale: Locale): Omit<WritingRow, "href"> => ({
+  tag: topicLabel(post.topics[0], locale),
   title: post.title,
   excerpt: post.excerpt,
   year: new Date(post.date).getFullYear().toString(),
@@ -213,11 +242,14 @@ export async function writingRowsFor(locale: Locale): Promise<WritingRow[]> {
   return content[locale].posts.map((stub) => {
     const localPost = mineById.get(stub.slug);
     if (localPost) {
-      return { href: `/${locale}/blog/${localPost.slug}`, ...toRow(localPost) };
+      return {
+        href: `/${locale}/blog/${localPost.slug}`,
+        ...toRow(localPost, locale),
+      };
     }
     const foreignPost = theirsById.get(stub.slug);
     if (foreignPost) {
-      const row = toRow(foreignPost);
+      const row = toRow(foreignPost, locale);
       return {
         href: `/${other}/blog/${foreignPost.slug}`,
         /* availability mark: the copy belongs to the other locale */

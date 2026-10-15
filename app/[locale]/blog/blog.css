@@ -112,9 +112,66 @@
   border-bottom: 1px solid var(--ea-line);
 }
 
-.blog-post__flag {
-  color: var(--ea-ink-mute);
+/* ---------- topic chips (listing filter + post header) ---------- */
+
+.blog-topics {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+
+.blog-topics--post {
   margin-bottom: 18px;
+}
+
+.blog-index .blog-topics {
+  margin-bottom: 30px;
+}
+
+.blog-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-work-sans);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ea-ink-mute);
+  background: none;
+  border: 1px solid var(--ea-line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.blog-chip:hover {
+  color: var(--ea-ink);
+  border-color: var(--ea-ink-mute);
+}
+
+.blog-chip:focus-visible {
+  outline: 1px solid var(--ea-ink);
+  outline-offset: 2px;
+}
+
+/* pressed = the active filter on the listing; header links never press */
+.blog-chip[aria-pressed="true"] {
+  color: var(--ea-ink);
+  background: rgba(232, 230, 225, 0.08);
+  border-color: var(--ea-ink-mute);
+}
+
+.blog-chip__count {
+  opacity: 0.55;
+  font-size: 10.5px;
 }
 
 .blog-post__title {
@@ -139,6 +196,22 @@
 .blog-post__meta {
   color: var(--ea-ink-mute);
   opacity: 0.75;
+}
+
+/* reading-size steps ride `zoom` so every prose measure — including the
+   code blocks and headings — scales together (dataset values 0..3,
+   default 1 = no rule). Browser support: Chrome/Safari always, Firefox
+   126+. */
+html[data-reading-size="0"] .ea-prose {
+  zoom: 0.92;
+}
+
+html[data-reading-size="2"] .ea-prose {
+  zoom: 1.08;
+}
+
+html[data-reading-size="3"] .ea-prose {
+  zoom: 1.16;
 }
 
 /* ---------- post layout: ToC + prose ---------- */
@@ -296,6 +369,252 @@
   padding: 0;
 }
 
+/* ---------- highlighted code blocks (rehype-pretty-code + shiki) ----------
+
+   The shell is a VS Code-dark editor panel; the tokens inside carry their
+   own inline colours from the build-time highlighter. Shell and bar use
+   logical properties + flex auto-flip, so the chrome mirrors for Arabic
+   posts on its own — no [dir="rtl"] entries needed here. The code itself
+   keeps the physical-LTR rule above. */
+.ea-prose [data-rehype-pretty-code-figure] {
+  margin: 0 0 1.4em;
+}
+
+.ea-prose [data-rehype-pretty-code-figure] pre {
+  margin: 0;
+}
+
+.ea-prose .code-shell {
+  position: relative;
+  background: #1e1e1e;
+  border: 1px solid var(--ea-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ea-prose .code-shell pre {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  /* clears the header strip with room to breathe below the divider */
+  padding: 54px 24px 22px;
+}
+
+/* header strip: language chip + copy button over a VS Code-chrome band,
+   closed by the divider line above the code */
+.ea-prose .code-shell__bar {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 46px;
+  padding: 8px 12px 8px 20px;
+  line-height: 1;
+  background: #252526;
+  border-bottom: 1px solid rgba(232, 230, 225, 0.09);
+  pointer-events: none;
+}
+
+.ea-prose .code-shell__lang {
+  font-family: var(--font-code);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9d9d9d;
+}
+
+.ea-prose .code-shell__copy {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: #9d9d9d;
+  background: rgba(232, 230, 225, 0.06);
+  border: 1px solid rgba(232, 230, 225, 0.14);
+  border-radius: 6px;
+  padding: 6px 10px;
+  /* min-width so the label swap to "Copied" doesn't resize the button */
+  min-width: 96px;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.ea-prose .code-shell__copy:hover {
+  color: #e8e6e1;
+  border-color: rgba(232, 230, 225, 0.3);
+}
+
+.ea-prose .code-shell__copy:focus-visible {
+  outline: 1px solid #e8e6e1;
+  outline-offset: 2px;
+}
+
+/* copy confirmation rides the highlighter's own success green */
+.ea-prose .code-shell__copy[data-copied="true"] {
+  color: #80a665;
+  border-color: rgba(128, 166, 101, 0.5);
+}
+
+/* gutter: line numbers are CSS counters on the highlighter's line rows.
+   Generated content must stay out of the clipboard payload — codeText()
+   in code-block.tsx rebuilds the text from [data-line] rows instead of
+   reading innerText. */
+.ea-prose .code-shell code {
+  counter-reset: code-line;
+}
+
+.ea-prose .code-shell [data-line]::before {
+  counter-increment: code-line;
+  content: counter(code-line);
+  display: inline-block;
+  width: 2.6ch;
+  margin-right: 20px;
+  text-align: right;
+  color: #6a6a6a;
+  font-size: 12px;
+  user-select: none;
+}
+
+.ea-prose [data-rehype-pretty-code-title] {
+  font-family: var(--font-code);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: #9d9d9d;
+  background: #252526;
+  border: 1px solid var(--ea-line);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  padding: 9px 18px;
+}
+
+.ea-prose [data-rehype-pretty-code-title] + .code-shell {
+  border-radius: 0 0 8px 8px;
+}
+
+/* ---------- post bar (copy markdown / copy link / text size) ---------- */
+
+/* the header hands its bottom gap to the bar, so the two hairlines frame
+   the controls with equal space above and below the text */
+.blog-post__head:has(+ .post-bar) {
+  margin-bottom: 0;
+}
+
+.post-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 32px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--ea-line);
+  font-family: var(--font-work-sans);
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  color: var(--ea-ink-mute);
+}
+
+/* fixed-height cells: labels, icons and the A glyphs share one centre
+   line no matter which face renders them */
+.post-bar button,
+.post-bar a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 9px;
+  line-height: 1;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.post-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.post-bar button:hover,
+.post-bar a:hover {
+  color: var(--ea-ink);
+}
+
+.post-bar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.post-bar button:focus-visible,
+.post-bar a:focus-visible {
+  outline: 1px solid var(--ea-ink);
+  outline-offset: 2px;
+}
+
+.post-bar__rule {
+  width: 1px;
+  height: 13px;
+  background: var(--ea-line);
+}
+
+.post-bar__size {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.post-bar__size button {
+  width: 34px;
+  padding: 0;
+}
+
+.post-bar__a {
+  display: block;
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.post-bar__a--small {
+  font-size: 11px;
+}
+
+.post-bar__a--large {
+  font-size: 17px;
+}
+
+/* ---------- reading progress ---------- */
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.reading-progress__bar {
+  height: 100%;
+  background: var(--ea-ink);
+  opacity: 0.85;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
 /* ---------- prev / next ---------- */
 
 .blog-xnav {
@@ -370,6 +689,22 @@
 
   .blog-xnav__link--index {
     order: 3;
+  }
+
+  /* phone toolbar: two deliberate rows — the actions wrap on their own
+     line (no dangling separators at wrap points) and the size group keeps
+     the end position on the second row */
+  .post-bar {
+    row-gap: 8px;
+  }
+
+  .post-bar__actions {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .post-bar__actions .post-bar__rule {
+    display: none;
   }
 }
 
@@ -476,9 +811,17 @@
     .ea-prose blockquote,
     .blog-empty,
     .blog-bar,
-    .blog-xnav
+    .blog-xnav,
+    .post-bar
   ) {
   letter-spacing: 0;
+}
+
+/* localized toolbar labels ride the Arabic reading face (Latin-first
+   font lists would drop them to Arial — gotcha 13/18); the size glyphs
+   stay Latin and keep Outfit */
+[dir="rtl"] .ea--blog .post-bar :is(button, a) {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
 }
 
 /* strong emphasis in Arabic prose rides the Arabic face too */
@@ -486,10 +829,24 @@
   font-family: inherit;
 }
 
+/* localized chip/button labels ride the Arabic reading face — the
+   Latin-first lists above would drop them to Arial (gotcha 13/18);
+   the code language chip stays Latin-only and keeps OfficeCodePro */
+[dir="rtl"] .ea--blog :is(.blog-chip, .code-shell__copy) {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* horizontal travel arrows mirror; the diagonal ArrowUpRight does not
    (same rule as the concept's row arrows) */
 [dir="rtl"] .blog-xnav__dir svg {
   transform: scaleX(-1);
+}
+
+/* the progress bar fills from the reading edge */
+[dir="rtl"] .reading-progress__bar {
+  transform-origin: right center;
 }
 
 /* bar burst mirrors: leak hugs the top-right corner in RTL (the hero
