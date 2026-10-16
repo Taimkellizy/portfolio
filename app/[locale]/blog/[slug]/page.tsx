@@ -99,7 +99,7 @@ export async function generateMetadata({
       ...(post.cover ? { images: [{ url: post.cover }] } : {}),
     },
     twitter: {
-      card: post.cover ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: post.title,
       description: post.excerpt,
       ...(post.cover ? { images: [{ url: post.cover }] } : {}),

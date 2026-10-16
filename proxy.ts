@@ -14,7 +14,10 @@ export default function proxy(request: NextRequest) {
 
   const rest = pathname === "/" ? "" : pathname;
   return NextResponse.redirect(
-    new URL(`/${defaultLocale}${rest}`, request.nextUrl.origin),
+    new URL(
+      `/${defaultLocale}${rest}${request.nextUrl.search}`,
+      request.nextUrl.origin,
+    ),
     308,
   );
 }

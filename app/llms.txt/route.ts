@@ -19,7 +19,7 @@ export async function GET() {
     "",
     `> ${ui.metaDescription}`,
     "",
-    `${person.name} is a ${person.role.toLowerCase()} based in ${person.location}. ` +
+    `${person.name} is a ${person.role.toLowerCase()} ${person.location.toLowerCase()}. ` +
       `Selected work, credentials, and writing live on this site, which exists in ` +
       `English (/en) and Arabic (/ar) — the two are translations of one another, ` +
       `not separate content.`,

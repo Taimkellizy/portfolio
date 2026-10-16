@@ -75,9 +75,11 @@ export function useSmoothScroll(enabled = true) {
   useEffect(() => {
     if (!enabled || reduced) return;
     let cleanup = () => {};
+    let cancelled = false;
 
     (async () => {
       const { default: Lenis } = await import("lenis");
+      if (cancelled) return;
 
       const lenis = new Lenis({
         duration: 1.15,
@@ -103,7 +105,10 @@ export function useSmoothScroll(enabled = true) {
       };
     })();
 
-    return () => cleanup();
+    return () => {
+      cancelled = true;
+      cleanup();
+    };
   }, [enabled, reduced]);
 }
 

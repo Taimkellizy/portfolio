@@ -25,7 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
       alternates: {
-        languages: { ...rootLanguages, "x-default": `${SITE}/` },
+        languages: {
+          en: `${SITE}/en/blog`,
+          ar: `${SITE}/ar/blog`,
+          "x-default": `${SITE}/`,
+        },
       },
     });
 
