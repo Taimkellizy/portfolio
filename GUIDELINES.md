@@ -77,7 +77,7 @@ LICENSE         GPL-3.0
 - **Blend cursor**: `.ea` root keeps `isolation: isolate`; don't add stacking-context hints (`will-change`, `transform`, `filter`) to text the difference bubble needs to invert.
 - **WebGL budget**: PrismaticBurst runs at 0.65× render scale, 24 march steps, adaptive 2–4 rAF cadence with offscreen pause — tuned so the site runs on weak machines; don't raise.
 - **Reduced-motion transition trap**: the global `transition-duration: 0.01ms !important` meets every element's initial `transition-property: all`, so a `visibility` flip resolves stale on descendants and `focus()` silently fails. The menu dialog kills its own transitions under reduced motion + retries focus after a double rAF — don't remove either.
-- **next/og + variable fonts**: the bundled opentype parser can't read `fvar` — OG/apple-icon routes must use the static TTFs in `public/fonts/static/`.
+- **next/og + variable fonts**: the bundled opentype parser can't read `fvar` — OG/twitter-image routes must use the static TTFs in `public/fonts/static/` (the apple icon reads no font; it draws a baked glyph path).
 
 ## Performance
 
