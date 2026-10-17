@@ -6,6 +6,8 @@ import "../../../concepts/editorial-var-a.css";
 import "./blog.css";
 import { getAllPosts } from "@/lib/blog";
 import { BlogIndexList, type BlogRow } from "@/components/blog-index-list";
+import { BlogIndexSearch } from "@/components/blog-index-search";
+import { BlogIndexResults } from "@/components/blog-index-results";
 import { content, isLocale, locales, type Locale } from "@/lib/i18n";
 import {
   SITE,
@@ -132,12 +134,29 @@ export default async function BlogIndexPage({
           <span className="ea-sec__count u-label">{ui.writingCount}</span>
         </header>
 
+        <BlogIndexSearch
+          placeholder={ui.blogSearchPlaceholder}
+          clearLabel={ui.searchClear}
+        />
+
         <BlogIndexList
           rows={rows}
           allLabel={ui.allTopics}
           topicsLabel={ui.topicsLabel}
           emptyLabel={ui.blogEmpty}
+          noMatchesLabel={ui.blogNoQueryMatches}
           locale={locale}
+        />
+
+        <BlogIndexResults
+          rows={rows}
+          locale={locale}
+          labels={{
+            hitsTitle: ui.blogHitsTitle,
+            hitsCount: ui.blogHitsCount,
+            searching: ui.blogSearching,
+            noMatches: ui.blogNoTextMatches,
+          }}
         />
         </main>
 

@@ -174,6 +174,165 @@
   font-size: 10.5px;
 }
 
+/* ---------- index search (title/excerpt + full-text results) ---------- */
+
+.blog-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 26px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ea-line);
+  font-family: var(--font-work-sans);
+  font-size: 15px;
+  color: var(--ea-ink-mute);
+}
+
+.blog-search svg {
+  flex: none;
+}
+
+.blog-search input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--ea-ink);
+  outline: none;
+  /* iOS paints its own rounded search field over the input — kill the
+     native chrome so the underline-only style survives there too */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.blog-search input::placeholder {
+  color: var(--ea-ink-mute);
+}
+
+/* the custom clear button replaces the webkit one */
+.blog-search input::-webkit-search-cancel-button,
+.blog-search input::-webkit-search-decoration,
+.post-bar__search input::-webkit-search-cancel-button,
+.post-bar__search input::-webkit-search-decoration {
+  appearance: none;
+  display: none;
+}
+
+.blog-search button {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  padding: 4px;
+  color: var(--ea-ink-mute);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.blog-search button:hover {
+  color: var(--ea-ink);
+}
+
+.blog-search button:focus-visible {
+  outline: 1px solid var(--ea-ink);
+  outline-offset: 2px;
+}
+
+/* full-text matches section under the rows */
+.blog-hits {
+  margin-top: 42px;
+  padding-top: 28px;
+  border-top: 1px solid var(--ea-line);
+}
+
+.blog-hits__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.blog-hits__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.blog-hits__item {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--ea-line);
+}
+
+.blog-hits__item:last-child {
+  border-bottom: 0;
+}
+
+.blog-hits__item > a {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  text-decoration: none;
+}
+
+.blog-hits__post {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.015em;
+  color: var(--ea-ink);
+}
+
+.blog-hits__item > a:hover .blog-hits__post {
+  text-decoration: underline;
+  text-decoration-color: var(--ea-line);
+  text-underline-offset: 4px;
+}
+
+.blog-hits__n {
+  opacity: 0.55;
+}
+
+.blog-hits__snip {
+  font-family: var(--font-work-sans);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ea-ink-mute);
+  max-width: 76ch;
+  margin: 8px 0 0;
+}
+
+/* ---------- search highlights ---------- */
+
+/* CSS Custom Highlight API (post page): no DOM nodes are created, so
+   the paint needs no box styles — background + color are enough */
+.ea--blog ::highlight(post-search-hits) {
+  background-color: rgba(232, 230, 225, 0.14);
+  color: var(--ea-ink);
+}
+
+.ea--blog ::highlight(post-search-active) {
+  background-color: rgba(232, 230, 225, 0.34);
+  color: var(--ea-ink);
+}
+
+/* DOM fallback (and the index snippets): <mark> */
+.ea--blog mark {
+  background: rgba(232, 230, 225, 0.14);
+  color: var(--ea-ink);
+  border-radius: 2px;
+  padding: 0 1px;
+  box-decoration-break: clone;
+}
+
+.ea--blog mark.post-search-hit--active {
+  background: rgba(232, 230, 225, 0.34);
+}
+
 .blog-post__title {
   font-family: var(--font-outfit);
   font-weight: 600;
@@ -595,6 +754,73 @@ html[data-reading-size="3"] .ea-prose {
   font-size: 17px;
 }
 
+/* find-in-post group (PostSearch slot): takes over the auto margin so
+   the search sits where the size group was, and the size group tucks
+   in beside it — with a deliberate stand-off gap so the two groups
+   read as separate tools */
+.post-bar__search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+  margin-inline-end: 18px;
+  /* the bar's buttons carry 9px side padding — match it so the search
+     icon lines up exactly with the icons of the rows above/below */
+  padding-inline-start: 9px;
+  color: var(--ea-ink-mute);
+}
+
+.post-bar:has(.post-bar__search) .post-bar__size {
+  margin-inline-start: 0;
+}
+
+.post-bar__search svg {
+  flex: none;
+}
+
+.post-bar__search input {
+  width: 180px;
+  min-width: 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ea-line);
+  padding: 4px 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--ea-ink);
+  outline: none;
+  /* iOS paints its own rounded search field over the input — kill the
+     native chrome so the underline-only style survives there too */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.post-bar__search input::placeholder {
+  color: var(--ea-ink-mute);
+}
+
+/* silence the concept's .ea :focus-visible ring (2px, offset 3px) — the
+   caret is the focus affordance on a text field, and the ring lands on
+   a click there; the search buttons keep their ring */
+.ea--blog :is(.post-bar__search input, .blog-search input):focus-visible {
+  outline: none;
+}
+
+.post-bar__search .post-bar__count {
+  white-space: nowrap;
+  opacity: 0.85;
+  padding: 0 4px;
+}
+
+.post-bar__search button {
+  width: 30px;
+  padding: 0;
+}
+
+.post-bar__search button:disabled {
+  opacity: 0.35;
+}
+
 /* ---------- reading progress ---------- */
 
 .reading-progress {
@@ -706,6 +932,24 @@ html[data-reading-size="3"] .ea-prose {
   .post-bar__actions .post-bar__rule {
     display: none;
   }
+
+  /* second row: the search takes a full row of its own — the input
+     underline runs the bar, no cramped half-and-half split */
+  .post-bar__search {
+    flex: 1 1 100%;
+    min-width: 0;
+    margin-inline-end: 0;
+  }
+
+  .post-bar__search input {
+    width: 100%;
+    flex: 1;
+  }
+
+  /* the size group then rides its own row, anchored to the end */
+  .post-bar:has(.post-bar__search) .post-bar__size {
+    margin-inline-start: auto;
+  }
 }
 
 .post-toc--folded {
@@ -765,7 +1009,8 @@ html[data-reading-size="3"] .ea-prose {
 [dir="rtl"] .ea--blog :is(
     .blog-post__title,
     .ea-prose :is(h2, h3),
-    .blog-xnav__title
+    .blog-xnav__title,
+    .blog-hits__post
   ) {
   /* headings: Thmanyah Serif Text — Latin glyphs inside Arabic headings
      (the "C" in CS50x) ride the serif if it carries them, else fall
@@ -838,12 +1083,35 @@ html[data-reading-size="3"] .ea-prose {
   text-transform: none;
 }
 
+/* search chrome (input text + result snippets) rides the reading face;
+   the snippets sit next to prose so they match the prose split */
+[dir="rtl"] .ea--blog :is(
+    .blog-search,
+    .blog-search input,
+    .post-bar__search,
+    .post-bar__search input,
+    .blog-hits__snip
+  ) {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .ea--blog :is(
+    .blog-hits__title,
+    .blog-hits__count,
+    .blog-hits__n,
+    .post-bar__count
+  ) {
+  font-family: var(--font-thmanyah), var(--font-work-sans), sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 /* horizontal travel arrows mirror; the diagonal ArrowUpRight does not
    (same rule as the concept's row arrows) */
 [dir="rtl"] .blog-xnav__dir svg {
   transform: scaleX(-1);
 }
-
 /* the progress bar fills from the reading edge */
 [dir="rtl"] .reading-progress__bar {
   transform-origin: right center;

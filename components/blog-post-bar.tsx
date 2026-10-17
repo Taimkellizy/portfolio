@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Copy, FileText, Link2 } from "lucide-react";
 
 const SIZE_DEFAULT = 1;
@@ -31,6 +31,7 @@ export function BlogPostBar({
   mdHref,
   canonical,
   labels,
+  searchSlot,
 }: {
   mdHref: string;
   canonical: string;
@@ -44,6 +45,7 @@ export function BlogPostBar({
     larger: string;
     readingSize: string;
   };
+  searchSlot?: ReactNode;
 }) {
   const [status, setStatus] = useState<Status>(null);
   const size = useSyncExternalStore(subscribeSize, readSize, () => SIZE_DEFAULT);
@@ -108,6 +110,7 @@ export function BlogPostBar({
           <span aria-live="polite">{labelFor("url", labels.copyLink)}</span>
         </button>
       </div>
+      {searchSlot}
       <div
         className="post-bar__size"
         role="group"

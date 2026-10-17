@@ -8,6 +8,7 @@ import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/code-block";
 import { BlogPostBar } from "@/components/blog-post-bar";
+import { PostSearch } from "@/components/post-search";
 import { PostToc } from "@/components/post-toc";
 import { ReadingProgress } from "@/components/reading-progress";
 import {
@@ -264,6 +265,17 @@ export default async function PostPage({
                 larger: ui.largerText,
                 readingSize: ui.readingSize,
               }}
+              searchSlot={
+                <PostSearch
+                  labels={{
+                    findInPost: ui.findInPost,
+                    searchPrev: ui.searchPrev,
+                    searchNext: ui.searchNext,
+                    searchClear: ui.searchClear,
+                    searchNoMatches: ui.searchNoMatches,
+                  }}
+                />
+              }
             />
 
             <div className="blog-post__layout">

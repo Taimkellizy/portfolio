@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useMemo } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { hasMatch } from "@/lib/search";
+import { selectTopic, useQueryParam, useTopicParam } from "./blog-filters";
 
 export type BlogRow = {
   id: string;
@@ -12,49 +14,28 @@ export type BlogRow = {
   topics: Array<{ id: string; label: string }>;
 };
 
-/* `?topic=` lives in the URL, not in component state: the page stays
-   statically generated (no searchParams on the server), and the store
-   keeps chips, back/forward and shared links all reading one source. */
-const TOPIC_EVENT = "blog-topic-change";
-
-function readTopic(): string | null {
-  return new URLSearchParams(window.location.search).get("topic");
-}
-
-function subscribeTopic(onChange: () => void) {
-  window.addEventListener("popstate", onChange);
-  window.addEventListener(TOPIC_EVENT, onChange);
-  return () => {
-    window.removeEventListener("popstate", onChange);
-    window.removeEventListener(TOPIC_EVENT, onChange);
-  };
-}
-
-function selectTopic(topic: string | null) {
-  const url = new URL(window.location.href);
-  if (topic) url.searchParams.set("topic", topic);
-  else url.searchParams.delete("topic");
-  window.history.replaceState(null, "", url);
-  window.dispatchEvent(new Event(TOPIC_EVENT));
-}
-
 /**
- * Topic chips + post rows for the blog index.
+ * Topic chips + post rows for the blog index. Rows filter by `?topic=`
+ * AND `?q=` (title/excerpt) — both live in the URL via blog-filters.
  */
 export function BlogIndexList({
   rows,
   allLabel,
   topicsLabel,
   emptyLabel,
+  noMatchesLabel,
   locale,
 }: {
   rows: BlogRow[];
   allLabel: string;
   topicsLabel: string;
   emptyLabel: string;
+  noMatchesLabel: string;
   locale: string;
 }) {
-  const rawTopic = useSyncExternalStore(subscribeTopic, readTopic, () => null);
+  const rawTopic = useTopicParam();
+  const rawQuery = useQueryParam();
+  const query = rawQuery.trim();
 
   const counts = useMemo(() => {
     const map = new Map<string, number>();
@@ -72,9 +53,16 @@ export function BlogIndexList({
   /* a ?topic= that matches nothing real falls back to the full list */
   const active = rawTopic && counts.has(rawTopic) ? rawTopic : null;
 
-  const shown = active
-    ? rows.filter((row) => row.topics.some((t) => t.id === active))
-    : rows;
+  const shown = rows.filter((row) => {
+    if (active && !row.topics.some((t) => t.id === active)) return false;
+    if (
+      query &&
+      !hasMatch(`${row.title} ${row.excerpt}`, query)
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   if (rows.length === 0) {
     return <p className="blog-empty">{emptyLabel}</p>;
@@ -123,7 +111,7 @@ export function BlogIndexList({
           ))}
         </ul>
       ) : (
-        <p className="blog-empty">{emptyLabel}</p>
+        <p className="blog-empty">{noMatchesLabel}</p>
       )}
     </>
   );

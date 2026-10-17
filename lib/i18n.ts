@@ -69,6 +69,17 @@ export interface Ui {
   allTopics: string;
   topicsLabel: string;
   minRead: string;
+  blogSearchPlaceholder: string;
+  blogHitsTitle: string;
+  blogHitsCount: string;
+  blogSearching: string;
+  blogNoTextMatches: string;
+  blogNoQueryMatches: string;
+  findInPost: string;
+  searchPrev: string;
+  searchNext: string;
+  searchClear: string;
+  searchNoMatches: string;
   copyAsMarkdown: string;
   viewAsMarkdown: string;
   copyLink: string;
