@@ -343,5 +343,8 @@ Proof over claims: everything below is checkable.`,
   backToTop: "Back to top",
   copyright: `© 2026 ${person.name}`,
   metaDescription:
-    "Portfolio of Taim Kellizy, a developer and computer science student. Selected work, credentials, and writing.",
+    "Taim Kellizy — software developer & CS student based in Syria. Selected work (Arabify, Shaghal, Meridian), credentials, and notes on software development.",
+  blogMetaTitle: "Writing & Notes",
+  blogMetaDescription:
+    "Technical writing by Taim Kellizy — notes on software development, learning C, translation at scale, and the craft of rendering.",
 };

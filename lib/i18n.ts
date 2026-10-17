@@ -79,6 +79,8 @@ export interface Ui {
   backToTop: string;
   copyright: string;
   metaDescription: string;
+  blogMetaTitle: string;
+  blogMetaDescription: string;
 }
 
 export interface LocaleContent {

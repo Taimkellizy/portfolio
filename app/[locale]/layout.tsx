@@ -15,6 +15,7 @@ import {
   absolute,
   graph,
   jsonLdScript,
+  OG_LOCALE,
   personNode,
   webSiteNode,
 } from "@/lib/seo";
@@ -39,6 +40,7 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(SITE),
+    applicationName: person.name,
     title: {
       default: title,
       template: `%s — ${person.name}`,
@@ -62,6 +64,8 @@ export async function generateMetadata({
       type: "website",
       url: siteUrl,
       siteName: person.name,
+      locale: OG_LOCALE[locale],
+      alternateLocale: [OG_LOCALE[locale === "en" ? "ar" : "en"]],
       title,
       description: ui.metaDescription,
     },
@@ -113,7 +117,7 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: jsonLdScript(graph(personNode(locale), webSiteNode(locale))),
+            __html: jsonLdScript(graph(personNode(), webSiteNode())),
           }}
         />
         {children}

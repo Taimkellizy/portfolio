@@ -9,9 +9,11 @@ import { BlogIndexList, type BlogRow } from "@/components/blog-index-list";
 import { content, isLocale, locales, type Locale } from "@/lib/i18n";
 import {
   SITE,
+  absolute,
   breadcrumbNode,
   graph,
   jsonLdScript,
+  OG_LOCALE,
 } from "@/lib/seo";
 import { topicLabel } from "@/lib/topics";
 
@@ -31,11 +33,12 @@ export async function generateMetadata({
   const locale = raw as Locale;
   const { person, ui } = content[locale];
   const siteUrl = `${SITE}/${locale}/blog`;
-  const title = `${person.name} — ${ui.writingTitle}`;
+  const title = `${ui.blogMetaTitle} — ${person.name}`;
+  const other = locale === "en" ? "ar" : "en";
 
   return {
-    title: ui.writingTitle,
-    description: ui.metaDescription,
+    title: ui.blogMetaTitle,
+    description: ui.blogMetaDescription,
     alternates: {
       canonical: siteUrl,
       languages: {
@@ -51,13 +54,32 @@ export async function generateMetadata({
       type: "website",
       url: siteUrl,
       siteName: person.name,
+      locale: OG_LOCALE[locale],
+      alternateLocale: [OG_LOCALE[other]],
       title,
-      description: ui.metaDescription,
+      description: ui.blogMetaDescription,
+      /* a page-level `openGraph` object replaces the parent segment's
+         file-convention og:image wholesale — restate the card here or
+         the blog index ships without one */
+      images: [
+        {
+          url: absolute(`/${locale}/opengraph-image`),
+          width: 1200,
+          height: 630,
+          alt: "Taim Kellizy — portfolio card",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: ui.metaDescription,
+      description: ui.blogMetaDescription,
+      images: [
+        {
+          url: absolute(`/${locale}/twitter-image`),
+          alt: "Taim Kellizy — portfolio card",
+        },
+      ],
     },
   };
 }

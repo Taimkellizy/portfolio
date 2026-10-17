@@ -26,6 +26,7 @@ import {
   breadcrumbNode,
   graph,
   jsonLdScript,
+  OG_LOCALE,
 } from "@/lib/seo";
 import { topicLabel } from "@/lib/topics";
 import { newTabProps } from "@/concepts/editorial-var-a/shared";
@@ -90,6 +91,8 @@ export async function generateMetadata({
       type: "article",
       url: siteUrl,
       siteName: person.name,
+      locale: OG_LOCALE[locale],
+      alternateLocale: [OG_LOCALE[other]],
       title: post.title,
       description: post.excerpt,
       publishedTime: post.date,

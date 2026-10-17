@@ -28,30 +28,75 @@ export function isoDate(date: string): string {
 const PERSON_ID = `${SITE}/#person`;
 const WEBSITE_ID = `${SITE}/#website`;
 
-export function personNode(locale: Locale) {
-  const dict = content[locale];
+/** `og:locale` per site locale (ll_CC). */
+export const OG_LOCALE: Record<Locale, string> = {
+  en: "en_US",
+  ar: "ar_SY",
+};
+
+/**
+ * One locale-neutral Person entity — byte-identical on /en and /ar so the
+ * two pages never publish contradictory values under the same @id (a `name`
+ * that flips per locale is the kind of conflict that makes Google drop the
+ * node, and with it the site-name signal). The Arabic name rides
+ * `alternateName`; page copy stays localized.
+ */
+export function personNode() {
+  const en = content.en.person;
+  const education = content.en.credentials.find((c) => c.id === "education");
   return {
     "@type": "Person",
     "@id": PERSON_ID,
-    name: dict.person.name,
-    jobTitle: dict.person.role,
-    url: absolute(`/${locale}`),
-    email: `mailto:${dict.person.email}`,
-    homeLocation: { "@type": "Place", name: dict.person.location },
-    sameAs: [dict.person.github, dict.person.linkedin, dict.person.instagram],
-    knowsAbout: dict.skills.flatMap((g) => g.items),
+    name: en.name,
+    alternateName: [content.ar.person.name],
+    description: content.en.ui.metaDescription,
+    image: absolute("/en/opengraph-image"),
+    jobTitle: en.role,
+    url: absolute("/en"),
+    email: `mailto:${en.email}`,
+    homeLocation: { "@type": "Place", name: en.location },
+    sameAs: [en.github, en.linkedin, en.instagram],
+    knowsAbout: content.en.skills.flatMap((g) => g.items),
+    ...(education
+      ? { alumniOf: { "@type": "CollegeOrUniversity", name: education.org } }
+      : {}),
+    hasOccupation: {
+      "@type": "Occupation",
+      name: "Software Developer",
+      occupationLocation: { "@type": "Country", name: "Syria" },
+    },
   };
 }
 
-export function webSiteNode(locale: Locale) {
+/**
+ * Also locale-neutral (same reasoning as personNode). `name` is the one
+ * brand string Google is asked to show instead of the host ("vercel.app"
+ * on this domain); `alternateName` carries the searchable variants.
+ */
+export function webSiteNode() {
   return {
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     url: SITE,
-    name: content[locale].person.name,
-    inLanguage: locale,
+    name: content.en.person.name,
+    alternateName: ["Taim Kellizy Portfolio", content.ar.person.name],
+    inLanguage: ["en", "ar"],
+    description: content.en.ui.metaDescription,
     publisher: { "@id": PERSON_ID },
     author: { "@id": PERSON_ID },
+  };
+}
+
+/** Google's ProfilePage markup — the home page IS the person's profile. */
+export function profilePageNode(locale: Locale) {
+  return {
+    "@type": "ProfilePage",
+    "@id": `${absolute(`/${locale}`)}#profile`,
+    url: absolute(`/${locale}`),
+    inLanguage: locale,
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": PERSON_ID },
+    mainEntity: personNode(),
   };
 }
 
