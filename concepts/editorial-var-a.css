@@ -601,6 +601,18 @@
   opacity: 0.62;
 }
 
+/* the writing section's count slot doubles as the blog handoff link */
+a.ea-sec__count {
+  color: var(--ea-ink-mute);
+  opacity: 1;
+  text-decoration: none;
+  transition: color 240ms var(--ease-out);
+}
+
+a.ea-sec__count:hover {
+  color: var(--ea-ink);
+}
+
 .ea-rows {
   list-style: none;
 }

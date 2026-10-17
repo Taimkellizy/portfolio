@@ -223,33 +223,6 @@ export const projects = [
   },
 ];
 
-export const posts = [
-  {
-    slug: "on-learning-c-twice",
-    title: "On Learning C Twice",
-    date: "2025-11-02",
-    excerpt:
-      "What CS50x got right about pointers, and what took a second pass to actually understand.",
-    tag: "Notes",
-  },
-  {
-    slug: "translating-at-scale",
-    title: "Translating at Scale",
-    date: "2025-09-14",
-    excerpt:
-      "850 minutes of TED talks taught me more about product quality than any spec sheet.",
-    tag: "Essay",
-  },
-  {
-    slug: "grain-dither-and-taste",
-    title: "Grain, Dither, and Taste",
-    date: "2025-07-30",
-    excerpt:
-      "Why the surface of an interface is part of its engineering, not decoration on top.",
-    tag: "Design",
-  },
-];
-
 /* UI copy (chrome + section labels) — locale-mirrored in content-ar.ts.
    Everything the concept renders outside lib/data lives here. */
 

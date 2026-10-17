@@ -223,31 +223,6 @@ export const projects = [
   },
 ];
 
-export const posts = [
-  {
-    slug: "on-learning-c-twice",
-    title: "عن تعلّم C مرتين",
-    date: "2025-11-02",
-    excerpt: "ما أحسنَه CS50x في المؤشرات، وما أخذ جولة ثانية ليهبَ بفعلًا.",
-    tag: "ملاحظات",
-  },
-  {
-    slug: "translating-at-scale",
-    title: "الترجمة على نطاق واسع",
-    date: "2025-09-14",
-    excerpt:
-      "850 دقيقة من محادثات TED علّمتني عن جودة المنتجات أكثر من أي ورقة مواصفات.",
-    tag: "مقالة",
-  },
-  {
-    slug: "grain-dither-and-taste",
-    title: "الحُبيبات، وتفريق التدرج، والذوق",
-    date: "2025-07-30",
-    excerpt: "سطح الواجهة جزء من هندستها، لا زخرفة فوقها.",
-    tag: "تصميم",
-  },
-];
-
 export const MENU_LINKS = [
   { label: "الأعمال", href: "#ea-work" },
   { label: "الخبرة", href: "#ea-experience" },

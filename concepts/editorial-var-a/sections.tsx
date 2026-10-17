@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Menu, X, ArrowUpRight, ArrowUp, Mail, Languages } from "lucide-react";
 import { Plate } from "@/components/plate";
 import PrismaticBurst from "@/components/prismatic-burst";
@@ -232,7 +233,7 @@ export function SectionHeader({
   locale,
 }: {
   title: string;
-  count: string;
+  count: string | ReactNode;
   locale: Locale;
 }) {
   return (
@@ -505,9 +506,8 @@ function CredentialRow({
 /* ===================== writing ===================== */
 
 /* Rows come pre-built from the server page (lib/blog writingRowsFor):
-   bundled posts link to their blog page, untranslated posts show the
-   available locale's copy, bundle-less stubs keep the placeholder
-   anchor until written. */
+   the latest three bundled posts, translated copies flagged honestly.
+   The header's count slot hands off to the blog index. */
 export function WritingSection({
   locale,
   rows,
@@ -518,10 +518,14 @@ export function WritingSection({
   const { ui } = content[locale];
   return (
     <section className="ea-block" id="ea-writing">
-      <SectionHeader title={ui.writingTitle} count={ui.writingCount} locale={locale} />
+      <SectionHeader
+        title={ui.writingTitle}
+        count={<a href={`/${locale}/blog`}>{ui.blogAllPosts}</a>}
+        locale={locale}
+      />
       <ul className="ea-rows">
         {rows.map((row) => (
-          <li key={row.title} className="ea-row" data-reveal-fade>
+          <li key={row.href} className="ea-row" data-reveal-fade>
             <a href={row.href} {...newTabProps(row.href)}>
               <span className="ea-row__org u-label">{row.tag}</span>
               <span className="ea-row__title">{row.title}</span>

@@ -1,7 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import { content, type Locale } from "./i18n";
+import { type Locale } from "./i18n";
 import { isTopicId, topicIds, topicLabel, type TopicId } from "./topics";
 
 /* Build-time blog loader — server-only fs reading, no runtime fetching.
@@ -212,10 +212,11 @@ export function readingMinutes(body: string, locale: Locale): number {
 
 /* ===================== one-pager "writing" rows ===================== */
 
-/* One link row in the one-pager's writing section. Posts with a bundle
-   link through to their page; untranslated posts show the other
-   locale's copy (never machine-translated) and are marked; stubs with
-   no bundle at all keep their placeholder anchor. */
+/* One link row in the one-pager's writing section — the latest three
+   bundled posts, most recent first. A bundle that exists only in the
+   other locale keeps its honest availability row (untranslated copy,
+   never machine-translated). No placeholder stubs: the section is real
+   posts only, so it grows with the blog. */
 export interface WritingRow {
   href: string;
   tag: string;
@@ -225,6 +226,8 @@ export interface WritingRow {
 }
 
 const otherLocale = (locale: Locale): Locale => (locale === "en" ? "ar" : "en");
+
+const WRITING_ROW_LIMIT = 3;
 
 const toRow = (post: PostMeta, locale: Locale): Omit<WritingRow, "href"> => ({
   tag: topicLabel(post.topics[0], locale),
@@ -237,34 +240,27 @@ export async function writingRowsFor(locale: Locale): Promise<WritingRow[]> {
   const other = otherLocale(locale);
   const [mine, theirs] = await Promise.all([getAllPosts(locale), getAllPosts(other)]);
   const mineById = new Map(mine.map((post) => [post.id, post]));
-  const theirsById = new Map(theirs.map((post) => [post.id, post]));
 
-  return content[locale].posts.map((stub) => {
-    const localPost = mineById.get(stub.slug);
-    if (localPost) {
+  const latest = [...mine, ...theirs.filter((post) => !mineById.has(post.id))]
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    .slice(0, WRITING_ROW_LIMIT);
+
+  return latest.map((post) => {
+    const local = mineById.get(post.id);
+    if (local) {
       return {
-        href: `/${locale}/blog/${localPost.slug}`,
-        ...toRow(localPost, locale),
+        href: `/${locale}/blog/${local.slug}`,
+        ...toRow(local, locale),
       };
     }
-    const foreignPost = theirsById.get(stub.slug);
-    if (foreignPost) {
-      const row = toRow(foreignPost, locale);
-      return {
-        href: `/${other}/blog/${foreignPost.slug}`,
-        /* availability mark: the copy belongs to the other locale */
-        tag: `${row.tag} · ${other}`,
-        title: row.title,
-        excerpt: row.excerpt,
-        year: row.year,
-      };
-    }
+    const row = toRow(post, locale);
     return {
-      href: "#ea-writing",
-      tag: stub.tag,
-      title: stub.title,
-      excerpt: stub.excerpt,
-      year: new Date(stub.date).getFullYear().toString(),
+      href: `/${other}/blog/${post.slug}`,
+      /* availability mark: the copy belongs to the other locale */
+      tag: `${row.tag} · ${other}`,
+      title: row.title,
+      excerpt: row.excerpt,
+      year: row.year,
     };
   });
 }

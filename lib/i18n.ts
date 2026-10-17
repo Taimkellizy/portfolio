@@ -2,7 +2,6 @@ import {
   credentials as credentialsEn,
   experience as experienceEn,
   person as personEn,
-  posts as postsEn,
   projects as projectsEn,
   skills as skillsEn,
   ui as uiEn,
@@ -11,7 +10,6 @@ import {
   credentials as credentialsAr,
   experience as experienceAr,
   person as personAr,
-  posts as postsAr,
   projects as projectsAr,
   skills as skillsAr,
   ui as uiAr,
@@ -100,7 +98,6 @@ export interface LocaleContent {
   credentials: typeof credentialsEn;
   experience: typeof experienceEn;
   projects: typeof projectsEn;
-  posts: typeof postsEn;
   ui: Ui;
 }
 
@@ -113,7 +110,6 @@ export const content: Record<Locale, LocaleContent> = {
     credentials: credentialsEn,
     experience: experienceEn,
     projects: projectsEn,
-    posts: postsEn,
     ui: uiEn,
   },
   ar: {
@@ -122,7 +118,6 @@ export const content: Record<Locale, LocaleContent> = {
     credentials: credentialsAr,
     experience: experienceAr,
     projects: projectsAr,
-    posts: postsAr,
     ui: uiAr,
   },
 };
