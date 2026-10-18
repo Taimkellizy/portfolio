@@ -210,6 +210,22 @@ export function readingMinutes(body: string, locale: Locale): number {
   return Math.max(1, Math.round(wordCount(body) / (locale === "ar" ? 180 : 225)));
 }
 
+/* ===================== markdown exports ===================== */
+
+/* Raw-body surfaces (.md route, llms-full.txt) serve plain markdown —
+   a JSX embed tag there is noise, so it folds back into a plain link. */
+export function toMarkdownBody(body: string): string {
+  return body.replace(
+    /<YouTubeEmbed\s+([^>]*?)\/>/g,
+    (_tag: string, attrs: string) => {
+      const id = /id="([^"]+)"/.exec(attrs)?.[1] ?? "";
+      const title =
+        /title="([^"]+)"/.exec(attrs)?.[1] ?? "Watch the video on YouTube";
+      return `[${title}](https://www.youtube.com/watch?v=${id})`;
+    },
+  );
+}
+
 /* ===================== one-pager "writing" rows ===================== */
 
 /* One link row in the one-pager's writing section — the latest three

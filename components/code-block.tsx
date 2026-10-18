@@ -1,11 +1,37 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { isValidElement, useRef, useState, type ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 
 type PreProps = React.HTMLAttributes<HTMLPreElement> & {
   "data-language"?: string;
 };
+
+const ARABIC = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/u;
+
+function textOf(node: ReactNode): string {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join("");
+  if (isValidElement(node)) {
+    return textOf((node.props as { children?: ReactNode }).children);
+  }
+  return "";
+}
+
+/**
+ * The block's direction follows the code's own first strong character
+ * (the Unicode bidi paragraph rule), never the page's: an Arabic prompt
+ * sample reads RTL even inside an English post, while real code stays
+ * LTR inside the Arabic one.
+ */
+function isRtlCode(children: ReactNode): boolean {
+  for (const ch of textOf(children)) {
+    if (!/\p{L}/u.test(ch)) continue;
+    return ARABIC.test(ch);
+  }
+  return false;
+}
 
 /**
  * The clipboard text is rebuilt from the `[data-line]` rows — NOT from
@@ -27,7 +53,7 @@ function codeText(root: HTMLElement): string {
  * Wraps every highlighted `<pre>` in a shell with a header strip: language
  * chip, copy button, and a divider above the code (line numbers ride CSS
  * counters in blog.css). Shell/bar use logical properties and flex
- * auto-flip; the code itself stays physical LTR (blog.css).
+ * auto-flip; the code's direction is content-driven (isRtlCode).
  */
 export function CodeBlock({
   copyLabel,
@@ -38,6 +64,7 @@ export function CodeBlock({
   const shellRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const language = rest["data-language"];
+  const dir = isRtlCode(children) ? "rtl" : "ltr";
 
   async function onCopy() {
     const text = codeText(shellRef.current ?? document.body);
@@ -51,7 +78,7 @@ export function CodeBlock({
   }
 
   return (
-    <div className="code-shell" ref={shellRef}>
+    <div className="code-shell" ref={shellRef} dir={dir}>
       <div className="code-shell__bar">
         <span className="code-shell__lang" aria-hidden="true">
           {language ?? ""}

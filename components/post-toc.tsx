@@ -56,11 +56,11 @@ export function PostToc({ summaryLabel, navIcons }: PostTocProps) {
 
   useEffect(() => {
     const collect = () => {
-      const heads = Array.from(
-        document.querySelectorAll<HTMLElement>(".ea-prose :is(h2[id], h3[id])"),
-      );
-      if (heads.length === 0) return;
-      setItems(buildItems(heads, navIcons));
+  const heads = Array.from(
+    document.querySelectorAll<HTMLElement>(".ea-prose :is(h2[id], h3[id])"),
+  );
+  if (heads.length === 0) return;
+  setItems(buildItems(heads, navIcons));
       return heads;
     };
     const heads = collect();

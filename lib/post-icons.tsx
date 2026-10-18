@@ -10,6 +10,7 @@ import {
   RotateCw,
   Sparkles,
   Star,
+  Wrench,
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -33,6 +34,7 @@ const registry: Record<string, LucideIcon> = {
   repeat: Repeat,
   "rotate-cw": RotateCw,
   "book-open": BookOpen,
+  wrench: Wrench,
 };
 
 function ToCIcon(name: string | undefined): ReactNode {

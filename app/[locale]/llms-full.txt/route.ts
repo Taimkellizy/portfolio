@@ -1,4 +1,4 @@
-import { getAllPosts } from "@/lib/blog";
+import { getAllPosts, toMarkdownBody } from "@/lib/blog";
 import { content, isLocale, type Locale } from "@/lib/i18n";
 import { absolute } from "@/lib/seo";
 import { topicLabel } from "@/lib/topics";
@@ -40,7 +40,7 @@ export async function GET(
     parts.push(`> ${post.excerpt}`);
     parts.push(`> ${link} · ${post.date} · ${topics}`);
     parts.push("");
-    parts.push(post.body.trim());
+    parts.push(toMarkdownBody(post.body.trim()));
     parts.push("");
     parts.push("---");
     parts.push("");

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 690" role="img" aria-labelledby="title desc">
+  <title id="title">An AI-assisted web design workflow</title>
+  <desc id="desc">A simple four-stage workflow: collect references, generate three to five concepts, choose a direction, then polish functionality, typography, consistency, and motion before publishing.</desc>
+  <defs>
+    <style>
+      .title{font:600 35px 'Work Sans','Segoe UI',Arial,sans-serif;fill:#e8e6e1;letter-spacing:-1px}
+      .sub{font:400 17px 'Work Sans','Segoe UI',Arial,sans-serif;fill:rgba(232,230,225,.58)}
+      .num{font:600 12.5px 'Work Sans','Segoe UI',Arial,sans-serif;letter-spacing:2px;fill:rgba(232,230,225,.58)}
+      .num-strong{fill:#e8e6e1}
+      .stage{font:600 24px 'Work Sans','Segoe UI',Arial,sans-serif;fill:#e8e6e1;letter-spacing:-.4px}
+      .rail{stroke:rgba(232,230,225,.25);stroke-width:1}
+      .dot{fill:#e8e6e1}
+      .chev{fill:none;stroke:rgba(232,230,225,.45);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+  <rect width="1200" height="690" rx="28" fill="#0c0c0e"/>
+  <text x="72" y="78" class="num">A PRACTICAL SYSTEM</text>
+  <text x="72" y="124" class="title">Design with agents. Keep the taste human.</text>
+  <text x="72" y="158" class="sub">Give the model better inputs, explore before you commit, and polish with intention.</text>
+
+  <path d="M72 330H1128" class="rail"/>
+  <path d="M209 325l6 5-6 5" class="chev"/>
+  <path d="M491 325l6 5-6 5" class="chev"/>
+  <path d="M773 325l6 5-6 5" class="chev"/>
+
+  <circle cx="72" cy="330" r="4" class="dot"/>
+  <text x="72" y="298" class="num">01 / GATHER</text>
+  <text x="72" y="378" class="stage">References</text>
+
+  <circle cx="354" cy="330" r="4" class="dot"/>
+  <text x="354" y="298" class="num">02 / GENERATE</text>
+  <text x="354" y="378" class="stage">Explore</text>
+
+  <circle cx="636" cy="330" r="4" class="dot"/>
+  <text x="636" y="298" class="num">03 / COMMIT</text>
+  <text x="636" y="378" class="stage">Pick a direction</text>
+
+  <circle cx="918" cy="330" r="4" class="dot"/>
+  <text x="918" y="298" class="num num-strong">04 / REFINE</text>
+  <text x="918" y="378" class="stage">Polish &amp; ship</text>
+
+  <path d="M72 504H1128" stroke="rgba(232,230,225,.14)" stroke-width="1"/>
+  <text x="72" y="548" class="num">THE PRINCIPLE</text>
+  <text x="72" y="588" class="title" style="font-size:27px">The agent moves fast. You decide what is worth keeping.</text>
+  <text x="72" y="622" class="sub">References → exploration → deliberate choices → a careful final pass.</text>
+</svg>

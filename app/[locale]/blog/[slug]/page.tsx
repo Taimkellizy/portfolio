@@ -8,6 +8,7 @@ import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/code-block";
 import { BlogPostBar } from "@/components/blog-post-bar";
+import { YouTubeEmbed } from "@/components/youtube-embed";
 import { PostSearch } from "@/components/post-search";
 import { PostToc } from "@/components/post-toc";
 import { ReadingProgress } from "@/components/reading-progress";
@@ -156,6 +157,7 @@ export default async function PostPage({
       },
       components: {
         a: PostLink,
+        YouTubeEmbed,
         pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
           <CodeBlock {...props} copyLabel={ui.copyCode} copiedLabel={ui.copied} />
         ),

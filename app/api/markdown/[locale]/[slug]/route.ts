@@ -1,4 +1,4 @@
-import { getAllPosts, getPost } from "@/lib/blog";
+import { getAllPosts, getPost, toMarkdownBody } from "@/lib/blog";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { absolute } from "@/lib/seo";
 import { topicLabel } from "@/lib/topics";
@@ -56,7 +56,7 @@ export async function GET(
     "",
   ].join("\n");
 
-  return new Response(`${header}${post.body}`, {
+  return new Response(`${header}${toMarkdownBody(post.body)}`, {
     headers: {
       "Content-Type": "text/markdown; charset=utf-8",
       "Cache-Control": "public, max-age=3600, s-maxage=86400",
