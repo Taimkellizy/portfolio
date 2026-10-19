@@ -943,25 +943,36 @@ html[data-reading-size="3"] .ea-prose {
     order: 3;
   }
 
-  /* phone toolbar: two deliberate rows — the actions wrap on their own
-     line (no dangling separators at wrap points) and the size group keeps
-     the end position on the second row */
+  /* phone toolbar: two deliberate rows — the actions at natural width
+     share the first row with the size group (end-aligned), and the
+     search takes a full row of its own below (no dangling separators
+     at wrap points) */
   .post-bar {
     row-gap: 8px;
   }
 
   .post-bar__actions {
-    flex: 1 1 100%;
+    flex: 0 1 auto;
     flex-wrap: wrap;
+    min-width: 0;
   }
 
   .post-bar__actions .post-bar__rule {
     display: none;
   }
 
+  .post-bar:has(.post-bar__search) .post-bar__size {
+    margin-inline-start: auto;
+  }
+
   /* second row: the search takes a full row of its own — the input
-     underline runs the bar, no cramped half-and-half split */
+     underline runs the bar, no cramped half-and-half split; the 9px
+     start padding stays so its icon lines up with the icons above.
+     order 3 sends it past the size group's line: its 100% basis would
+     otherwise force the wrap BEFORE the size group, stranding it on a
+     third row below the search */
   .post-bar__search {
+    order: 3;
     flex: 1 1 100%;
     min-width: 0;
     margin-inline-end: 0;
@@ -971,10 +982,48 @@ html[data-reading-size="3"] .ea-prose {
     width: 100%;
     flex: 1;
   }
+}
 
-  /* the size group then rides its own row, anchored to the end */
-  .post-bar:has(.post-bar__search) .post-bar__size {
-    margin-inline-start: auto;
+/* phones: the action labels fold away (icons carry the meaning, the
+   aria-labels carry the names) so actions + size share one row; the
+   clipboard flash re-reveals its short status text over the icon */
+@media (max-width: 620px) {
+  .post-bar__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .post-bar [data-flash] .post-bar__label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  /* the search doesn't need the whole line at rest — cap it to the
+     reading-start three quarters; once a query is active (counter +
+     chevrons render) it takes the full row back. The desktop auto
+     start margin is reset so the cap parks it at the line's start */
+  .post-bar__search {
+    max-width: 75%;
+    margin-inline-start: 0;
+  }
+
+  .post-bar__search:has(.post-bar__count) {
+    max-width: none;
+  }
+
+  /* 16px floor — Safari force-zooms the page when focusing a smaller
+     input */
+  .post-bar__search input {
+    font-size: 16px;
   }
 }
 

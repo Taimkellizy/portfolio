@@ -95,19 +95,33 @@ export function BlogPostBar({
   return (
     <div className="post-bar">
       <div className="post-bar__actions">
-        <button type="button" onClick={copyMarkdown}>
+        <button
+          type="button"
+          onClick={copyMarkdown}
+          aria-label={labels.copyMarkdown}
+          data-flash={status?.key === "markdown" ? "" : undefined}
+        >
           <Copy size={15} strokeWidth={1.5} aria-hidden="true" />
-          <span aria-live="polite">{labelFor("markdown", labels.copyMarkdown)}</span>
+          <span className="post-bar__label" aria-live="polite">
+            {labelFor("markdown", labels.copyMarkdown)}
+          </span>
         </button>
         <span className="post-bar__rule" aria-hidden="true" />
-        <a href={mdHref}>
+        <a href={mdHref} aria-label={labels.viewMarkdown}>
           <FileText size={15} strokeWidth={1.5} aria-hidden="true" />
-          <span>{labels.viewMarkdown}</span>
+          <span className="post-bar__label">{labels.viewMarkdown}</span>
         </a>
         <span className="post-bar__rule" aria-hidden="true" />
-        <button type="button" onClick={() => copyText("url", canonical)}>
+        <button
+          type="button"
+          onClick={() => copyText("url", canonical)}
+          aria-label={labels.copyLink}
+          data-flash={status?.key === "url" ? "" : undefined}
+        >
           <Link2 size={15} strokeWidth={1.5} aria-hidden="true" />
-          <span aria-live="polite">{labelFor("url", labels.copyLink)}</span>
+          <span className="post-bar__label" aria-live="polite">
+            {labelFor("url", labels.copyLink)}
+          </span>
         </button>
       </div>
       {searchSlot}
