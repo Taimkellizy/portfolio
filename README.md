@@ -1,5 +1,12 @@
 # Taim Kellizy — Portfolio
 
+[![XERJ Corpus Hub contributor](https://hub.xerj.org/contributors/Taimkellizy/badge.svg)](https://hub.xerj.org/contributors/Taimkellizy)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=flat&logo=typescript&logoColor=white)
+![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=flat&logo=vercel&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-black?style=flat&logo=next.js&logoColor=white)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-%230077B5.svg?logo=linkedin&logoColor=white)](https://linkedin.com/in/https://www.linkedin.com/in/taimkellizy/) 
+
+
 My personal website: a one-page portfolio plus a bilingual blog (English / Arabic).
 Built as a design concept — dark, editorial, motion-heavy — where the site itself is
 part of the work.
